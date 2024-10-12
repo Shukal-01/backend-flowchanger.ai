@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Staff {
+  id                 String      @id @default(uuid())
+  name               String   
+  job_title           String  
+  branch             String   
+  departmentId       Int      
+  roleId             Int      
+  mobile             String   
+  login_otp           String   
+  gender             String   
+  official_email      String   
+  date_of_joining      DateTime 
+  address            String   
+
+  // department         Department @relation(fields: [departmentId], references: [id])
+  // role               Role       @relation(fields: [roleId], references: [id])
+}
