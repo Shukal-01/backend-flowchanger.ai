@@ -1,11 +1,6 @@
-const express = require("express");
-const {
-  createStaff,
-  getAllStaff,
-  getStaffById,
-  updateStaff,
-  deleteStaff,
-} = require("../../controller/admin/staff/staff.controller");
+
+const express = require('express');
+const {createStaff,getAllStaff,getStaffById,updateStaff,deleteStaff,} = require("../../controller/admin/staff/staff.controller");
 
 const staffRouter = express.Router();
 

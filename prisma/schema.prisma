@@ -8,12 +8,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
-
 model Department {
-  id              String   @id @default(uuid())
+  id              String @id @default(uuid())
   department_name String
 }
+
 model Staff {
   id              String   @id @default(uuid())
   name            String
@@ -44,4 +43,170 @@ model BankDetails {
   updated_at     DateTime @updatedAt
 
   staff Staff @relation(fields: [staffId], references: [id])
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  role_name   String       @unique
+  permissions Permissions?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+}
+
+model ClientsPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model ProjectsPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model ReportPermissions {
+  id               String       @id @default(uuid())
+  view_global      Boolean      @default(false)
+  view_time_sheets Boolean      @default(false)
+  Permissions      Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId    String?      @unique
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+}
+
+model StaffRolePermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model SettingsPermissions {
+  id               String       @id @default(uuid())
+  view_global      Boolean      @default(false)
+  view_time_sheets Boolean      @default(false)
+  Permissions      Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId    String?      @unique
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+}
+
+model StaffPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model TaskPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model SubTaskPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model ChatModulePermissions {
+  id            String       @id @default(uuid())
+  grant_access  Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model AIPermissions {
+  id            String       @id @default(uuid())
+  grant_access  Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model Permissions {
+  id                      String                 @id @default(uuid())
+  clients_permissions     ClientsPermissions?
+  projects_permissions    ProjectsPermissions?
+  report_permissions      ReportPermissions?
+  staff_role_permissions  StaffRolePermissions?
+  settings_permissions    SettingsPermissions?
+  staff_permissions       StaffPermissions?
+  task_permissions        TaskPermissions?
+  sub_task_permissions    SubTaskPermissions?
+  chat_module_permissions ChatModulePermissions?
+  ai_permissions          AIPermissions?
+  roleId                  String?                @unique
+  Role                    Role?                  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  created_at              DateTime               @default(now())
+  updated_at              DateTime               @updatedAt
+}
+
+model SalaryDetails {
+  id                 String       @id @default(uuid())
+  effective_date     DateTime
+  salary_type        String
+  ctc_amount         Float
+  basic              Float
+  hra                Float
+  dearness_allowance Float
+  employer_pf        Float
+  employer_esi       Float
+  employer_lwf       Float
+  employee_pf        Float
+  employee_esi       Float
+  professional_tax   Float
+  employee_lwf       Float
+  tds                Float
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+  Deductions         Deductions[]
+}
+
+model Deductions {
+  id            String         @id @default(uuid())
+  salaryId      String?
+  heads         String[]
+  calculation   String[]
+  amount        Float[]
+  SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
 }

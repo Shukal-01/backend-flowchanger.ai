@@ -1,11 +1,14 @@
-import express from "express";
-import { PrismaClient } from "@prisma/client";
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
 
+const app = express();
 const prisma = new PrismaClient();
+
+app.use(express.json()); 
 
 // Add Department
 
-export const addDepartment = async (req, res) => {
+ const addDepartment = async (req, res) => {
     try {
         const { departmentName } = req.body;
         const addNewDepartment = await prisma.department.create({
@@ -13,15 +16,15 @@ export const addDepartment = async (req, res) => {
                 department_name: departmentName
             },
         });
-        res.status(200).json({ success: true, message: "Department added successfully", data: addNewDepartment });
+        res.status(200).json({ success: true, message: "Department Add Successfully", data: addNewDepartment });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error adding department", error: error.message });
+        res.status(500).json({ success: false, message: "Error Adding Department", error: error.message });
     }
 };
 
 // Update Department
 
-export const updateDepartment = async (req, res) => {
+ const updateDepartment = async (req, res) => {
     const { id } = req.params;
     try {
         const { departmentName } = req.body;
@@ -33,14 +36,15 @@ export const updateDepartment = async (req, res) => {
                 department_name: departmentName,
             }
         });
-        return res.status(200).json({ status: true, message: "Department Data Successfully Updated!("+ id +")"   })
+        return res.status(200).json({ status: true, message: "Department Name Successfully Updated!("+ id +")"   })
     } catch (error) {
         return res.status(500).json({ status: false, message: "Something Went Wrong!", error: error.code })
     }
 }
 
+// Fetch All Department
 
-export const fetchDepartment = async(req, res) => {    
+ const fetchDepartment = async(req, res) => {    
         const department = await prisma.department.findMany({});
         try{
             if(department.length === 0){
@@ -50,7 +54,9 @@ export const fetchDepartment = async(req, res) => {
         } catch{}                   
 }
 
-export const deleteDepartment = async (req, res) => {
+// Delete Department By Id
+
+ const deleteDepartment = async (req, res) => {
     const { id } = req.params;
     try {        
         await prisma.department.delete({
@@ -64,7 +70,9 @@ export const deleteDepartment = async (req, res) => {
     }
 }
 
-export const showDepartment = async (req, res) => {
+// Show Department By Id
+
+ const showDepartment = async (req, res) => {
     const { id } = req.params;
     try {        
         const showdepartment = await prisma.department.findUnique({
@@ -81,3 +89,5 @@ export const showDepartment = async (req, res) => {
     }
 };
 
+// Export all modules by default
+module.exports = {addDepartment,updateDepartment,fetchDepartment,deleteDepartment,showDepartment};
