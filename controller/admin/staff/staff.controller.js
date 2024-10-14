@@ -45,10 +45,10 @@ const createStaff = async (req, res) => {
 const getAllStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
-      include: {
-        department: true, // Include department details in the response
-        role: true, // Include role details in the response
-      },
+      // include: {
+      //   department: true, // Include department details in the response
+      //   role: true, // Include role details in the response
+      // },
     });
     res.status(200).json(staff);
   } catch (error) {
@@ -61,13 +61,14 @@ const getAllStaff = async (req, res) => {
 // Get a single staff member by UUID
 const getStaffById = async (req, res) => {
   const { id } = req.params;
+  console.log(id);
   try {
     const staff = await prisma.staff.findUnique({
       where: { id },
-      include: {
-        department: true, // Include department details in the response
-        role: true, // Include role details in the response
-      },
+      // include: {
+      //   department: true, // Include department details in the response
+      //   role: true, // Include role details in the response
+      // },
     });
     if (staff) {
       res.status(200).json(staff);
@@ -75,6 +76,7 @@ const getStaffById = async (req, res) => {
       res.status(404).json({ error: "Staff member not found" });
     }
   } catch (error) {
+    console.log(error);
     res
       .status(500)
       .json({ error: "Failed to fetch staff member", details: error.message });
@@ -111,7 +113,7 @@ const updateStaff = async (req, res) => {
         login_otp,
         gender,
         official_email,
-        date_of_joining: new Date(date_of_joining), // Convert date string to Date
+        // date_of_joining: new Date(date_of_joining), // Convert date string to Date
         address,
       },
     });

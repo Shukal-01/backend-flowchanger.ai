@@ -9,19 +9,33 @@ datasource db {
 }
 
 model Staff {
-  id                 String      @id @default(uuid())
-  name               String   
-  job_title           String  
-  branch             String   
-  departmentId       Int      
-  roleId             Int      
-  mobile             String   
-  login_otp           String   
-  gender             String   
-  official_email      String   
-  date_of_joining      DateTime 
-  address            String   
+  id              String   @id @default(uuid())
+  name            String
+  job_title       String
+  branch          String
+  departmentId    Int
+  roleId          Int
+  mobile          String
+  login_otp       String
+  gender          String
+  official_email  String
+  date_of_joining DateTime
+  address         String
 
-  // department         Department @relation(fields: [departmentId], references: [id])
+  // department         Department @relation(fields: [departmentId], references: [id])/
   // role               Role       @relation(fields: [roleId], references: [id])
+  BankDetails BankDetails[]
+}
+
+model BankDetails {
+  id             String   @id @default(uuid())
+  staffId        String
+  bank_name      String
+  account_number String
+  branch_name    String
+  ifsc_code      String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  staff Staff @relation(fields: [staffId], references: [id])
 }
