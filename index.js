@@ -15,3 +15,17 @@ app.use(router);
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+const express = require("express");
+const { PrismaClient } = require("@prisma/client");
+const rootRouter = require("./router/routes");
+const prisma = new PrismaClient();
+
+require("dotenv").config();
+
+app.use(express.json());
+
+app.use("/", rootRouter);
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
