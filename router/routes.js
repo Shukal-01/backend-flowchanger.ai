@@ -6,3 +6,4 @@ const rootRouter = Router();
 rootRouter.use("/role", roleRouter);
 
 module.exports = rootRouter;
+ 
