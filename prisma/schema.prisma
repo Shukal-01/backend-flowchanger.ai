@@ -42,9 +42,9 @@ model PanaltyOvertimeDetails {
   staffId              String             @unique              
   
 
-  earlyLeavePolicyId     EarlyLeavePolicy?              
-  lateComingPolicyId     LateComingPolicy?            
-  overtimePolicyId       OvertimePolicy?                
+  earlyLeavePolicy    EarlyLeavePolicy?              
+  lateComingPolicy     LateComingPolicy?            
+  overtimePolicy       OvertimePolicy?                
 
   staff                Staff?            @relation(fields: [staffId], references: [id]) 
 }

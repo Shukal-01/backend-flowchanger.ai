@@ -1,32 +1,36 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// async function createPenaltyOvertimeDetails(req, res) {
+//     try {
+//         const { earlyLeavePolicy, lateComingPolicy, overtimePolicy, staffId } = req.body;
+
+//         const newPenaltyOvertimeDetails = await prisma.panaltyOvertimeDetails.create({
+//             data: {
+//                 earlyLeavePolicy,
+//                 lateComingPolicy, 
+//                 overtimePolicy,
+//                 staffId
+//             }
+//         });
+
+//         res.status(201).json(newPenaltyOvertimeDetails);
+//     } catch (error) {
+//         console.log(error.message);
+//         res.status(500).json({ error: "Failed to create PenaltyOvertimeDetails" });
+//     }
+// }
+
 async function createPenaltyOvertimeDetails(req, res) {
     try {
-        const { staffId, earlyLeavePolicyId, lateComingPolicyId, overtimePolicyId } = req.body;
-
-
-        // error : Unknown argument `staffId`. Did you mean `staff`? Available options are marked with ?.
-        // please have a look
-
+        const { earlyLeavePolicy, lateComingPolicy, overtimePolicy, staffId } = req.body;
 
         const newPenaltyOvertimeDetails = await prisma.panaltyOvertimeDetails.create({
             data: {
                 staffId,
-                earlyLeavePolicy: {
-                    connect: { id: earlyLeavePolicyId },
-                },
-                lateComingPolicy: {
-                    connect: { id: lateComingPolicyId },
-                },
-                overtimePolicy: {
-                    connect: { id: overtimePolicyId },
-                },
-            },
-            include: {
-                earlyLeavePolicy: true,
-                lateComingPolicy: true,
-                overtimePolicy: true,
+                earlyLeavePolicyId: earlyLeavePolicy,
+                lateComingPolicyId: lateComingPolicy,
+                overtimePolicyId: overtimePolicy,
             },
         });
 

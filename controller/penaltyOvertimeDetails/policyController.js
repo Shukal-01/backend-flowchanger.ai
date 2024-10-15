@@ -1,5 +1,9 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const EarlyLeavePolicySchema = require('../../utils/validations').EarlyLeavePolicySchema;
+const { ZodError } = require('zod');
+const LateComingPolicySchema = require('../../utils/validations').LateComingPolicySchema;
+const OvertimePolicySchema = require('../../utils/validations').OvertimePolicySchema;
 
 async function getAllEarlyLeavePolicy(req, res) {
     try {
@@ -15,19 +19,31 @@ async function createEarlyLeavePolicy(req, res) {
     try {
         const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays } = req.body;
 
+        
+        const earlyLeavePolicyResult = EarlyLeavePolicySchema.safeParse({
+            fineType,
+            gracePeriodMins,
+            fineAmountMins,
+            waiveOffDays,
+        });
+
+        if (!earlyLeavePolicyResult.success) {
+            return res.status(400).json({ error: earlyLeavePolicyResult.error.format() });
+        }
+
+
         const newEarlyLeavePolicy = await prisma.earlyLeavePolicy.create({
-            data: {
-                fineType,
-                gracePeriodMins,
-                fineAmountMins,
-                waiveOffDays,
-            },
+            data: earlyLeavePolicyResult.data,
         });
 
         res.status(201).json(newEarlyLeavePolicy);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to create Early Leave Policy" });
+        if (error instanceof ZodError) {
+            res.status(400).json({ error: 'Invalid request data' });
+        } else {
+            console.log(error);
+            res.status(500).json({ error: 'Failed to create Early Leave Policy' });
+        }
     }
 }
 
@@ -40,23 +56,38 @@ async function getAllLateComingPolicy(req, res) {
         res.status(500).json({ error: "Failed to get policies" });
     }
 }
+
+
 async function createLateComingPolicy(req, res) {
     try {
         const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays } = req.body;
 
+
+        const lateComingPolicyResult = LateComingPolicySchema.safeParse({
+            fineType,
+            gracePeriodMins,
+            fineAmountMins,
+            waiveOffDays,
+        });        
+        
+        
+        if (!lateComingPolicyResult.success) {
+            return res.status(400).json({ error: lateComingPolicyResult.error.format() });
+        }
+
+        
         const newLateComingPolicy = await prisma.lateComingPolicy.create({
-            data: {
-                fineType,
-                gracePeriodMins,
-                fineAmountMins,
-                waiveOffDays,
-            },
+            data: lateComingPolicyResult.data,
         });
 
         res.status(201).json(newLateComingPolicy);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to create Late Coming Policy" });
+        if (error instanceof ZodError) {
+            res.status(400).json({ error: 'Invalid request data' });
+        } else {
+            console.log(error);
+            res.status(500).json({ error: 'Failed to create Late Coming Policy' });
+        }
     }
 }
 
@@ -69,23 +100,38 @@ async function getAllOvertimePolicy(req, res) {
         res.status(500).json({ error: "Failed to get policies" });
     }
 }
+
+
 async function createOvertimePolicy(req, res) {
     try {
         const { gracePeriodMins, extraHoursPay, publicHolidayPay, weekOffPay } = req.body;
 
+        
+        const overtimePolicyResult = OvertimePolicySchema.safeParse({
+            gracePeriodMins,
+            extraHoursPay,
+            publicHolidayPay,
+            weekOffPay,
+        });        
+        
+        
+        if (!overtimePolicyResult.success) {
+            return res.status(400).json({ error: overtimePolicyResult.error.format() });
+        }
+
+        // Use the valid data from overtimePolicyResult.data
         const newOvertimePolicy = await prisma.overtimePolicy.create({
-            data: {
-                gracePeriodMins,
-                extraHoursPay,
-                publicHolidayPay,
-                weekOffPay,
-            },
+            data: overtimePolicyResult.data,
         });
 
         res.status(201).json(newOvertimePolicy);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to create Overtime Policy" });
+        if (error instanceof ZodError) {
+            res.status(400).json({ error: 'Invalid request data' });
+        } else {
+            console.log(error);
+            res.status(500).json({ error: 'Failed to create Overtime Policy' });
+        }
     }
 }
 
