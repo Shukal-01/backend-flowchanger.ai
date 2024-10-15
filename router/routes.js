@@ -1,6 +1,7 @@
 const express = require("express");
 
 // const router = Router();
+const adminSignup = require('./admin/registerLogin.router')
 const department = require('./admin/department.router');
 const staffRouter = require("./admin/staff.router");
 const bankDetailsRouter = require("./admin/bankDetails.router");
@@ -9,6 +10,7 @@ const deductionsRouter = require("./admin/salaryDetails.router");
 
 const rootRouter = express.Router();
 
+rootRouter.use('/admin', adminSignup)
 rootRouter.use('/department', department);
 rootRouter.use("/staff", staffRouter);
 rootRouter.use("/bank-details", bankDetailsRouter);

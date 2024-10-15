@@ -8,6 +8,25 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  first_name   String
+  last_name    String
+  mobile       String
+  time_zone    String
+  time_formate String
+  date_formate String
+  week_formate String
+  package_id   String
+  company_name String
+  company_logo String?
+  password     String
+  is_verified  Boolean  @default(false)
+  otp          Int
+  otpExpiresAt DateTime
+}
+
 model Department {
   id              String @id @default(uuid())
   department_name String
