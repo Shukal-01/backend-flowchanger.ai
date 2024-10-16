@@ -133,103 +133,85 @@ async function addRole(req, res) {
         role_name: roleName, // Provide role name
         permissions: {
           create: {
-            // Provide client-related permissions
             clients_permissions: {
               create: {
-                view_global:
-                  permissions?.clientsPermissions?.view_global || false,
-                create: permissions?.clientsPermissions?.create || false,
-                edit: permissions?.clientsPermissions?.edit || false,
-                delete: permissions?.clientsPermissions?.delete || false,
+                view_global: permissions.client_permissions.view_global,
+                create: permissions.client_permissions.create,
+                edit: permissions.client_permissions.edit,
+                delete: permissions.client_permissions.delete,
               },
             },
 
-            // Provide project-related permissions
             projects_permissions: {
               create: {
-                view_global:
-                  permissions?.projectsPermissions?.view_global || false,
-                create: permissions?.projectsPermissions?.create || false,
-                edit: permissions?.projectsPermissions?.edit || false,
-                delete: permissions?.projectsPermissions?.delete || false,
+                view_global: permissions.projects_permissions.view_global,
+                create: permissions.projects_permissions.create,
+                edit: permissions.projects_permissions.edit,
+                delete: permissions.projects_permissions.delete,
               },
             },
 
-            // Provide report-related permissions
             report_permissions: {
               create: {
-                view_global:
-                  permissions?.reportPermissions?.view_global || false,
+                view_global: permissions.reportPermissions.view_global,
                 view_time_sheets:
-                  permissions?.reportPermissions?.view_time_sheets || false,
+                  permissions.reportPermissions.view_time_sheets,
               },
             },
 
-            // Provide staff role-related permissions
             staff_role_permissions: {
               create: {
-                view_global:
-                  permissions?.staffRolePermissions?.view_global || false,
-                create: permissions?.staffRolePermissions?.create || false,
-                edit: permissions?.staffRolePermissions?.edit || false,
-                delete: permissions?.staffRolePermissions?.delete || false,
+                view_global: permissions.staff_role_permissions.view_global,
+                create: permissions.staff_role_permissions.create,
+                edit: permissions.staff_role_permissions.edit,
+                delete: permissions.staff_role_permissions.delete,
               },
             },
 
-            // Provide settings-related permissions
             settings_permissions: {
               create: {
-                view_global:
-                  permissions?.settingsPermissions?.view_global || false,
+                view_global: permissions.settings_permissions.view_global,
                 view_time_sheets:
-                  permissions?.settingsPermissions?.view_time_sheets || false,
+                  permissions.settings_permissions.view_time_sheets,
               },
             },
 
-            // Provide staff-related permissions
             staff_permissions: {
               create: {
-                view_global:
-                  permissions?.staffPermissions?.view_global || false,
-                create: permissions?.staffPermissions?.create || false,
-                edit: permissions?.staffPermissions?.edit || false,
-                delete: permissions?.staffPermissions?.delete || false,
+                view_global: permissions.staff_permissions.view_global,
+                create: permissions.staff_permissions.create,
+                edit: permissions.staff_permissions.edit,
+                delete: permissions.staff_permissions.delete,
               },
             },
 
-            // Provide task-related permissions
             task_permissions: {
               create: {
-                view_global: permissions?.taskPermissions?.view_global || false,
-                create: permissions?.taskPermissions?.create || false,
-                edit: permissions?.taskPermissions?.edit || false,
-                delete: permissions?.taskPermissions?.delete || false,
+                view_global: permissions.task_permissions.view_global,
+                create: permissions.task_permissions.create,
+                edit: permissions.task_permissions.edit,
+                delete: permissions.task_permissions.delete,
               },
             },
 
-            // Provide sub-task-related permissions
             sub_task_permissions: {
               create: {
-                view_global:
-                  permissions?.subTaskPermissions?.view_global || false,
-                create: permissions?.subTaskPermissions?.create || false,
-                edit: permissions?.subTaskPermissions?.edit || false,
-                delete: permissions?.subTaskPermissions?.delete || false,
+                view_global: permissions.sub_task_permissions.view_global,
+                create: permissions.sub_task_permissions.create,
+                edit: permissions.sub_task_permissions.edit,
+                delete: permissions.sub_task_permissions.delete,
               },
             },
 
-            // Provide chat module-related permissions
             chat_module_permissions: {
               create: {
-                grant_access:
-                  permissions?.chatModulePermissions?.grantAccess || false,
+                grant_access: permissions.chat_module_permissions.grantAccess,
               },
             },
 
-            // Provide AI-related permissions
             ai_permissions: {
               create: {
-                grant_access: permissions?.aiPermissions?.grantAccess || false,
+                grant_access: permissions.ai_permissions.grantAccess,
               },
             },
           },
@@ -328,16 +310,16 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.clientsPermissions?.view_global ??
+                    permissions?.client_permissions?.view_global ??
                     findRole.permissions.clients_permissions.view_global,
                   create:
-                    permissions?.clientsPermissions?.create ??
+                    permissions?.client_permissions?.create ??
                     findRole.permissions.clients_permissions.create,
                   edit:
-                    permissions?.clientsPermissions?.edit ??
+                    permissions?.client_permissions?.edit ??
                     findRole.permissions.clients_permissions.edit,
                   delete:
-                    permissions?.clientsPermissions?.delete ??
+                    permissions?.client_permissions?.delete ??
                     findRole.permissions.clients_permissions.delete,
                 },
               },
