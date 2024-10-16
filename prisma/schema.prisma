@@ -3,15 +3,125 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 // model Department {
 //   id              String @id @default(uuid())
 //   department_name String
 // }
+model AttendanceAutomationRule {
+  id                  String   @id @default(uuid())
+  auto_absent         Boolean  @default(false)
+  present_on_punch    Boolean  @default(false)
+  auto_half_day       String?
+  manadatory_half_day String?
+  manadatory_full_day String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  staffId             String   @unique
+  staff               Staff    @relation(fields: [staffId], references: [id])
+}
+
+model AttendanceMode {
+  id                        String             @id @default(uuid())
+  selfie_attendance         Boolean            @default(false)
+  qr_attendance             Boolean            @default(false)
+  gps_attendance            Boolean            @default(false)
+  mark_attendance           MarkAttendenceType @default(Office)
+  allow_punch_in_for_mobile Boolean            @default(false) // Allows punch-in from mobile devices
+  created_at                DateTime           @default(now())
+  updated_at                DateTime           @updatedAt
+  staffId                   String             @unique
+  staff                     Staff              @relation(fields: [staffId], references: [id])
+}
+
+enum MarkAttendenceType {
+  Office
+  Anywhere
+}
+
+model Staff {
+  id                       String                    @id @default(uuid())
+  name                     String
+  job_title                String
+  branch                   String
+  departmentId             Int
+  roleId                   Int
+  mobile                   String
+  login_otp                String
+  gender                   String
+  official_email           String
+  date_of_joining          DateTime
+  address                  String
+  BankDetails              BankDetails[]
+  panaltyOvertimeDetailId  PanaltyOvertimeDetails?
+  attendanceAutomationRule AttendanceAutomationRule?
+  AttendenceMode           AttendanceMode?
+}
+
+model BankDetails {
+  id             String   @id @default(uuid())
+  staffId        String
+  bank_name      String
+  account_number String
+  branch_name    String
+  ifsc_code      String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  staff          Staff    @relation(fields: [staffId], references: [id])
+}
+
+model PanaltyOvertimeDetails {
+  id      String @id @default(uuid())
+  staffId String @unique
+
+  earlyLeavePolicy EarlyLeavePolicy?
+  lateComingPolicy LateComingPolicy?
+  overtimePolicy   OvertimePolicy?
+
+  staff Staff? @relation(fields: [staffId], references: [id])
+}
+
+enum FineType {
+  HOURLY
+  DAILY
+}
+
+model EarlyLeavePolicy {
+  id              String   @id @default(uuid())
+  fineType        FineType @default(HOURLY)
+  gracePeriodMins Int
+  fineAmountMins  Int
+  waiveOffDays    Int
+
+  panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id])
+  panaltyOvertimeDetailId String?                 @unique
+}
+
+model LateComingPolicy {
+  id              String   @id @default(uuid())
+  fineType        FineType @default(HOURLY)
+  gracePeriodMins Int
+  fineAmountMins  Int
+  waiveOffDays    Int
+
+  panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id])
+  panaltyOvertimeDetailId String?                 @unique
+}
+
+model OvertimePolicy {
+  id               String @id @default(uuid())
+  gracePeriodMins  Int
+  extraHoursPay    Int
+  publicHolidayPay Int
+  weekOffPay       Int
+
+  panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id])
+  panaltyOvertimeDetailId String?                 @unique
+}
 
 model Role {
   id          String       @id @default(uuid())

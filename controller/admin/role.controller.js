@@ -95,9 +95,9 @@ const fetchRoleWithName = async (req, res) => {
 
 // add new Role 
 async function addRole(req, res) {
-    const { roleName, permissions } = req.body;
+    const { role_name, permissions } = req.body;
     try {
-        const validateNewRoleData = newRoleSchema.safeParse({ roleName, permissions });
+        const validateNewRoleData = newRoleSchema.safeParse({ role_name, permissions });
         if (!validateNewRoleData.success) {
             return res.status(400).json({
                 success: false,
@@ -105,9 +105,9 @@ async function addRole(req, res) {
             })
         }
         // find Role with name if exist or not 
-        const findRoleWithName = await prisma.role.findFirst({
+        const findRoleWithName = await prisma.Role.findFirst({
             where: {
-                role_name: roleName,
+                role_name: role_name,
             }
         })
 
@@ -115,104 +115,103 @@ async function addRole(req, res) {
         if (findRoleWithName) {
             return res.json({
                 status: false,
-                message: "Role is already created with " + roleName + " name"
+                message: "Role is already created with " + role_name + " name"
             })
         }
 
         // if role is not exist then create new role
-        const newRole = await prisma.role.create({
+        const newRole = await prisma.Role.create({
             data: {
-                role_name: roleName, // Provide role name
+                role_name: role_name, // Provide role name
                 permissions: {
                     create: {
-
                         // Provide client-related permissions
                         clients_permissions: {
                             create: {
-                                view_global: permissions?.clientsPermissions?.viewGlobal || false,
-                                create: permissions?.clientsPermissions?.create || false,
-                                edit: permissions?.clientsPermissions?.edit || false,
-                                delete: permissions?.clientsPermissions?.delete || false,
+                                view_global: permissions?.clients_permissions?.view_global || false,
+                                create: permissions?.clients_permissions?.create || false,
+                                edit: permissions?.clients_permissions?.edit || false,
+                                delete: permissions?.clients_permissions?.delete || false,
                             },
                         },
 
                         // Provide project-related permissions
                         projects_permissions: {
                             create: {
-                                view_global: permissions?.projectsPermissions?.viewGlobal || false,
-                                create: permissions?.projectsPermissions?.create || false,
-                                edit: permissions?.projectsPermissions?.edit || false,
-                                delete: permissions?.projectsPermissions?.delete || false,
+                                view_global: permissions?.projects_permissions?.view_global || false,
+                                create: permissions?.projects_permissions?.create || false,
+                                edit: permissions?.projects_permissions?.edit || false,
+                                delete: permissions?.projects_permissions?.delete || false,
                             },
                         },
 
                         // Provide report-related permissions
                         report_permissions: {
                             create: {
-                                view_global: permissions?.reportPermissions?.viewGlobal || false,
-                                view_time_sheets: permissions?.reportPermissions?.viewTimesheets || false,
+                                view_global: permissions?.report_permissions?.view_global || false,
+                                view_time_sheets: permissions?.report_permissions?.view_time_sheets || false,
                             },
                         },
 
                         // Provide staff role-related permissions
                         staff_role_permissions: {
                             create: {
-                                view_global: permissions?.staffRolePermissions?.viewGlobal || false,
-                                create: permissions?.staffRolePermissions?.create || false,
-                                edit: permissions?.staffRolePermissions?.edit || false,
-                                delete: permissions?.staffRolePermissions?.delete || false,
+                                view_global: permissions?.staff_role_permissions?.view_global || false,
+                                create: permissions?.staff_role_permissions?.create || false,
+                                edit: permissions?.staff_role_permissions?.edit || false,
+                                delete: permissions?.staff_role_permissions?.delete || false,
                             },
                         },
 
                         // Provide settings-related permissions
                         settings_permissions: {
                             create: {
-                                view_global: permissions?.settingsPermissions?.viewGlobal || false,
-                                view_time_sheets: permissions?.settingsPermissions?.viewTimesheets || false,
+                                view_global: permissions?.settings_permissions?.view_global || false,
+                                view_time_sheets: permissions?.settings_permissions?.view_time_sheets || false,
                             },
                         },
 
                         // Provide staff-related permissions
                         staff_permissions: {
                             create: {
-                                view_global: permissions?.staffPermissions?.viewGlobal || false,
-                                create: permissions?.staffPermissions?.create || false,
-                                edit: permissions?.staffPermissions?.edit || false,
-                                delete: permissions?.staffPermissions?.delete || false,
+                                view_global: permissions?.staff_permissions?.view_global || false,
+                                create: permissions?.staff_permissions?.create || false,
+                                edit: permissions?.staff_permissions?.edit || false,
+                                delete: permissions?.staff_permissions?.delete || false,
                             },
                         },
 
                         // Provide task-related permissions
                         task_permissions: {
                             create: {
-                                view_global: permissions?.taskPermissions?.viewGlobal || false,
-                                create: permissions?.taskPermissions?.create || false,
-                                edit: permissions?.taskPermissions?.edit || false,
-                                delete: permissions?.taskPermissions?.delete || false,
+                                view_global: permissions?.task_permissions?.view_global || false,
+                                create: permissions?.task_permissions?.create || false,
+                                edit: permissions?.task_permissions?.edit || false,
+                                delete: permissions?.task_permissions?.delete || false,
                             },
                         },
 
                         // Provide sub-task-related permissions
                         sub_task_permissions: {
                             create: {
-                                view_global: permissions?.subTaskPermissions?.viewGlobal || false,
-                                create: permissions?.subTaskPermissions?.create || false,
-                                edit: permissions?.subTaskPermissions?.edit || false,
-                                delete: permissions?.subTaskPermissions?.delete || false,
+                                view_global: permissions?.sub_task_permissions?.view_global || false,
+                                create: permissions?.sub_task_permissions?.create || false,
+                                edit: permissions?.sub_task_permissions?.edit || false,
+                                delete: permissions?.sub_task_permissions?.delete || false,
                             },
                         },
 
                         // Provide chat module-related permissions
                         chat_module_permissions: {
                             create: {
-                                grant_access: permissions?.chatModulePermissions?.grantAccess || false,
+                                grant_access: permissions?.chat_module_permissions?.grant_access || false,
                             },
                         },
 
                         // Provide AI-related permissions
                         ai_permissions: {
                             create: {
-                                grant_access: permissions?.aiPermissions?.grantAccess || false,
+                                grant_access: permissions?.ai_permissions?.grant_access || false,
                             },
                         },
                     },
@@ -251,13 +250,13 @@ async function addRole(req, res) {
 // updated Role for specific id
 const updateRole = async (req, res) => {
     const { roleName: roleNameParmas } = req.params;
-    const { roleName, permissions } = req.body;
+    const { role_name, permissions } = req.body;
 
 
     try {
         const validateRoleNameParams = roleNameSchema.min(2, "role name in params is required").safeParse(roleNameParmas);
         const validateUpdatedRoleData = updateRoleSchema.safeParse({
-            roleName,
+            role_name,
             permissions
         });
         if (!validateRoleNameParams.success || !validateUpdatedRoleData.success) {
@@ -268,7 +267,7 @@ const updateRole = async (req, res) => {
         }
 
         // find a role with specific role id 
-        const findRole = await prisma.role.findFirst({
+        const findRole = await prisma.Role.findFirst({
             where: { role_name: roleNameParmas },
             include: {
                 permissions: {
@@ -300,108 +299,107 @@ const updateRole = async (req, res) => {
         const updatedRole = await prisma.role.update({
             where: { id: findRole.id },
             data: {
-                role_name: roleName,
+                role_name: role_name,
                 permissions: {
-
-                    // update a all permission like client,projects,task, etc. with the used of permission id with specific value
+                    // Update all permissions (clients, projects, tasks, etc.) using the permission ID with specific values
                     update: {
                         clients_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.clientsPermissions?.viewGlobal ?? findRole.permissions.clients_permissions.view_global,
-                                    create: permissions?.clientsPermissions?.create ?? findRole.permissions.clients_permissions.create,
-                                    edit: permissions?.clientsPermissions?.edit ?? findRole.permissions.clients_permissions.edit,
-                                    delete: permissions?.clientsPermissions?.delete ?? findRole.permissions.clients_permissions.delete,
+                                    view_global: permissions?.clients_permissions?.view_global ?? findRole.permissions.clients_permissions.view_global,
+                                    create: permissions?.clients_permissions?.create ?? findRole.permissions.clients_permissions.create,
+                                    edit: permissions?.clients_permissions?.edit ?? findRole.permissions.clients_permissions.edit,
+                                    delete: permissions?.clients_permissions?.delete ?? findRole.permissions.clients_permissions.delete,
                                 },
                             },
                         },
                         projects_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.projectsPermissions?.viewGlobal ?? findRole.permissions.projects_permissions.view_global,
-                                    create: permissions?.projectsPermissions?.create ?? findRole.permissions.projects_permissions.create,
-                                    edit: permissions?.projectsPermissions?.edit ?? findRole.permissions.projects_permissions.edit,
-                                    delete: permissions?.projectsPermissions?.delete ?? findRole.permissions.projects_permissions.delete,
+                                    view_global: permissions?.projects_permissions?.view_global ?? findRole.permissions.projects_permissions.view_global,
+                                    create: permissions?.projects_permissions?.create ?? findRole.permissions.projects_permissions.create,
+                                    edit: permissions?.projects_permissions?.edit ?? findRole.permissions.projects_permissions.edit,
+                                    delete: permissions?.projects_permissions?.delete ?? findRole.permissions.projects_permissions.delete,
                                 },
                             },
                         },
                         report_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.reportPermissions?.viewGlobal ?? findRole.permissions.report_permissions.view_global,
-                                    view_time_sheets: permissions?.reportPermissions?.viewTimesheets ?? findRole.permissions.report_permissions.view_time_sheets,
+                                    view_global: permissions?.report_permissions?.view_global ?? findRole.permissions.report_permissions.view_global,
+                                    view_time_sheets: permissions?.report_permissions?.view_time_sheets ?? findRole.permissions.report_permissions.view_time_sheets,
                                 },
                             },
                         },
                         staff_role_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.staffRolePermissions?.viewGlobal ?? findRole.permissions.staff_role_permissions.view_global,
-                                    create: permissions?.staffRolePermissions?.create ?? findRole.permissions.staff_role_permissions.create,
-                                    edit: permissions?.staffRolePermissions?.edit ?? findRole.permissions.staff_role_permissions.edit,
-                                    delete: permissions?.staffRolePermissions?.delete ?? findRole.permissions.staff_role_permissions.delete,
+                                    view_global: permissions?.staff_role_permissions?.view_global ?? findRole.permissions.staff_role_permissions.view_global,
+                                    create: permissions?.staff_role_permissions?.create ?? findRole.permissions.staff_role_permissions.create,
+                                    edit: permissions?.staff_role_permissions?.edit ?? findRole.permissions.staff_role_permissions.edit,
+                                    delete: permissions?.staff_role_permissions?.delete ?? findRole.permissions.staff_role_permissions.delete,
                                 },
                             },
                         },
                         settings_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.settingsPermissions?.viewGlobal ?? findRole.permissions.settings_permissions.view_global,
-                                    view_time_sheets: permissions?.settingsPermissions?.viewTimesheets ?? findRole.permissions.settings_permissions.view_time_sheets,
+                                    view_global: permissions?.settings_permissions?.view_global ?? findRole.permissions.settings_permissions.view_global,
+                                    view_time_sheets: permissions?.settings_permissions?.view_time_sheets ?? findRole.permissions.settings_permissions.view_time_sheets,
                                 },
                             },
                         },
                         staff_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.staffPermissions?.viewGlobal ?? findRole.permissions.staff_permissions.view_global,
-                                    create: permissions?.staffPermissions?.create ?? findRole.permissions.staff_permissions.create,
-                                    edit: permissions?.staffPermissions?.edit ?? findRole.permissions.staff_permissions.edit,
-                                    delete: permissions?.staffPermissions?.delete ?? findRole.permissions.staff_permissions.delete,
+                                    view_global: permissions?.staff_permissions?.view_global ?? findRole.permissions.staff_permissions.view_global,
+                                    create: permissions?.staff_permissions?.create ?? findRole.permissions.staff_permissions.create,
+                                    edit: permissions?.staff_permissions?.edit ?? findRole.permissions.staff_permissions.edit,
+                                    delete: permissions?.staff_permissions?.delete ?? findRole.permissions.staff_permissions.delete,
                                 },
                             },
                         },
                         task_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.taskPermissions?.viewGlobal ?? findRole.permissions.task_permissions.view_global,
-                                    create: permissions?.taskPermissions?.create ?? findRole.permissions.task_permissions.create,
-                                    edit: permissions?.taskPermissions?.edit ?? findRole.permissions.task_permissions.edit,
-                                    delete: permissions?.taskPermissions?.delete ?? findRole.permissions.task_permissions.delete,
+                                    view_global: permissions?.task_permissions?.view_global ?? findRole.permissions.task_permissions.view_global,
+                                    create: permissions?.task_permissions?.create ?? findRole.permissions.task_permissions.create,
+                                    edit: permissions?.task_permissions?.edit ?? findRole.permissions.task_permissions.edit,
+                                    delete: permissions?.task_permissions?.delete ?? findRole.permissions.task_permissions.delete,
                                 },
                             },
                         },
                         sub_task_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    view_global: permissions?.subTaskPermissions?.viewGlobal ?? findRole.permissions.sub_task_permissions.view_global,
-                                    create: permissions?.subTaskPermissions?.create ?? findRole.permissions.sub_task_permissions.create,
-                                    edit: permissions?.subTaskPermissions?.edit ?? findRole.permissions.sub_task_permissions.edit,
-                                    delete: permissions?.subTaskPermissions?.delete ?? findRole.permissions.sub_task_permissions.delete,
+                                    view_global: permissions?.sub_task_permissions?.view_global ?? findRole.permissions.sub_task_permissions.view_global,
+                                    create: permissions?.sub_task_permissions?.create ?? findRole.permissions.sub_task_permissions.create,
+                                    edit: permissions?.sub_task_permissions?.edit ?? findRole.permissions.sub_task_permissions.edit,
+                                    delete: permissions?.sub_task_permissions?.delete ?? findRole.permissions.sub_task_permissions.delete,
                                 },
                             },
                         },
                         chat_module_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    grant_access: permissions?.chatModulePermissions?.grantAccess ?? findRole.permissions.chat_module_permissions.grant_access,
+                                    grant_access: permissions?.chat_module_permissions?.grant_access ?? findRole.permissions.chat_module_permissions.grant_access,
                                 },
                             },
                         },
                         ai_permissions: {
                             update: {
-                                where: { permissionsId: findRole.permissions.id },
+                                where: { permissions_id: findRole.permissions.id },
                                 data: {
-                                    grant_access: permissions?.aiPermissions?.grantAccess ?? findRole.permissions.ai_permissions.grant_access,
+                                    grant_access: permissions?.ai_permissions?.grant_access ?? findRole.permissions.ai_permissions.grant_access,
                                 },
                             },
                         },
@@ -439,7 +437,7 @@ const updateRole = async (req, res) => {
         if (error.code === 'P2002') { // Unique constraint violation
             res.status(409).json({
                 success: false,
-                error: roleName + " role already exists.",
+                error: role_name + " role already exists.",
             });
         } else {
             // Handle any other errors
@@ -452,43 +450,43 @@ const updateRole = async (req, res) => {
 };
 
 // delete specific roleId's role
-const deleteRole = async (req, res) => {
-    const { roleName: roleNameParams } = req.params;
-    const validateRoleNameParams = roleNameSchema.min(2, "role name in params is required").safeParse(roleNameParams);
-    if (!validateRoleNameParams.success) {
-        return res.status(400).json({
-            success: false,
-            error: "Invalid role name format or length provided in params",
-        });
-    }
-    try {
-        const findRole = await prisma.role.findFirst({
-            where: { role_name: roleNameParams },
-        });
+// const deleteRole = async (req, res) => {
+//     const { roleName: roleNameParams } = req.params;
+//     const validateRoleNameParams = roleNameSchema.min(2, "role name in params is required").safeParse(roleNameParams);
+//     if (!validateRoleNameParams.success) {
+//         return res.status(400).json({
+//             success: false,
+//             error: "Invalid role name format or length provided in params",
+//         });
+//     }
+//     try {
+//         const findRole = await prisma.role.findFirst({
+//             where: { role_name: roleNameParams },
+//         });
 
-        if (!findRole) {
-            return res.status(404).json({
-                success: false,
-                message: "Role not found.",
-            });
-        }
-        await prisma.role.delete({ where: { id: findRole.id } });
-        res.status(200).json({
-            success: true,
-            message: "Delete role successfully"
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: "Failed to delete role"
-        });
-    }
-}
+//         if (!findRole) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Role not found.",
+//             });
+//         }
+//         await prisma.role.delete({ where: { id: findRole.id } });
+//         res.status(200).json({
+//             success: true,
+//             message: "Delete role successfully"
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             error: "Failed to delete role"
+//         });
+//     }
+// }
 
 module.exports = {
     fetchRole,
     fetchRoleWithName,
     addRole,
     updateRole,
-    deleteRole
+
 };
