@@ -135,83 +135,90 @@ async function addRole(req, res) {
           create: {
             clients_permissions: {
               create: {
-                view_global: permissions.client_permissions.view_global,
-                create: permissions.client_permissions.create,
-                edit: permissions.client_permissions.edit,
-                delete: permissions.client_permissions.delete,
+                view_global:
+                  permissions.client_permissions.view_global || false,
+                create: permissions.client_permissions.create || false,
+                edit: permissions.client_permissions.edit || false,
+                delete: permissions.client_permissions.delete || false,
               },
             },
 
             projects_permissions: {
               create: {
-                view_global: permissions.projects_permissions.view_global,
-                create: permissions.projects_permissions.create,
-                edit: permissions.projects_permissions.edit,
-                delete: permissions.projects_permissions.delete,
+                view_global:
+                  permissions.projects_permissions.view_global || false,
+                create: permissions.projects_permissions.create || false,
+                edit: permissions.projects_permissions.edit || false,
+                delete: permissions.projects_permissions.delete || false,
               },
             },
 
             report_permissions: {
               create: {
-                view_global: permissions.reportPermissions.view_global,
+                view_global:
+                  permissions.report_permissions.view_global || false,
                 view_time_sheets:
-                  permissions.reportPermissions.view_time_sheets,
+                  permissions.report_permissions.view_time_sheets || false,
               },
             },
 
             staff_role_permissions: {
               create: {
-                view_global: permissions.staff_role_permissions.view_global,
-                create: permissions.staff_role_permissions.create,
-                edit: permissions.staff_role_permissions.edit,
-                delete: permissions.staff_role_permissions.delete,
+                view_global:
+                  permissions.staff_role_permissions.view_global || false,
+                create: permissions.staff_role_permissions.create || false,
+                edit: permissions.staff_role_permissions.edit || false,
+                delete: permissions.staff_role_permissions.delete || false,
               },
             },
 
             settings_permissions: {
               create: {
-                view_global: permissions.settings_permissions.view_global,
+                view_global:
+                  permissions.settings_permissions.view_global || false,
                 view_time_sheets:
-                  permissions.settings_permissions.view_time_sheets,
+                  permissions.settings_permissions.view_time_sheets || false,
               },
             },
 
             staff_permissions: {
               create: {
-                view_global: permissions.staff_permissions.view_global,
-                create: permissions.staff_permissions.create,
-                edit: permissions.staff_permissions.edit,
-                delete: permissions.staff_permissions.delete,
+                view_global: permissions.staff_permissions.view_global || false,
+                create: permissions.staff_permissions.create || false,
+                edit: permissions.staff_permissions.edit || false,
+                delete: permissions.staff_permissions.delete || false,
               },
             },
 
             task_permissions: {
               create: {
-                view_global: permissions.task_permissions.view_global,
-                create: permissions.task_permissions.create,
-                edit: permissions.task_permissions.edit,
-                delete: permissions.task_permissions.delete,
+                view_global: permissions.task_permissions.view_global || false,
+                create: permissions.task_permissions.create || false,
+                edit: permissions.task_permissions.edit || false,
+                delete: permissions.task_permissions.delete || false,
               },
             },
 
             sub_task_permissions: {
               create: {
-                view_global: permissions.sub_task_permissions.view_global,
-                create: permissions.sub_task_permissions.create,
-                edit: permissions.sub_task_permissions.edit,
-                delete: permissions.sub_task_permissions.delete,
+                view_global:
+                  permissions.sub_task_permissions.view_global || false,
+                create: permissions.sub_task_permissions.create || false,
+                edit: permissions.sub_task_permissions.edit || false,
+                delete: permissions.sub_task_permissions.delete || false,
               },
             },
 
             chat_module_permissions: {
               create: {
-                grant_access: permissions.chat_module_permissions.grantAccess,
+                grant_access:
+                  permissions.chat_module_permissions.grant_access || false,
               },
             },
 
             ai_permissions: {
               create: {
-                grant_access: permissions.ai_permissions.grantAccess,
+                grant_access: permissions.ai_permissions.grant_access || false,
               },
             },
           },
