@@ -137,7 +137,7 @@ async function addRole(req, res) {
             clients_permissions: {
               create: {
                 view_global:
-                  permissions?.clientsPermissions?.viewGlobal || false,
+                  permissions?.clientsPermissions?.view_global || false,
                 create: permissions?.clientsPermissions?.create || false,
                 edit: permissions?.clientsPermissions?.edit || false,
                 delete: permissions?.clientsPermissions?.delete || false,
@@ -148,7 +148,7 @@ async function addRole(req, res) {
             projects_permissions: {
               create: {
                 view_global:
-                  permissions?.projectsPermissions?.viewGlobal || false,
+                  permissions?.projectsPermissions?.view_global || false,
                 create: permissions?.projectsPermissions?.create || false,
                 edit: permissions?.projectsPermissions?.edit || false,
                 delete: permissions?.projectsPermissions?.delete || false,
@@ -159,9 +159,9 @@ async function addRole(req, res) {
             report_permissions: {
               create: {
                 view_global:
-                  permissions?.reportPermissions?.viewGlobal || false,
+                  permissions?.reportPermissions?.view_global || false,
                 view_time_sheets:
-                  permissions?.reportPermissions?.viewTimesheets || false,
+                  permissions?.reportPermissions?.view_time_sheets || false,
               },
             },
 
@@ -169,7 +169,7 @@ async function addRole(req, res) {
             staff_role_permissions: {
               create: {
                 view_global:
-                  permissions?.staffRolePermissions?.viewGlobal || false,
+                  permissions?.staffRolePermissions?.view_global || false,
                 create: permissions?.staffRolePermissions?.create || false,
                 edit: permissions?.staffRolePermissions?.edit || false,
                 delete: permissions?.staffRolePermissions?.delete || false,
@@ -180,16 +180,17 @@ async function addRole(req, res) {
             settings_permissions: {
               create: {
                 view_global:
-                  permissions?.settingsPermissions?.viewGlobal || false,
+                  permissions?.settingsPermissions?.view_global || false,
                 view_time_sheets:
-                  permissions?.settingsPermissions?.viewTimesheets || false,
+                  permissions?.settingsPermissions?.view_time_sheets || false,
               },
             },
 
             // Provide staff-related permissions
             staff_permissions: {
               create: {
-                view_global: permissions?.staffPermissions?.viewGlobal || false,
+                view_global:
+                  permissions?.staffPermissions?.view_global || false,
                 create: permissions?.staffPermissions?.create || false,
                 edit: permissions?.staffPermissions?.edit || false,
                 delete: permissions?.staffPermissions?.delete || false,
@@ -199,7 +200,7 @@ async function addRole(req, res) {
             // Provide task-related permissions
             task_permissions: {
               create: {
-                view_global: permissions?.taskPermissions?.viewGlobal || false,
+                view_global: permissions?.taskPermissions?.view_global || false,
                 create: permissions?.taskPermissions?.create || false,
                 edit: permissions?.taskPermissions?.edit || false,
                 delete: permissions?.taskPermissions?.delete || false,
@@ -210,7 +211,7 @@ async function addRole(req, res) {
             sub_task_permissions: {
               create: {
                 view_global:
-                  permissions?.subTaskPermissions?.viewGlobal || false,
+                  permissions?.subTaskPermissions?.view_global || false,
                 create: permissions?.subTaskPermissions?.create || false,
                 edit: permissions?.subTaskPermissions?.edit || false,
                 delete: permissions?.subTaskPermissions?.delete || false,
@@ -327,7 +328,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.clientsPermissions?.viewGlobal ??
+                    permissions?.clientsPermissions?.view_global ??
                     findRole.permissions.clients_permissions.view_global,
                   create:
                     permissions?.clientsPermissions?.create ??
@@ -346,7 +347,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.projectsPermissions?.viewGlobal ??
+                    permissions?.projectsPermissions?.view_global ??
                     findRole.permissions.projects_permissions.view_global,
                   create:
                     permissions?.projectsPermissions?.create ??
@@ -365,10 +366,10 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.reportPermissions?.viewGlobal ??
+                    permissions?.reportPermissions?.view_global ??
                     findRole.permissions.report_permissions.view_global,
                   view_time_sheets:
-                    permissions?.reportPermissions?.viewTimesheets ??
+                    permissions?.reportPermissions?.view_time_sheets ??
                     findRole.permissions.report_permissions.view_time_sheets,
                 },
               },
@@ -378,7 +379,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.staffRolePermissions?.viewGlobal ??
+                    permissions?.staffRolePermissions?.view_global ??
                     findRole.permissions.staff_role_permissions.view_global,
                   create:
                     permissions?.staffRolePermissions?.create ??
@@ -397,10 +398,10 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.settingsPermissions?.viewGlobal ??
+                    permissions?.settingsPermissions?.view_global ??
                     findRole.permissions.settings_permissions.view_global,
                   view_time_sheets:
-                    permissions?.settingsPermissions?.viewTimesheets ??
+                    permissions?.settingsPermissions?.view_time_sheets ??
                     findRole.permissions.settings_permissions.view_time_sheets,
                 },
               },
@@ -410,7 +411,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.staffPermissions?.viewGlobal ??
+                    permissions?.staffPermissions?.view_global ??
                     findRole.permissions.staff_permissions.view_global,
                   create:
                     permissions?.staffPermissions?.create ??
@@ -429,7 +430,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.taskPermissions?.viewGlobal ??
+                    permissions?.taskPermissions?.view_global ??
                     findRole.permissions.task_permissions.view_global,
                   create:
                     permissions?.taskPermissions?.create ??
@@ -448,7 +449,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   view_global:
-                    permissions?.subTaskPermissions?.viewGlobal ??
+                    permissions?.subTaskPermissions?.view_global ??
                     findRole.permissions.sub_task_permissions.view_global,
                   create:
                     permissions?.subTaskPermissions?.create ??
@@ -467,7 +468,7 @@ const updateRole = async (req, res) => {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
                   grant_access:
-                    permissions?.chatModulePermissions?.grantAccess ??
+                    permissions?.chatModulePermissions?.grant_access ??
                     findRole.permissions.chat_module_permissions.grant_access,
                 },
               },
