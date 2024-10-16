@@ -1,0 +1,314 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  first_name   String
+  last_name    String
+  mobile       String
+  time_zone    String
+  time_formate String
+  date_formate String
+  week_formate String
+  package_id   String
+  company_name String
+  company_logo String?
+  password     String
+  is_verified  Boolean  @default(false)
+  otp          Int
+  otpExpiresAt DateTime
+} 
+
+model Department {
+  id              String @id @default(uuid())
+  department_name String
+}
+
+model Staff {
+  id                         String    @id @default(uuid())
+  name                       String
+  job_title                  String?
+  branch                     String?
+  departmentId               String?
+  roleId                     String?
+  mobile                     String?
+  login_otp                  String?
+  gender                     String?
+  official_email             String?
+  date_of_joining            DateTime? @default(now())
+  date_of_birth              DateTime? @default(now())
+  current_address            String?
+  permanent_address          String?
+  emergency_contact_name     String?
+  emergency_contact_mobile   String?
+  emergency_contact_relation String?
+  emergency_contact_address  String?
+
+  // department         Department @relation(fields: [departmentId], references: [id])/
+  // role               Role       @relation(fields: [roleId], references: [id])
+  verifications Verification[]
+  BankDetails   BankDetails[]
+  LeavePolicy   LeavePolicy[]
+  LeaveBalance  LeaveBalance[]
+  LeaveRequest  LeaveRequest[]
+}
+
+model BankDetails {
+  id             String   @id @default(uuid())
+  staffId        String
+  bank_name      String?
+  account_number String?
+  branch_name    String?
+  ifsc_code      String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  staff Staff @relation(fields: [staffId], references: [id])
+}
+
+model LeavePolicy {
+  id                   String   @id @default(uuid())
+  staffId              String
+  name                 String
+  allowed_leaves       Int      @default(0)
+  carry_forward_leaves Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  staff        Staff          @relation(fields: [staffId], references: [id])
+  LeaveBalance LeaveBalance[]
+  LeaveRequest LeaveRequest[]
+}
+
+model LeaveBalance {
+  id          String   @id @default(uuid())
+  staffId     String
+  leaveTypeId String
+  balance     Int      @default(0)
+  used        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  staff       Staff       @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id])
+}
+
+model LeaveRequest {
+  id           String   @id @default(uuid())
+  staffId      String
+  leaveTypeId  String
+  request_date DateTime @default(now())
+  start_date   DateTime
+  end_date     DateTime
+  status       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  staff       Staff       @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id])
+}
+
+model Verification {
+  id          String             @id @default(uuid())
+  staffId     String
+  type        VerificationType 
+  status      VerificationStatus 
+  documentUrl String? 
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  staff Staff @relation(fields: [staffId], references: [id]) 
+}
+
+
+enum VerificationType {
+  AADHAAR
+  PAN
+  DRIVING_LICENSE
+  UAN
+  FACE
+  ADDRESS
+  PAST_EMPLOYMENT
+}
+
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  role_name   String       @unique
+  permissions Permissions?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+}
+
+model ClientsPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model ProjectsPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model ReportPermissions {
+  id               String       @id @default(uuid())
+  view_global      Boolean      @default(false)
+  view_time_sheets Boolean      @default(false)
+  Permissions      Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId    String?      @unique
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+}
+
+model StaffRolePermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model SettingsPermissions {
+  id               String       @id @default(uuid())
+  view_global      Boolean      @default(false)
+  view_time_sheets Boolean      @default(false)
+  Permissions      Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId    String?      @unique
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+}
+
+model StaffPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model TaskPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model SubTaskPermissions {
+  id            String       @id @default(uuid())
+  view_global   Boolean      @default(false)
+  create        Boolean      @default(false)
+  edit          Boolean      @default(false)
+  delete        Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model ChatModulePermissions {
+  id            String       @id @default(uuid())
+  grant_access  Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model AIPermissions {
+  id            String       @id @default(uuid())
+  grant_access  Boolean      @default(false)
+  Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
+  permissionsId String?      @unique
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+}
+
+model Permissions {
+  id                      String                 @id @default(uuid())
+  clients_permissions     ClientsPermissions?
+  projects_permissions    ProjectsPermissions?
+  report_permissions      ReportPermissions?
+  staff_role_permissions  StaffRolePermissions?
+  settings_permissions    SettingsPermissions?
+  staff_permissions       StaffPermissions?
+  task_permissions        TaskPermissions?
+  sub_task_permissions    SubTaskPermissions?
+  chat_module_permissions ChatModulePermissions?
+  ai_permissions          AIPermissions?
+  roleId                  String?                @unique
+  Role                    Role?                  @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  created_at              DateTime               @default(now())
+  updated_at              DateTime               @updatedAt
+}
+
+model SalaryDetails {
+  id                 String       @id @default(uuid())
+  effective_date     DateTime
+  salary_type        String
+  ctc_amount         Float
+  basic              Float
+  hra                Float
+  dearness_allowance Float
+  employer_pf        Float
+  employer_esi       Float
+  employer_lwf       Float
+  employee_pf        Float
+  employee_esi       Float
+  professional_tax   Float
+  employee_lwf       Float
+  tds                Float
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+  Deductions         Deductions[]
+}
+
+model Deductions {
+  id            String         @id @default(uuid())
+  salaryId      String?
+  heads         String[]
+  calculation   String[]
+  amount        Float[]
+  SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
+}
+
