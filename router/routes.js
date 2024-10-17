@@ -1,20 +1,18 @@
-const express = require("express");
+const { Router } = require("express");
+const rootRouter = Router();
 
-// const router = Router();
-const adminSignup = require('./admin/registerLogin.router')
-const department = require('./admin/department.router');
+const adminRouter = require("./admin/admin.router");
+const department = require("./admin/department.router");
 const staffRouter = require("./admin/staff.router");
-const bankDetailsRouter = require("./admin/bankDetails.router");
 const salaryDetailsRouter = require("./admin/salaryDetails.router");
 const deductionsRouter = require("./admin/salaryDetails.router");
+const customDetailsRouter = require("./admin/customDetails.router");
 
-const rootRouter = express.Router();
-
-rootRouter.use('/admin', adminSignup)
-rootRouter.use('/department', department);
+rootRouter.use("/admin", adminRouter);
+rootRouter.use("/department", department);
 rootRouter.use("/staff", staffRouter);
-rootRouter.use("/bank-details", bankDetailsRouter);
 rootRouter.use("/salary", salaryDetailsRouter);
-rootRouter.use("/salary", deductionsRouter);
+rootRouter.use("/salary-deduction", deductionsRouter);
+rootRouter.use("/custom-details", customDetailsRouter)
 
 module.exports = rootRouter;

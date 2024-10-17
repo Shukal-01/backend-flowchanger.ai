@@ -45,10 +45,10 @@ const createStaff = async (req, res) => {
 const getAllStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
-      // include: {
-      //   department: true, // Include department details in the response
-      //   role: true, // Include role details in the response
-      // },
+      include: {
+        CustomDetails: true,
+        SalaryDetails:true,
+      },
     });
     res.status(200).json(staff);
   } catch (error) {

@@ -32,23 +32,12 @@ model Department {
   department_name String
 }
 
-model Staff {
-  id              String   @id @default(uuid())
-  name            String
-  job_title       String
-  branch          String
-  departmentId    Int
-  roleId          Int
-  mobile          String
-  login_otp       String
-  gender          String
-  official_email  String
-  date_of_joining DateTime
-  address         String
-
-  // department         Department @relation(fields: [departmentId], references: [id])/
-  // role               Role       @relation(fields: [roleId], references: [id])
-  BankDetails BankDetails[]
+model CustomDetails {
+  id          String @id @default(uuid())
+  staffId     String
+  field_name  String
+  field_value String
+  staff       Staff  @relation(fields: [staffId], references: [id])
 }
 
 model BankDetails {
@@ -202,23 +191,46 @@ model Permissions {
 
 model SalaryDetails {
   id                 String       @id @default(uuid())
-  effective_date     DateTime
-  salary_type        String
-  ctc_amount         Float
-  basic              Float
-  hra                Float
-  dearness_allowance Float
-  employer_pf        Float
-  employer_esi       Float
-  employer_lwf       Float
-  employee_pf        Float
-  employee_esi       Float
-  professional_tax   Float
-  employee_lwf       Float
-  tds                Float
-  created_at         DateTime     @default(now())
-  updated_at         DateTime     @updatedAt
-  Deductions         Deductions[]
+  effective_date     DateTime?
+  salary_type        String?
+  ctc_amount         Float?
+  basic              Float?
+  hra                Float?
+  dearness_allowance Float?
+  employer_pf        Float?
+  employer_esi       Float?
+  employer_lwf       Float?
+  employee_pf        Float?
+  employee_esi       Float?
+  professional_tax   Float?
+  employee_lwf       Float?
+  tds                Float?
+  created_at         DateTime?     @default(now())
+  updated_at         DateTime?     @updatedAt
+  staffId            String
+  Deductions         Deductions[]  
+  Staff              Staff        @relation(fields: [staffId], references: [id])
+}
+
+model Staff {
+  id              String   @id @default(uuid())
+  name            String
+  job_title       String
+  branch          String
+  departmentId    Int
+  roleId          Int
+  mobile          String
+  login_otp       String
+  gender          String
+  official_email  String
+  date_of_joining DateTime
+  address         String
+
+  // department         Department @relation(fields: [departmentId], references: [id])/
+  // role               Role       @relation(fields: [roleId], references: [id])
+  BankDetails   BankDetails[]
+  CustomDetails CustomDetails[]
+  SalaryDetails SalaryDetails[]
 }
 
 model Deductions {
