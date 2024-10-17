@@ -42,23 +42,23 @@ const fetchRole = async (req, res) => {
 };
 
 // fetch role with specific id
-const fetchRoleWithName = async (req, res) => {
-  const { roleName } = req.params;
+const fetchRoleWithId = async (req, res) => {
+  const { id } = req.params;
 
   try {
-    const validateroleName = roleNameSchema
-      .min(2, "role name in params is required")
-      .safeParse(roleName);
-    // find Role of id if existing or not
-    if (!validateroleName.success) {
+    // Validate the id parameter
+    const validateId = idSchema.safeParse(id);
+
+    if (!validateId.success) {
       return res.status(400).json({
         success: false,
-        message: "Invalid role name format or length provided in params",
+        message: "Invalid role ID format provided in params",
       });
     }
 
+    // Find role by id
     const findRole = await prisma.role.findFirst({
-      where: { role_name: roleName },
+      where: { id: parseInt(id) },
       include: {
         permissions: {
           include: {
@@ -77,23 +77,25 @@ const fetchRoleWithName = async (req, res) => {
       },
     });
 
-    // if role not found
+    // If role is not found
     if (!findRole) {
       return res.status(404).json({
         success: false,
         message: "Role not found.",
-        data: findRole,
       });
     }
+
+    // Successfully fetched the role
     res.status(200).json({
       success: true,
-      message: "Fetch role detail of " + roleName + " successfully",
+      message: `Fetched role details for ID ${id} successfully`,
       data: findRole,
     });
   } catch (error) {
+    // Handle any other errors
     res.status(500).json({
       success: false,
-      error: "Failed to fetch all roles" + error.message,
+      error: "Failed to fetch role: " + error.message,
     });
   }
 };
@@ -251,27 +253,33 @@ async function addRole(req, res) {
 
 // updated Role for specific id
 const updateRole = async (req, res) => {
-  const { roleName: roleNameParmas } = req.params;
-  const { roleName, permissions } = req.body;
+  const { id } = req.params; // Extracting role ID from the request params
+  const { roleName, permissions } = req.body; // Extracting role name and permissions from the request body
 
   try {
-    const validateRoleNameParams = roleNameSchema
-      .min(2, "role name in params is required")
-      .safeParse(roleNameParmas);
+    // Validate the ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "Role ID is required",
+      });
+    }
+
+    // Validate the updated role data
     const validateUpdatedRoleData = updateRoleSchema.safeParse({
       roleName,
       permissions,
     });
-    if (!validateRoleNameParams.success || !validateUpdatedRoleData.success) {
+    if (!validateUpdatedRoleData.success) {
       return res.status(400).json({
         success: false,
-        error: "Invalid updated role permission and role name format provided",
+        error: "Invalid updated role data format provided",
       });
     }
 
-    // find a role with specific role id
-    const findRole = await prisma.role.findFirst({
-      where: { role_name: roleNameParmas },
+    // Find the role by its ID
+    const findRole = await prisma.role.findUnique({
+      where: { id },
       include: {
         permissions: {
           include: {
@@ -290,7 +298,7 @@ const updateRole = async (req, res) => {
       },
     });
 
-    // If role not found, return 404
+    // If the role is not found, return 404
     if (!findRole) {
       return res.status(404).json({
         success: false,
@@ -298,30 +306,21 @@ const updateRole = async (req, res) => {
       });
     }
 
-    // update the role with provide values or already present value
+    // Update the role with the provided values or retain existing values if not provided
     const updatedRole = await prisma.role.update({
-      where: { id: findRole.id },
+      where: { id },
       data: {
         role_name: roleName,
         permissions: {
-          // update a all permission like client,projects,task, etc. with the used of permission id with specific value
           update: {
             clients_permissions: {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.client_permissions?.view_global ??
-                    findRole.permissions.clients_permissions.view_global,
-                  create:
-                    permissions?.client_permissions?.create ??
-                    findRole.permissions.clients_permissions.create,
-                  edit:
-                    permissions?.client_permissions?.edit ??
-                    findRole.permissions.clients_permissions.edit,
-                  delete:
-                    permissions?.client_permissions?.delete ??
-                    findRole.permissions.clients_permissions.delete,
+                  view_global: permissions?.client_permissions?.view_global ?? findRole.permissions.clients_permissions.view_global,
+                  create: permissions?.client_permissions?.create ?? findRole.permissions.clients_permissions.create,
+                  edit: permissions?.client_permissions?.edit ?? findRole.permissions.clients_permissions.edit,
+                  delete: permissions?.client_permissions?.delete ?? findRole.permissions.clients_permissions.delete,
                 },
               },
             },
@@ -329,18 +328,10 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.projectsPermissions?.view_global ??
-                    findRole.permissions.projects_permissions.view_global,
-                  create:
-                    permissions?.projectsPermissions?.create ??
-                    findRole.permissions.projects_permissions.create,
-                  edit:
-                    permissions?.projectsPermissions?.edit ??
-                    findRole.permissions.projects_permissions.edit,
-                  delete:
-                    permissions?.projectsPermissions?.delete ??
-                    findRole.permissions.projects_permissions.delete,
+                  view_global: permissions?.projectsPermissions?.view_global ?? findRole.permissions.projects_permissions.view_global,
+                  create: permissions?.projectsPermissions?.create ?? findRole.permissions.projects_permissions.create,
+                  edit: permissions?.projectsPermissions?.edit ?? findRole.permissions.projects_permissions.edit,
+                  delete: permissions?.projectsPermissions?.delete ?? findRole.permissions.projects_permissions.delete,
                 },
               },
             },
@@ -348,12 +339,8 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.reportPermissions?.view_global ??
-                    findRole.permissions.report_permissions.view_global,
-                  view_time_sheets:
-                    permissions?.reportPermissions?.view_time_sheets ??
-                    findRole.permissions.report_permissions.view_time_sheets,
+                  view_global: permissions?.reportPermissions?.view_global ?? findRole.permissions.report_permissions.view_global,
+                  view_time_sheets: permissions?.reportPermissions?.view_time_sheets ?? findRole.permissions.report_permissions.view_time_sheets,
                 },
               },
             },
@@ -361,18 +348,10 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.staffRolePermissions?.view_global ??
-                    findRole.permissions.staff_role_permissions.view_global,
-                  create:
-                    permissions?.staffRolePermissions?.create ??
-                    findRole.permissions.staff_role_permissions.create,
-                  edit:
-                    permissions?.staffRolePermissions?.edit ??
-                    findRole.permissions.staff_role_permissions.edit,
-                  delete:
-                    permissions?.staffRolePermissions?.delete ??
-                    findRole.permissions.staff_role_permissions.delete,
+                  view_global: permissions?.staffRolePermissions?.view_global ?? findRole.permissions.staff_role_permissions.view_global,
+                  create: permissions?.staffRolePermissions?.create ?? findRole.permissions.staff_role_permissions.create,
+                  edit: permissions?.staffRolePermissions?.edit ?? findRole.permissions.staff_role_permissions.edit,
+                  delete: permissions?.staffRolePermissions?.delete ?? findRole.permissions.staff_role_permissions.delete,
                 },
               },
             },
@@ -380,12 +359,8 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.settingsPermissions?.view_global ??
-                    findRole.permissions.settings_permissions.view_global,
-                  view_time_sheets:
-                    permissions?.settingsPermissions?.view_time_sheets ??
-                    findRole.permissions.settings_permissions.view_time_sheets,
+                  view_global: permissions?.settingsPermissions?.view_global ?? findRole.permissions.settings_permissions.view_global,
+                  view_time_sheets: permissions?.settingsPermissions?.view_time_sheets ?? findRole.permissions.settings_permissions.view_time_sheets,
                 },
               },
             },
@@ -393,18 +368,10 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.staffPermissions?.view_global ??
-                    findRole.permissions.staff_permissions.view_global,
-                  create:
-                    permissions?.staffPermissions?.create ??
-                    findRole.permissions.staff_permissions.create,
-                  edit:
-                    permissions?.staffPermissions?.edit ??
-                    findRole.permissions.staff_permissions.edit,
-                  delete:
-                    permissions?.staffPermissions?.delete ??
-                    findRole.permissions.staff_permissions.delete,
+                  view_global: permissions?.staffPermissions?.view_global ?? findRole.permissions.staff_permissions.view_global,
+                  create: permissions?.staffPermissions?.create ?? findRole.permissions.staff_permissions.create,
+                  edit: permissions?.staffPermissions?.edit ?? findRole.permissions.staff_permissions.edit,
+                  delete: permissions?.staffPermissions?.delete ?? findRole.permissions.staff_permissions.delete,
                 },
               },
             },
@@ -412,18 +379,10 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.taskPermissions?.view_global ??
-                    findRole.permissions.task_permissions.view_global,
-                  create:
-                    permissions?.taskPermissions?.create ??
-                    findRole.permissions.task_permissions.create,
-                  edit:
-                    permissions?.taskPermissions?.edit ??
-                    findRole.permissions.task_permissions.edit,
-                  delete:
-                    permissions?.taskPermissions?.delete ??
-                    findRole.permissions.task_permissions.delete,
+                  view_global: permissions?.taskPermissions?.view_global ?? findRole.permissions.task_permissions.view_global,
+                  create: permissions?.taskPermissions?.create ?? findRole.permissions.task_permissions.create,
+                  edit: permissions?.taskPermissions?.edit ?? findRole.permissions.task_permissions.edit,
+                  delete: permissions?.taskPermissions?.delete ?? findRole.permissions.task_permissions.delete,
                 },
               },
             },
@@ -431,18 +390,10 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  view_global:
-                    permissions?.subTaskPermissions?.view_global ??
-                    findRole.permissions.sub_task_permissions.view_global,
-                  create:
-                    permissions?.subTaskPermissions?.create ??
-                    findRole.permissions.sub_task_permissions.create,
-                  edit:
-                    permissions?.subTaskPermissions?.edit ??
-                    findRole.permissions.sub_task_permissions.edit,
-                  delete:
-                    permissions?.subTaskPermissions?.delete ??
-                    findRole.permissions.sub_task_permissions.delete,
+                  view_global: permissions?.subTaskPermissions?.view_global ?? findRole.permissions.sub_task_permissions.view_global,
+                  create: permissions?.subTaskPermissions?.create ?? findRole.permissions.sub_task_permissions.create,
+                  edit: permissions?.subTaskPermissions?.edit ?? findRole.permissions.sub_task_permissions.edit,
+                  delete: permissions?.subTaskPermissions?.delete ?? findRole.permissions.sub_task_permissions.delete,
                 },
               },
             },
@@ -450,9 +401,7 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  grant_access:
-                    permissions?.chatModulePermissions?.grant_access ??
-                    findRole.permissions.chat_module_permissions.grant_access,
+                  grant_access: permissions?.chatModulePermissions?.grant_access ?? findRole.permissions.chat_module_permissions.grant_access,
                 },
               },
             },
@@ -460,17 +409,13 @@ const updateRole = async (req, res) => {
               update: {
                 where: { permissionsId: findRole.permissions.id },
                 data: {
-                  grant_access:
-                    permissions?.aiPermissions?.grantAccess ??
-                    findRole.permissions.ai_permissions.grant_access,
+                  grant_access: permissions?.aiPermissions?.grantAccess ?? findRole.permissions.ai_permissions.grant_access,
                 },
               },
             },
           },
         },
       },
-
-      // show all related data table
       include: {
         permissions: {
           include: {
@@ -513,45 +458,51 @@ const updateRole = async (req, res) => {
   }
 };
 
+
 // delete specific roleId's role
 const deleteRole = async (req, res) => {
-  const { roleName: roleNameParams } = req.params;
-  const validateRoleNameParams = roleNameSchema
-    .min(2, "role name in params is required")
-    .safeParse(roleNameParams);
-  if (!validateRoleNameParams.success) {
-    return res.status(400).json({
-      success: false,
-      error: "Invalid role name format or length provided in params",
-    });
-  }
+  const { id } = req.params; // Accepting roleId from params
+
   try {
-    const findRole = await prisma.role.findFirst({
-      where: { role_name: roleNameParams },
+    // Validate the id
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: "Role ID is required",
+      });
+    }
+
+    // Find the role by its ID
+    const findRole = await prisma.role.findUnique({
+      where: { id },
     });
 
+    // If role not found, return 404
     if (!findRole) {
       return res.status(404).json({
         success: false,
         message: "Role not found.",
       });
     }
-    await prisma.role.delete({ where: { id: findRole.id } });
+
+    // Delete the role by its ID
+    await prisma.role.delete({ where: { id } });
+
     res.status(200).json({
       success: true,
-      message: "Delete role successfully",
+      message: "Role deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Failed to delete role",
+      error: `Failed to delete role: ${error.message}`,
     });
   }
 };
 
 module.exports = {
   fetchRole,
-  fetchRoleWithName,
+  fetchRoleWithId,
   addRole,
   updateRole,
   deleteRole,
