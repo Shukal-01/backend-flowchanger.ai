@@ -1,7 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { attendanceModeSchema } = require("../../../utils/validations.js");
+const { attendanceModeSchema } = require("../../../../utils/validations.js");
 
+// fetch attendance mode configuaration for all staff
 const fetchAttendenceModeForAllStaff = async (req, res) => {
     try {
         const allAttendenceModeOfStaff = await prisma.attendanceMode.findMany({
@@ -20,7 +21,7 @@ const fetchAttendenceModeForAllStaff = async (req, res) => {
     }
 }
 
-// updated automation rule for single or multiple staff
+// update or crate attendance mode configuaration for single or multiple staff
 const addAndUpdateAttendenceModeForStaffs = async (req, res) => {
     const { staff_ids, attendence_mode = {} } = req.body;
 

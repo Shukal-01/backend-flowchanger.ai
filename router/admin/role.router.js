@@ -1,4 +1,4 @@
-const { addRole, fetchRole, fetchRoleWithName, updateRole } = require("../../controller/admin/role.controller.js");
+const { addRole, fetchRole, updateRole, fetchRoleWithId, deleteRole } = require("../../controller/admin/role.controller.js");
 const { Router } = require("express");
 
 const roleRouter = Router();
@@ -10,9 +10,10 @@ roleRouter.post("/", addRole);
 roleRouter.get("/", fetchRole);
 
 // Update a Role
-roleRouter.put("/:roleName", updateRole);
+roleRouter.put("/:id", updateRole);
 
 // Fetch a Role with role ID
-roleRouter.get("/:roleName", fetchRoleWithName);
+roleRouter.get("/:id", fetchRoleWithId);
+roleRouter.delete("/:id", deleteRole);
 
 module.exports = roleRouter;

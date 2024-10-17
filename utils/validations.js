@@ -3,6 +3,9 @@ const zod = require("zod");
 const roleNameSchema = zod
     .string()
     .regex(/^[a-zA-Z\s]+$/, "Role name can only contain alphabets and spaces");
+const roleIdSchema = zod
+    .string()
+    .uuid("Role name can only contain alphabets and spaces");
 
 const allPermissionSchema = zod.object({
     clients_permission: zod
@@ -83,7 +86,7 @@ const newRoleSchema = zod.object({
 });
 
 const updateRoleSchema = zod.object({
-    roleName: roleNameSchema.optional(),
+    role_name: roleNameSchema.optional(),
     permissions: allPermissionSchema.optional(),
 });
 
@@ -115,10 +118,55 @@ const attendanceModeSchema = zod.object({
     }),
 });
 
+const multipleStaffBankDetailSchema = zod.array(zod.object({
+    staff_id: zod.string().uuid("Invalid staff ID"),
+    bank_name: zod.string().min(1, "Bank name is required"),
+    account_number: zod.string()
+        .length(12, "Account number must be exactly 12 digits") // Assuming a fixed length based on provided data
+        .regex(/^\d{12}$/, "Account number should only contain digits"),
+    account_holder_name: zod.string().min(3, "Account holder name must be at least 3 characters"),
+    branch_name: zod.string().min(3, "Branch name should have at least 3 characters").max(60, "Branch name should have at most 60 characters"),
+    ifsc_code: zod.string()
+        .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code")
+        .length(11, "IFSC code must be exactly 11 characters"),
+}));
+
+const aadhaarNumberPattern = /^\d{4}-\d{4}-\d{4}$/; // Format: 1234-5678-9012
+const panNumberPattern = /^[A-Z]{5}\d{4}[A-Z]$/; // Format: ABCDE1234F
+const uanNumberPattern = /^\d{12}$/; // 12 digits
+const drivingLicensePattern = /^[A-Z]{2}[0-9]{2}[0-9]{1,11}$/;
+
+const staffBackgroundVerificationSchema = zod.object({
+    aadhaar_number: zod.string().regex(aadhaarNumberPattern, "invalid Aadhaar number format").optional(),
+    aadhaar_verification_status: zod.string().default("Not Verified").optional(),
+    aadhaar_file: zod.string().optional(),
+    pan_number: zod.string().regex(panNumberPattern, "invalid pan number format").optional(),
+    pan_verification_status: zod.string().default("Not Verified").optional(),
+    pan_file: zod.string().optional(),
+    uan_number: zod.string().regex(uanNumberPattern, "Invalid uan number format").optional(),
+    uan_verification_status: zod.string().default("Not Verified").optional(),
+    uan_file: zod.string().optional(),
+    driving_license_number: zod.string().regex(drivingLicensePattern, "Invalid driving license number format").optional(),
+    driving_license_status: zod.string().default("Not Verified").optional(),
+    driving_license_file: zod.string().optional(),
+    face_file: zod.string().optional(),
+    face_verification_status: zod.string().default("Not Verified").optional(),
+    current_address: zod.string().optional(),
+    permanent_address: zod.string().optional(),
+    address_status: zod.string().default("Not Verified").optional(),
+    address_file: zod.string().optional(),
+    staffId: zod.string().optional(),
+});
+
+
+
 module.exports = {
+    roleIdSchema,
     roleNameSchema,
     newRoleSchema,
     updateRoleSchema,
     attendenceAutomationRuleSchema,
     attendanceModeSchema,
+    multipleStaffBankDetailSchema,
+    staffBackgroundVerificationSchema,
 };

@@ -1,6 +1,6 @@
 const { Router } = require("express");
-const { fetchAllStaftAutomationAttendence, addAndUpdateAutomationRuleForStaffs } = require("../../controller/admin/attendence/automationRules.controller.js");
-const { fetchAttendenceModeForAllStaff, addAndUpdateAttendenceModeForStaffs } = require("../../controller/admin/attendence/mode.controller.js");
+const { fetchAllStaftAutomationAttendence, addAndUpdateAutomationRuleForStaffs } = require("../../controller/admin/staff/attendence/automationRules.controller.js");
+const { fetchAttendenceModeForAllStaff, addAndUpdateAttendenceModeForStaffs } = require("../../controller/admin/staff/attendence/mode.controller.js");
 const attendenceRouter = Router();
 
 attendenceRouter.get("/automation", fetchAllStaftAutomationAttendence);

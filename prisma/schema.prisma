@@ -44,7 +44,7 @@ enum MarkAttendenceType {
 }
 
 model Staff {
-  id                       String                    @id @default(uuid())
+  id                       String                       @id @default(uuid())
   name                     String
   job_title                String
   branch                   String
@@ -60,18 +60,46 @@ model Staff {
   panaltyOvertimeDetailId  PanaltyOvertimeDetails?
   attendanceAutomationRule AttendanceAutomationRule?
   AttendenceMode           AttendanceMode?
+  staff_bg_verification    StaffBackgroundVerification?
+}
+
+model StaffBackgroundVerification {
+  id                          Int      @id @default(autoincrement())
+  aadhaar_number              String?
+  aadhaar_verification_status String?  @default("Not Verified")
+  aadhaar_file                String?
+  pan_number                  String?
+  pan_verification_status     String?  @default("Not Verified")
+  pan_file                    String?
+  uan_number                  String?
+  uan_verification_status     String?  @default("Not Verified")
+  uan_file                    String?
+  driving_license_number      String?
+  driving_license_status      String?  @default("Not Verified")
+  driving_license_file        String?
+  face_file                   String?
+  face_verification_status    String?  @default("Not Verified")
+  current_address             String?
+  permanent_address           String?
+  address_status              String?  @default("Not Verified")
+  address_file                String?
+  staff                       Staff?   @relation(fields: [staffId], references: [id])
+  staffId                     String?  @unique
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
 }
 
 model BankDetails {
-  id             String   @id @default(uuid())
-  staffId        String
-  bank_name      String
-  account_number String
-  branch_name    String
-  ifsc_code      String
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  staff          Staff    @relation(fields: [staffId], references: [id])
+  id                  String   @id @default(uuid())
+  staffId             String   @unique
+  bank_name           String
+  account_number      String   @unique
+  account_holder_name String
+  branch_name         String
+  ifsc_code           String
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  staff               Staff    @relation(fields: [staffId], references: [id])
 }
 
 model PanaltyOvertimeDetails {
@@ -125,7 +153,7 @@ model OvertimePolicy {
 
 model Role {
   id          String       @id @default(uuid())
-  role_name   String       @unique
+  role_name   String       
   permissions Permissions?
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
