@@ -68,12 +68,25 @@ const PunchInSchema = zod.object({
     punchInMethod: zod.string().refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
         message: "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
     }).optional(),
-    punchInTime: zod.string().optional(),
-    punchOutTime: zod.string().optional(),
     biometricData: zod.string().optional(), // Only required for biometric
     qrCodeValue: zod.string().optional(),   // Only required for QR scan
     photoUrl: zod.string().optional(),       // Required for photo click
     staffId: zod.string().min(1, { message: "Staff ID is required." }),
+});
+
+const PunchOutSchema = zod.object({
+    punchOutMethod: zod.string().refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
+        message: "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
+    }).optional(),
+    biometricData: zod.string().optional(), // Only required for biometric
+    qrCodeValue: zod.string().optional(),   // Only required for QR scan
+    photoUrl: zod.string().optional(),       // Required for photo click
+    staffId: zod.string().min(1, { message: "Staff ID is required." }),
+});
+
+const PunchRecordsSchema = zod.object({
+    punchInId: zod.string().min(1, { message: 'PunchInId is required.' }),
+    punchOutId: zod.string().min(1, { message: 'PunchOutId is required.' })
 });
 
 module.exports = {
@@ -83,5 +96,7 @@ module.exports = {
     FlexibleShiftSchema,
     FixedShiftSchema,
     ShiftSchema,
-    PunchInSchema
+    PunchInSchema,
+    PunchOutSchema,
+    PunchRecordsSchema
 };

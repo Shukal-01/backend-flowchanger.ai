@@ -265,7 +265,7 @@ model FlexibleShift {
   Shifts    Shifts[]
 }
 
-model Punch {
+model PunchRecords {
   id      String  @id @default(uuid())
   punchDate   DateTime @default(now())
   punchInId  String @unique
@@ -288,20 +288,26 @@ model PunchIn {
   biometricData   String?  // Store biometric signature, nullable
   qrCodeValue     String?  // Store QR scan result, nullable
   photoUrl        String?  // Store the URL of the photo taken, nullable
-  Punch           Punch?
+  PunchRecords           PunchRecords?
   staffId         String   // Foreign key to User table
   staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
+enum PunchOutMethod {
+  BIOMETRIC
+  QRSCAN
+  PHOTOCLICK
+}
+
 model PunchOut {
   id              String   @id @default(uuid())
-  method          PunchInMethod @default(PHOTOCLICK)
-  punchOutTime    DateTime @default(now())
+  punchOutMethod   PunchOutMethod @default(PHOTOCLICK)
+  punchOutTime    DateTime  @default(now())
   punchOutDate    DateTime @default(now())
   biometricData   String?  // Store biometric signature, nullable
   qrCodeValue     String?  // Store QR scan result, nullable
   photoUrl        String?  // Store the URL of the photo taken, nullable
-  punch           Punch?
+  PunchRecords           PunchRecords?
   staffId         String   // Foreign key to User table
   staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }

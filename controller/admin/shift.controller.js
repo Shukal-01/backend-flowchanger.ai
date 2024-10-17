@@ -40,6 +40,7 @@ async function createShift(req, res) {
         });
         res.status(201).json(newShiftPolicy);
     } catch (error) {
+        console.log(error)
         if (error instanceof ZodError) {
             res.status(400).json({ error: 'Invalid request data' });
         } else {

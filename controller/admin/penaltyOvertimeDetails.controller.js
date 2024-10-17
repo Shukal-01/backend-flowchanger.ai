@@ -74,23 +74,9 @@ async function updatePenaltyOvertimeDetails(req, res) {
     }
 }
 
-// async function deletePenaltyOvertimeDetails(req, res) {
-//     const { id } = req.params;
-//     try {
-//         const deletedPenaltyOvertimeDetails = await prisma.panaltyOvertimeDetails.delete({
-//             where: { id },
-//         });
-//         res.status(200).json(deletedPenaltyOvertimeDetails);
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ error: "Failed to delete penaltyOvertimeDetails" });
-//     }
-// }
-
 module.exports = {
     createPenaltyOvertimeDetails,
     getAllPenaltyOvertimeDetails,
     getPenaltyOvertimeDetailsById,
     updatePenaltyOvertimeDetails,
-    // deletePenaltyOvertimeDetails,
 }
