@@ -17,7 +17,7 @@ async function getAllEarlyLeavePolicy(req, res) {
 
 async function createEarlyLeavePolicy(req, res) {
     try {
-        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays } = req.body;
+        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays, panaltyOvertimeDetailId } = req.body;
 
         
         const earlyLeavePolicyResult = EarlyLeavePolicySchema.safeParse({
@@ -25,6 +25,7 @@ async function createEarlyLeavePolicy(req, res) {
             gracePeriodMins,
             fineAmountMins,
             waiveOffDays,
+            panaltyOvertimeDetailId
         });
 
         if (!earlyLeavePolicyResult.success) {
@@ -60,7 +61,7 @@ async function getAllLateComingPolicy(req, res) {
 
 async function createLateComingPolicy(req, res) {
     try {
-        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays } = req.body;
+        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays, panaltyOvertimeDetailId } = req.body;
 
 
         const lateComingPolicyResult = LateComingPolicySchema.safeParse({
@@ -68,6 +69,7 @@ async function createLateComingPolicy(req, res) {
             gracePeriodMins,
             fineAmountMins,
             waiveOffDays,
+            panaltyOvertimeDetailId
         });        
         
         
@@ -104,7 +106,7 @@ async function getAllOvertimePolicy(req, res) {
 
 async function createOvertimePolicy(req, res) {
     try {
-        const { gracePeriodMins, extraHoursPay, publicHolidayPay, weekOffPay } = req.body;
+        const { gracePeriodMins, extraHoursPay, publicHolidayPay, weekOffPay, panaltyOvertimeDetailId } = req.body;
 
         
         const overtimePolicyResult = OvertimePolicySchema.safeParse({
@@ -112,6 +114,7 @@ async function createOvertimePolicy(req, res) {
             extraHoursPay,
             publicHolidayPay,
             weekOffPay,
+            panaltyOvertimeDetailId
         });        
         
         

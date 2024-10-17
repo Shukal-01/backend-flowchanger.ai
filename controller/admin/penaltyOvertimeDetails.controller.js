@@ -1,25 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// async function createPenaltyOvertimeDetails(req, res) {
-//     try {
-//         const { earlyLeavePolicy, lateComingPolicy, overtimePolicy, staffId } = req.body;
-
-//         const newPenaltyOvertimeDetails = await prisma.panaltyOvertimeDetails.create({
-//             data: {
-//                 earlyLeavePolicy,
-//                 lateComingPolicy, 
-//                 overtimePolicy,
-//                 staffId
-//             }
-//         });
-
-//         res.status(201).json(newPenaltyOvertimeDetails);
-//     } catch (error) {
-//         console.log(error.message);
-//         res.status(500).json({ error: "Failed to create PenaltyOvertimeDetails" });
-//     }
-// }
 
 async function createPenaltyOvertimeDetails(req, res) {
     try {
@@ -27,10 +8,10 @@ async function createPenaltyOvertimeDetails(req, res) {
 
         const newPenaltyOvertimeDetails = await prisma.panaltyOvertimeDetails.create({
             data: {
-                staffId,
                 earlyLeavePolicyId: earlyLeavePolicy,
                 lateComingPolicyId: lateComingPolicy,
                 overtimePolicyId: overtimePolicy,
+                staffId,
             },
         });
 

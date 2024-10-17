@@ -1,5 +1,5 @@
 const express = require("express");
-const { createPenaltyOvertimeDetails, getAllPenaltyOvertimeDetails, getPenaltyOvertimeDetailsById, updatePenaltyOvertimeDetails } = require("../../controller/penaltyOvertimeDetails/penaltyOvertimeDetails.controller");
+const { createPenaltyOvertimeDetails, getAllPenaltyOvertimeDetails, getPenaltyOvertimeDetailsById, updatePenaltyOvertimeDetails } = require("../../controller/admin/penaltyOvertimeDetails.controller");
 const penaltyOvertimeDetailRouter = express.Router();
 
 penaltyOvertimeDetailRouter.post("/create", createPenaltyOvertimeDetails);

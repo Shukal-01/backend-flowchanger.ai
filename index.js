@@ -10,7 +10,9 @@ app.use(cors({
     credentials: true
 }))
 
+// Middleware for parsing JSON and form data
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use("/", routeRouter);
 

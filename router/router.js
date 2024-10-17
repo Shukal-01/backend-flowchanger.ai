@@ -1,14 +1,14 @@
 const { Router } = require("express");
-// import staffRouter from "./admin/staff.router";
-// import bankDetailsRouter from "./admin/bankDetails.router";
-const policyRouter = require("./penaltyOvertimeDetail/policy.router");
-const penaltyOvertimeDetailRouter = require("./penaltyOvertimeDetail/penaltyOvertimeDetail.router");
+const policyRouter = require("./admin/policy.router");
+const penaltyOvertimeDetailRouter = require("./admin/penaltyOvertimeDetail.router");
+const shiftRouter = require("./admin/shiftRouter");
+const punchRouter = require("./admin/punch.router");
 
 const rootRouter = Router();
 
 rootRouter.use("/policy", policyRouter);
 rootRouter.use("/panaltyOvertimeDetails", penaltyOvertimeDetailRouter);
-// rootRouter.use("/staff", staffRouter);
-// rootRouter.use("/bank-details", bankDetailsRouter);
+rootRouter.use("/shift", shiftRouter);
+rootRouter.use("/punch", punchRouter);
 
 module.exports = rootRouter
