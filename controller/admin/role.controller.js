@@ -250,7 +250,7 @@ async function addRole(req, res) {
 // updated Role for specific id
 const updateRole = async (req, res) => {
     const { id } = req.params;
-    const { role_name, permissions } = req.body;
+    const { roleName: role_name, permissions } = req.body;
 
 
     try {

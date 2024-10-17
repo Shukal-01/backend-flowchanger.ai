@@ -64,7 +64,7 @@ model Staff {
 }
 
 model StaffBackgroundVerification {
-  id                          Int      @id @default(autoincrement())
+  id                          String   @id @default(uuid())
   aadhaar_number              String?
   aadhaar_verification_status String?  @default("Not Verified")
   aadhaar_file                String?
@@ -153,7 +153,7 @@ model OvertimePolicy {
 
 model Role {
   id          String       @id @default(uuid())
-  role_name   String       
+  role_name   String
   permissions Permissions?
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
