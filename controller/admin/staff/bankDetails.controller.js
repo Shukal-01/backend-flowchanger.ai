@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { multipleStaffBankDetailSchema } = require("../../utils/validations.js");
+const { multipleStaffBankDetailSchema } = require("../../../utils/validations.js");
 
 // fetch all attendence automation rule 
 const fetchAllStaffBankDetails = async (req, res) => {

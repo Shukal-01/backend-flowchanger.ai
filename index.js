@@ -1,17 +1,21 @@
+require("dotenv").config();
 const express = require("express");
-const rootRouter = require("./router/routes.js")
-const { config } = require("dotenv");
-
-config();
-
+const rootRouter = require("./router/routes");
+const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 8000;
+const path = require("path");
+const PORT = process.env.PORT || 3000;
+
+app.use(
+    cors({
+        origin: "*",
+    })
+);
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-app.use("/api", rootRouter);
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/api/", rootRouter);
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`)
+    console.log(`Server running on port ${PORT}`);
 });
