@@ -283,8 +283,8 @@ enum PunchInMethod {
 model PunchIn {
   id              String   @id @default(uuid())
   punchInMethod   PunchInMethod @default(PHOTOCLICK)
-  punchInTime     String
-  punchInDate     String
+  punchInTime     DateTime @default(now())
+  punchInDate     DateTime @default(now())
   biometricData   String?  // Store biometric signature, nullable
   qrCodeValue     String?  // Store QR scan result, nullable
   photoUrl        String?  // Store the URL of the photo taken, nullable

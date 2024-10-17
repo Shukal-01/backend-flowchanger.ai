@@ -39,6 +39,7 @@ async function createPunchIn(req, res) {
 
         return res.status(201).json(punchIn);
     } catch (error) {
+        console.log(error)
         // Check if the error is from Zod validation and handle accordingly
         if (error instanceof ZodError) {
           return res.status(400).json({ errors: error.errors }); // Return detailed validation errors
