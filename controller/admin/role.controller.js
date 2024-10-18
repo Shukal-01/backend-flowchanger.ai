@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const { newRoleSchema, updateRoleSchema, roleNameSchema, roleIdSchema } = require("../../utils/validations.js");
+const { newRoleSchema, updateRoleSchema, idSchema } = require("../../utils/validations.js");
 
 // fetch all roles 
 const fetchRole = async (req, res) => {
@@ -43,7 +43,7 @@ const fetchRoleWithId = async (req, res) => {
 
     try {
 
-        const validateRoleId = roleIdSchema.min(2, "role id is required").safeParse(id);
+        const validateRoleId = idSchema.min(2, "role id is required").safeParse(id);
         // find Role of id if existing or not
         if (!validateRoleId.success) {
             return res.status(400).json({
@@ -104,21 +104,6 @@ async function addRole(req, res) {
                 message: "Invalid new role data provided",
             })
         }
-        // find Role with name if exist or not 
-        const findRoleWithName = await prisma.Role.findFirst({
-            where: {
-                role_name: role_name,
-            }
-        })
-
-        // if find role with name then return false
-        if (findRoleWithName) {
-            return res.json({
-                status: false,
-                message: "Role is already created with " + role_name + " name"
-            })
-        }
-
         // if role is not exist then create new role
         const newRole = await prisma.Role.create({
             data: {
@@ -258,7 +243,7 @@ const updateRole = async (req, res) => {
             role_name,
             permissions
         });
-        const validateRoleId = roleIdSchema.min(2, "role id is required").safeParse(id);
+        const validateRoleId = idSchema.safeParse(id);
         if (!validateRoleId.success || !validateUpdatedRoleData.success) {
             return res.status(400).json({
                 success: false,
@@ -453,7 +438,7 @@ const updateRole = async (req, res) => {
 // delete specific roleId's role
 const deleteRole = async (req, res) => {
     const { id } = req.params;
-    const validateRoleId = roleIdSchema.safeParse(id);
+    const validateRoleId = idSchema.safeParse(id);
     if (!validateRoleId.success) {
         return res.status(400).json({
             success: false,

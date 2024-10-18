@@ -3,7 +3,7 @@ const zod = require("zod");
 const roleNameSchema = zod
     .string()
     .regex(/^[a-zA-Z\s]+$/, "Role name can only contain alphabets and spaces");
-const roleIdSchema = zod
+const idSchema = zod
     .string()
     .uuid("Role name can only contain alphabets and spaces");
 
@@ -158,10 +158,33 @@ const staffBackgroundVerificationSchema = zod.object({
     staffId: zod.string().optional(),
 });
 
+const clientSchema = zod.object({
+    company: zod.string().min(1, "Company name is required"),
+    vat_number: zod
+        .string()
+        .regex(/^[A-Z0-9]{8,12}$/, "VAT number must be 8-12 characters long, containing only uppercase letters and digits"),
+    phone: zod
+        .string()
+        .regex(/^\+?\d{7,15}$/, "Phone number must be 7 to 15 digits, with an optional '+' prefix"),
+    website: zod
+        .string(),
+    groups: zod.array(zod.string()).min(1, "At least one group is required"),
+    currency: zod.array(zod.string()).min(1, "At least one group is required"),
+    default_language: zod.array(zod.string()).min(1, "At least one group is required"),
+    address: zod.string().min(1, "Address is required"),
+    country: zod.string().min(2, "Country name is required"),
+    state: zod.string().min(2, "State name is required"),
+    city: zod.string().min(1, "City name is required"),
+    status: zod.enum(["active", "inactive"]).default("inactive"),
+    zip_code: zod
+        .string()
+        .regex(/^\d{4,10}$/, "ZIP code must be 4 to 10 digits"),
+});
 
 
 module.exports = {
-    roleIdSchema,
+    clientSchema,
+    idSchema,
     roleNameSchema,
     newRoleSchema,
     updateRoleSchema,
