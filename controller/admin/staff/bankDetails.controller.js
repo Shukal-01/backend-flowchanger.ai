@@ -83,7 +83,6 @@ exports.updateBankDetails = async (req, res) => {
       where: { id },
       data: { bank_name, account_number, branch_name, ifsc_code },
     });
-
     res.status(200).json(updatedBankDetails);
   } catch (error) {
     console.log(error);

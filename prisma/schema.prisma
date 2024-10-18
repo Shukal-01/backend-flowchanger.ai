@@ -311,4 +311,3 @@ model Deductions {
   amount        Float[]
   SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
 }
-
