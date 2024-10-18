@@ -140,7 +140,7 @@ const deleteSpecificClient = async (req, res) => {
         return res.status(500).json({ status: false, message: "An error occurred while deleting the client." });
     }
 };
-
+ 
 const fetchClientInfoSpecificID = async (req, res) => {
     const id = req.params.id;
 
