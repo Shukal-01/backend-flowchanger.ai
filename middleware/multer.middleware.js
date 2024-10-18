@@ -10,8 +10,8 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => {
         // const uniqueFilename = Date.now() + path.extname(file.originalname); 
         const uniqueFilename = `${Date.now()}-${uuidv4()}${path.extname(file.originalname)}`; // Generate the unique filename with Date.now() and UUID
-        req.savedFilename = uniqueFilename; 
-        cb(null, uniqueFilename); 
+        req.savedFilename = uniqueFilename;
+        cb(null, uniqueFilename);
         // cb(null, Date.now() + path.extname(file.originalname)); // File naming convention
     },
 });
@@ -25,10 +25,25 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+const Filter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/svg', 'application/pdf', 'text/plain'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only .jpeg, .jpg, .png, .svg, .txt and .pdf formats allowed!'), false);
+    }
+};
+
 const upload = multer({
     storage,
-    limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 5MB
+    limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 10MB
     fileFilter,
 });
 
-module.exports = upload;
+const uploadFile = multer({
+    storage,
+    limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 10MB
+    Filter,
+});
+
+module.exports = { upload, uploadFile };

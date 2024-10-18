@@ -1,9 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const dayjs = require('dayjs');
 const PunchInSchema = require('../../utils/validations').PunchInSchema;
 const { ZodError } = require('zod');
-const { PunchOutSchema, PunchRecordsSchema } = require('../../utils/validations');
+const { PunchOutSchema } = require('../../utils/validations');
 
 async function createPunchIn(req, res) {
     try {
@@ -72,16 +71,6 @@ async function createPunchIn(req, res) {
 };
 
 async function getPunchIn(req, res) {
-    // try {
-    //     const { id } = req.params;
-    //     const punchIn = await prisma.punchIn.findMany({
-    //         where: { id },
-    //     });
-    //     res.status(200).json(punchIn);
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(500).json({ error: "Failed to fetch punch-in" });
-    // }
     try {
         const { staffId } = req.query; // Optionally filter by userId
 
@@ -155,6 +144,13 @@ async function createPunchOut(req, res) {
         }
 
         // Create the punch-in record in the database
+        const punchOut = await prisma.punchOut.create({
+            data: {
+                punchOutMethod: punchOutMethod || 'PHOTOCLICK', // default to PHOTOCLICK if not provided
+                ...punchOutData,
+                staffId,
+            },
+        });
 
         return res.status(201).json(punchOut);
     } catch (error) {
@@ -198,75 +194,122 @@ async function getPunchOut(req, res) {
     }
 }
 
-async function createPunchRecords(req, res) {
-    try {
-        const { punchInId, punchOutId } = req.body;
+// async function createPunchRecords(req, res) {
+//     try {
+//         const { punchInId, punchOutId } = req.body;
 
-        // Get today's date (only the date part)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Set time to 00:00:00 to compare only the date
+//         // Get today's date (only the date part)
+//         const today = new Date();
+//         today.setHours(0, 0, 0, 0); // Set time to 00:00:00 to compare only the date
 
-        // Check if there's already a punchInId or punchOutId for today
-        const existingPunch = await prisma.punchRecords.findFirst({
-            where: {
-                punchDate: { // Check the punchInDate field
-                    gte: today, // Greater than or equal to today
-                    lt: new Date(today.getTime() + 86400000) // Less than tomorrow
-                },
-                OR: [
-                    { punchInId },
-                    { punchOutId }
-                ],
-            }
-        });
+//         // Check if there's already a punchInId or punchOutId for today
+//         const existingPunch = await prisma.punchRecords.findFirst({
+//             where: {
+//                 punchDate: { // Check the punchInDate field
+//                     gte: today, // Greater than or equal to today
+//                     lt: new Date(today.getTime() + 86400000) // Less than tomorrow
+//                 },
+//                 OR: [
+//                     { punchInId },
+//                     { punchOutId }
+//                 ],
+//             }
+//         });
 
-        // If the punch already exists, return an error
-        if (existingPunch) {
-            return res.status(400).json({ message: "PunchInId or PunchOutId already exists for today." });
-        }
+//         // If the punch already exists, return an error
+//         if (existingPunch) {
+//             return res.status(400).json({ message: "PunchInId or PunchOutId already exists for today." });
+//         }
 
-        PunchRecordsSchema.safeParse({ punchInId, punchOutId })
+//         PunchRecordsSchema.safeParse({ punchInId, punchOutId })
 
-        // If no record exists for today, create a new punch entry
-        const newPunchRecord = await prisma.punchRecords.create({
-            data: {
-                punchInId,
-                punchOutId,
-            }
-        });
+//         // If no record exists for today, create a new punch entry
+//         const newPunchRecord = await prisma.punchRecords.create({
+//             data: {
+//                 punchInId,
+//                 punchOutId,
+//             }
+//         });
 
-        return res.status(201).json(newPunchRecord);
-    } catch (error) {
-        console.log(error)
-        // Check if the error is from Zod validation and handle accordingly
-        if (error instanceof ZodError) {
-            return res.status(400).json({ errors: error.errors }); // Return detailed validation errors
-        }
-        if (error.code === "P2002") {
-            res.status(409).json({
-                success: false,
-                error: "PunchRecordId is already exists.",
-            })
-        }
+//         return res.status(201).json(newPunchRecord);
+//     } catch (error) {
+//         console.log(error)
+//         // Check if the error is from Zod validation and handle accordingly
+//         if (error instanceof ZodError) {
+//             return res.status(400).json({ errors: error.errors }); // Return detailed validation errors
+//         }
+//         if (error.code === "P2002") {
+//             res.status(409).json({
+//                 success: false,
+//                 error: "PunchRecordId is already exists.",
+//             })
+//         }
 
-        // For any other errors, return a general error message
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
-}
-
+//         // For any other errors, return a general error message
+//         return res.status(500).json({ error: "Internal Server Error" });
+//     }
+// }
 
 
 async function getPunchRecords(req, res) {
     try {
-        const { id } = req.params;
+        const { punchInId, punchOutId, staffId } = req.params;
+
+        // Fetch punch records by punchInId, punchOutId, and staffId
         const punchRecords = await prisma.punchRecords.findMany({
-            where: { id },
+            where: {
+                punchInId,
+                punchOutId,
+                staffId,
+            },
+            include: {
+                punchIn: true,  // Include PunchIn details
+                punchOut: true, // Include PunchOut details
+                // staff: true,    // Include Staff details
+            },
         });
+
+        if (!punchRecords.length) {
+            return res.status(404).json({ message: "No records found" });
+        }
+
         res.status(200).json(punchRecords);
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to fetch punch-in" });
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch punch records" });
     }
 }
 
-module.exports = { createPunchIn, getPunchIn, createPunchOut, getPunchOut, createPunchRecords, getPunchRecords };
+async function getPunchRecordById(req, res) {
+    try {
+        const { punchInId, punchOutId } = req.params; // Extract the IDs from the URL params
+
+        // Fetch punch record by punchInId or punchOutId
+        const punchRecord = await prisma.punchRecords.findFirst({
+            where: {
+                OR: [
+                    { punchInId },
+                    { punchOutId }
+                ]
+            },
+            include: {
+                punchIn: true,  // Include PunchIn details
+                punchOut: true, // Include PunchOut details
+                staff: true,    // Optionally include Staff details if needed
+            },
+        });
+
+        // If the punch record is not found, return a 404 error
+        if (!punchRecord) {
+            return res.status(404).json({ message: "Punch record not found" });
+        }
+
+        // If punch record is found, return it
+        res.status(200).json(punchRecord);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch punch record" });
+    }
+}
+
+module.exports = { createPunchIn, getPunchIn, createPunchOut, getPunchOut, getPunchRecords, getPunchRecordById };

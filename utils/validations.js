@@ -1,5 +1,4 @@
 const zod = require("zod");
-// const penaltyOvertimeDetailRouter = require("../router/admin/penaltyOvertimeDetail.router");
 
 
 const EarlyLeavePolicySchema = zod.object({
@@ -39,7 +38,7 @@ const FlexibleShiftSchema = zod.object({
 });
 
 const FixedShiftSchema = zod.object({
-    day: zod.string().min(1,{ message: "Day is required." }),
+    day: zod.string().min(1, { message: "Day is required." }),
     weekOff: zod.boolean().refine(val => typeof val === 'boolean', {
         message: "Week Off must be a boolean.",
     }),
@@ -55,10 +54,10 @@ const ShiftSchema = zod.object({
     punchOutTime: zod.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid punch out time format (HH:mm)"),
     punchInType: zod.string().refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
         message: "PunchIn Type must be either 'ANYTIME' or 'ADDLIMIT'.",
-    }).optional(),
+    }),
     punchOutType: zod.string().refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
         message: "PunchOut Type must be either 'ANYTIME' or 'ADDLIMIT'.",
-    }).optional(),
+    }),
     flexibleId: zod.string().min(1, { message: "Staff ID is required." }),
     fixedId: zod.string().min(1, { message: "Staff ID is required." })
 });
@@ -77,7 +76,7 @@ const PunchInSchema = zod.object({
 const PunchOutSchema = zod.object({
     punchOutMethod: zod.string().refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
         message: "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
-    }).optional(),
+    }),
     biometricData: zod.string().optional(), // Only required for biometric
     qrCodeValue: zod.string().optional(),   // Only required for QR scan
     photoUrl: zod.string().optional(),       // Required for photo click
@@ -86,7 +85,35 @@ const PunchOutSchema = zod.object({
 
 const PunchRecordsSchema = zod.object({
     punchInId: zod.string().min(1, { message: 'PunchInId is required.' }),
-    punchOutId: zod.string().min(1, { message: 'PunchOutId is required.' })
+    punchOutId: zod.string().min(1, { message: 'PunchOutId is required.' }),
+    staffId: zod.string().min(1, { message: 'StaffId is required.' }),
+});
+
+const TaskTypeSchema = zod.object({
+    taskTypeName: zod.string().min(1, "Task Type name is required"),
+});
+
+const TaskStatusSchema = zod.object({
+    taskStatusName: zod.string().min(1, "Task Status name is required"),
+});
+
+const TaskPrioritySchema = zod.object({
+    taskPriorityName: zod.string().min(1, "Task Priority name is required"),
+});
+
+const TaskDetailSchema = zod.object({
+    taskName: zod.string().min(1, { message: "Task name is required" }),
+    taskStatusId: zod.string().uuid({ message: "Invalid task status ID" }),
+    taskTypeId: zod.string().uuid({ message: "Invalid task type ID" }),
+    taskPriorityId: zod.string().uuid({ message: "Invalid task priority ID" }),
+    startDate: zod.string(),
+    endDate: zod.string(),
+    dueDate: zod.string().optional(),
+    selectProject: zod.string().min(1, { message: "Project selection is required" }),
+    selectDepartment: zod.string().min(1, { message: "Department selection is required" }),
+    taskAssign: zod.string().min(1, { message: "Task assignee is required" }),
+    taskDescription: zod.string().optional(),
+    attachFile: zod.string().optional(),
 });
 
 module.exports = {
@@ -98,5 +125,9 @@ module.exports = {
     ShiftSchema,
     PunchInSchema,
     PunchOutSchema,
-    PunchRecordsSchema
+    PunchRecordsSchema,
+    TaskTypeSchema,
+    TaskStatusSchema,
+    TaskPrioritySchema,
+    TaskDetailSchema
 };

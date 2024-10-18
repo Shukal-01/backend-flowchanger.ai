@@ -22,15 +22,15 @@ async function getShiftById(req, res) {
 
 async function createShift(req, res) {
     try {
-        const { shiftName, shiftStartTime, shiftEndTime, punchInTime, punchOutTime, punchInType, punchOutType, flexibleId, fixedId } = req.body;    
-        
+        const { shiftName, shiftStartTime, shiftEndTime, punchInTime, punchOutTime, punchInType, punchOutType, flexibleId, fixedId } = req.body;
+
         const shiftResult = ShiftSchema.safeParse({
             shiftName,
             shiftStartTime,
             shiftEndTime,
             punchInTime,
             punchOutTime,
-            punchInType,    
+            punchInType,
             punchOutType,
             flexibleId,
             fixedId
@@ -62,7 +62,7 @@ async function updateShift(req, res) {
                 shiftEndTime,
                 punchInTime,
                 punchOutTime,
-                punchInType,    
+                punchInType,
                 punchOutType,
             },
         });
@@ -154,10 +154,10 @@ async function createFlexibleShift(req, res) {
             staffId
         })
 
-
         const flexibleShift = await prisma.flexibleShift.create({
             data: fexibleShiftResult
         });
+
         res.status(201).json(flexibleShift);
     } catch (error) {
         if (error instanceof ZodError) {
@@ -174,7 +174,7 @@ async function updateMultipleShifts(req, res) {
 
     try {
         const updatedShifts = await prisma.$transaction(
-            shifts.map(shift => 
+            shifts.map(shift =>
                 prisma.shifts.update({
                     where: { id: shift.id },
                     data: {

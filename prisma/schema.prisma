@@ -8,26 +8,39 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-
 model Staff {
-  id                      String                  @id @default(uuid())
-  name                    String
-  job_title               String
-  branch                  String
-  departmentId            Int
-  roleId                  Int
-  mobile                  String
-  login_otp               String
-  gender                  String
-  official_email          String
-  // date_of_joining         DateTime
-  address                 String
-  BankDetails             BankDetails[]
-  panaltyOvertimeDetailId PanaltyOvertimeDetails?
-  FixedShift   FixedShift[]
-  FlexibleShift  FlexibleShift[]
-  PunchIn     PunchIn[]
-  PunchOut    PunchOut[]
+  id                         String                  @id @default(uuid())
+  name                       String
+  job_title                  String?
+  branch                     String?
+  departmentId               String?
+  roleId                     String?
+  mobile                     String?
+  login_otp                  String?
+  gender                     String?
+  official_email             String?
+  date_of_joining            DateTime?               @default(now())
+  date_of_birth              DateTime?               @default(now())
+  current_address            String?
+  permanent_address          String?
+  emergency_contact_name     String?
+  emergency_contact_mobile   String?
+  emergency_contact_relation String?
+  emergency_contact_address  String?
+  BankDetails                BankDetails[]
+  panaltyOvertimeDetailId    PanaltyOvertimeDetails?
+  FixedShift                 FixedShift[]
+  FlexibleShift              FlexibleShift[]
+  PunchIn                    PunchIn[]
+  PunchOut                   PunchOut[]
+  PunchRecords               PunchRecords[]
+  department                 Department?             @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+}
+
+model Department {
+  id              String  @id @default(uuid())
+  department_name String
+  Staff           Staff[]
 }
 
 model BankDetails {
@@ -224,22 +237,22 @@ model Permissions {
   roleId                  String?                @unique
   Role                    Role?                  @relation(fields: [roleId], references: [id], onDelete: Cascade)
   created_at              DateTime               @default(now())
-  updated_at              DateTime           @updatedAt
+  updated_at              DateTime               @updatedAt
 }
 
 model Shifts {
-  id            String      @id @default(uuid())
-  shiftName     String
-  shiftStartTime  String
-  shiftEndTime    String
-  punchInTime   String
+  id             String        @id @default(uuid())
+  shiftName      String
+  shiftStartTime String
+  shiftEndTime   String
+  punchInTime    String
   punchOutTime   String
-  punchInType  PunchTime @default(ANYTIME)
-  punchOutType  PunchTime @default(ANYTIME)
-  fixed  FixedShift   @relation(fields: [fixedId], references: [id], onDelete: Cascade)
-  fixedId  String
-  flexible  FlexibleShift   @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
-  flexibleId  String
+  punchInType    PunchTime     @default(ANYTIME)
+  punchOutType   PunchTime     @default(ANYTIME)
+  fixed          FixedShift    @relation(fields: [fixedId], references: [id], onDelete: Cascade)
+  fixedId        String
+  flexible       FlexibleShift @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
+  flexibleId     String
 }
 
 enum PunchTime {
@@ -248,30 +261,32 @@ enum PunchTime {
 }
 
 model FixedShift {
-  id      String    @id  @default(uuid())
-  day   String
-  weekOff   Boolean
-  staff   Staff?      @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String?
-  Shifts   Shifts[]
+  id      String   @id @default(uuid())
+  day     String
+  weekOff Boolean
+  staff   Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId String?
+  Shifts  Shifts[]
 }
 
 model FlexibleShift {
-  id      String    @id  @default(uuid())
-  day   String
-  weekOff   Boolean
-  staff   Staff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String
-  Shifts    Shifts[]
+  id      String   @id @default(uuid())
+  day     String
+  weekOff Boolean
+  staff   Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId String
+  Shifts  Shifts[]
 }
 
 model PunchRecords {
-  id      String  @id @default(uuid())
-  punchDate   DateTime @default(now())
-  punchInId  String @unique
-  punchIn     PunchIn @relation(fields: [punchInId], references: [id], onDelete: Cascade)
-  punchOutId     String @unique
-  punchOut    PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  punchDate  DateTime @default(now())
+  punchInId  String   @unique
+  punchIn    PunchIn  @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId String   @unique
+  punchOut   PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  staffId    String?
+  staff      Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchInMethod {
@@ -281,16 +296,16 @@ enum PunchInMethod {
 }
 
 model PunchIn {
-  id              String   @id @default(uuid())
-  punchInMethod   PunchInMethod @default(PHOTOCLICK)
-  punchInTime     DateTime @default(now())
-  punchInDate     DateTime @default(now())
-  biometricData   String?  // Store biometric signature, nullable
-  qrCodeValue     String?  // Store QR scan result, nullable
-  photoUrl        String?  // Store the URL of the photo taken, nullable
-  PunchRecords           PunchRecords?
-  staffId         String   // Foreign key to User table
-  staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  id            String        @id @default(uuid())
+  punchInMethod PunchInMethod @default(PHOTOCLICK)
+  punchInTime   DateTime      @default(now())
+  punchInDate   DateTime      @default(now())
+  biometricData String? // Store biometric signature, nullable
+  qrCodeValue   String? // Store QR scan result, nullable
+  photoUrl      String? // Store the URL of the photo taken, nullable
+  PunchRecords  PunchRecords?
+  staffId       String // Foreign key to User table
+  staff         Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchOutMethod {
@@ -300,14 +315,51 @@ enum PunchOutMethod {
 }
 
 model PunchOut {
-  id              String   @id @default(uuid())
-  punchOutMethod   PunchOutMethod @default(PHOTOCLICK)
-  punchOutTime    DateTime  @default(now())
-  punchOutDate    DateTime @default(now())
-  biometricData   String?  // Store biometric signature, nullable
-  qrCodeValue     String?  // Store QR scan result, nullable
-  photoUrl        String?  // Store the URL of the photo taken, nullable
-  PunchRecords           PunchRecords?
-  staffId         String   // Foreign key to User table
-  staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  id             String         @id @default(uuid())
+  punchOutMethod PunchOutMethod @default(PHOTOCLICK)
+  punchOutTime   DateTime       @default(now())
+  punchOutDate   DateTime       @default(now())
+  biometricData  String? // Store biometric signature, nullable
+  qrCodeValue    String? // Store QR scan result, nullable
+  photoUrl       String? // Store the URL of the photo taken, nullable
+  PunchRecords   PunchRecords?
+  staffId        String // Foreign key to User table
+  staff          Staff          @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model TaskType {
+  id           String       @id @default(uuid())
+  taskTypeName String
+  TaskDetail   TaskDetail[]
+}
+
+model TaskStatus {
+  id             String       @id @default(uuid())
+  taskStatusName String
+  TaskDetail     TaskDetail[]
+}
+
+model TaskPriority {
+  id               String       @id @default(uuid())
+  taskPriorityName String
+  TaskDetail       TaskDetail[]
+}
+
+model TaskDetail {
+  id               String       @id @default(uuid())
+  taskName         String
+  taskStatusId     String
+  taskTypeId       String
+  taskPriorityId   String
+  taskPriority     TaskPriority @relation(fields: [taskPriorityId], references: [id], onDelete: Cascade)
+  taskType         TaskType     @relation(fields: [taskTypeId], references: [id], onDelete: Cascade)
+  taskStatus       TaskStatus   @relation(fields: [taskStatusId], references: [id], onDelete: Cascade)
+  startDate        String
+  endDate          String
+  dueDate          String
+  selectProject    String
+  selectDepartment String
+  taskAssign       String
+  taskDescription  String
+  attachFile       String
 }
