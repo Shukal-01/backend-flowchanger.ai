@@ -8,6 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+<<<<<<< HEAD
 model Admin {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -59,11 +60,34 @@ model Staff {
   LeavePolicy   LeavePolicy[]
   LeaveBalance  LeaveBalance[]
   LeaveRequest  LeaveRequest[]
+=======
+
+model Staff {
+  id                      String                  @id @default(uuid())
+  name                    String
+  job_title               String
+  branch                  String
+  departmentId            Int
+  roleId                  Int
+  mobile                  String
+  login_otp               String
+  gender                  String
+  official_email          String
+  // date_of_joining         DateTime
+  address                 String
+  BankDetails             BankDetails[]
+  panaltyOvertimeDetailId PanaltyOvertimeDetails?
+  FixedShift   FixedShift[]
+  FlexibleShift  FlexibleShift[]
+  PunchIn     PunchIn[]
+  PunchOut    PunchOut[]
+>>>>>>> 342586a3f0a9dd4c97358ada1550e932393b3fd2
 }
 
 model BankDetails {
   id             String   @id @default(uuid())
   staffId        String
+<<<<<<< HEAD
   bank_name      String?
   account_number String?
   branch_name    String?
@@ -144,6 +168,64 @@ enum VerificationStatus {
   PENDING
   APPROVED
   REJECTED
+=======
+  bank_name      String
+  account_number String
+  branch_name    String
+  ifsc_code      String
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  staff          Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model PanaltyOvertimeDetails {
+  id      String @id @default(uuid())
+  staffId String @unique
+
+  earlyLeavePolicy EarlyLeavePolicy?
+  lateComingPolicy LateComingPolicy?
+  overtimePolicy   OvertimePolicy?
+
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+enum FineType {
+  HOURLY
+  DAILY
+}
+
+model EarlyLeavePolicy {
+  id              String   @id @default(uuid())
+  fineType        FineType @default(HOURLY)
+  gracePeriodMins Int
+  fineAmountMins  Int
+  waiveOffDays    Int
+
+  panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id], onDelete: Cascade)
+  panaltyOvertimeDetailId String?                 @unique
+}
+
+model LateComingPolicy {
+  id              String   @id @default(uuid())
+  fineType        FineType @default(HOURLY)
+  gracePeriodMins Int
+  fineAmountMins  Int
+  waiveOffDays    Int
+
+  panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id], onDelete: Cascade)
+  panaltyOvertimeDetailId String?                 @unique
+}
+
+model OvertimePolicy {
+  id               String @id @default(uuid())
+  gracePeriodMins  Int
+  extraHoursPay    Int
+  publicHolidayPay Int
+  weekOffPay       Int
+
+  panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id], onDelete: Cascade)
+  panaltyOvertimeDetailId String?                 @unique
+>>>>>>> 342586a3f0a9dd4c97358ada1550e932393b3fd2
 }
 
 model Role {
@@ -279,6 +361,7 @@ model Permissions {
   roleId                  String?                @unique
   Role                    Role?                  @relation(fields: [roleId], references: [id], onDelete: Cascade)
   created_at              DateTime               @default(now())
+<<<<<<< HEAD
   updated_at              DateTime               @updatedAt
 }
 
@@ -310,4 +393,92 @@ model Deductions {
   calculation   String[]
   amount        Float[]
   SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
+=======
+  updated_at              DateTime           @updatedAt
+}
+
+model Shifts {
+  id            String      @id @default(uuid())
+  shiftName     String
+  shiftStartTime  String
+  shiftEndTime    String
+  punchInTime   String
+  punchOutTime   String
+  punchInType  PunchTime @default(ANYTIME)
+  punchOutType  PunchTime @default(ANYTIME)
+  fixed  FixedShift   @relation(fields: [fixedId], references: [id], onDelete: Cascade)
+  fixedId  String
+  flexible  FlexibleShift   @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
+  flexibleId  String
+}
+
+enum PunchTime {
+  ANYTIME
+  ADDLIMIT
+}
+
+model FixedShift {
+  id      String    @id  @default(uuid())
+  day   String
+  weekOff   Boolean
+  staff   Staff?      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String?
+  Shifts   Shifts[]
+}
+
+model FlexibleShift {
+  id      String    @id  @default(uuid())
+  day   String
+  weekOff   Boolean
+  staff   Staff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String
+  Shifts    Shifts[]
+}
+
+model PunchRecords {
+  id      String  @id @default(uuid())
+  punchDate   DateTime @default(now())
+  punchInId  String @unique
+  punchIn     PunchIn @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId     String @unique
+  punchOut    PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+}
+
+enum PunchInMethod {
+  BIOMETRIC
+  QRSCAN
+  PHOTOCLICK
+}
+
+model PunchIn {
+  id              String   @id @default(uuid())
+  punchInMethod   PunchInMethod @default(PHOTOCLICK)
+  punchInTime     DateTime @default(now())
+  punchInDate     DateTime @default(now())
+  biometricData   String?  // Store biometric signature, nullable
+  qrCodeValue     String?  // Store QR scan result, nullable
+  photoUrl        String?  // Store the URL of the photo taken, nullable
+  PunchRecords           PunchRecords?
+  staffId         String   // Foreign key to User table
+  staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+enum PunchOutMethod {
+  BIOMETRIC
+  QRSCAN
+  PHOTOCLICK
+}
+
+model PunchOut {
+  id              String   @id @default(uuid())
+  punchOutMethod   PunchOutMethod @default(PHOTOCLICK)
+  punchOutTime    DateTime  @default(now())
+  punchOutDate    DateTime @default(now())
+  biometricData   String?  // Store biometric signature, nullable
+  qrCodeValue     String?  // Store QR scan result, nullable
+  photoUrl        String?  // Store the URL of the photo taken, nullable
+  PunchRecords           PunchRecords?
+  staffId         String   // Foreign key to User table
+  staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+>>>>>>> 342586a3f0a9dd4c97358ada1550e932393b3fd2
 }
