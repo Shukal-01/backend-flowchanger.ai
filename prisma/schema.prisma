@@ -205,15 +205,15 @@ model SalaryDetails {
   professional_tax   Float?
   employee_lwf       Float?
   tds                Float?
-  created_at         DateTime?     @default(now())
-  updated_at         DateTime?     @updatedAt
+  created_at         DateTime?    @default(now())
+  updated_at         DateTime?    @updatedAt
   staffId            String
-  Deductions         Deductions[]  
+  Deductions         Deductions[]
   Staff              Staff        @relation(fields: [staffId], references: [id])
 }
 
 model Staff {
-  id              String   @id @default(uuid())
+  id              String          @id @default(uuid())
   name            String
   job_title       String
   branch          String
@@ -225,12 +225,59 @@ model Staff {
   official_email  String
   date_of_joining DateTime
   address         String
+  BankDetails     BankDetails[]
+  CustomDetails   CustomDetails[]
+  SalaryDetails   SalaryDetails[]
+}
 
-  // department         Department @relation(fields: [departmentId], references: [id])/
-  // role               Role       @relation(fields: [roleId], references: [id])
-  BankDetails   BankDetails[]
-  CustomDetails CustomDetails[]
-  SalaryDetails SalaryDetails[]
+model ProjectFiles {
+  id                  String   @id @default(uuid())
+  file_name           String
+  file_type           String
+  last_activity       String? // Optional field
+  total_comments      String? // Optional field
+  visible_to_customer Boolean @default(false) // Optional field
+  uploaded_by         String
+  date_uploaded       DateTime // Use DateTime for better date handling
+  projectId           String // Renamed for clarity
+  project_files       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id              String         @id @default(uuid())
+  project_name    String
+  customer        String
+  billing_type    String
+  status          String
+  total_rate      Int
+  estimated_hours Int
+  start_Date      String
+  department      String
+  deadline        String
+  tags            String[]
+  description     String
+  clientId        String
+  client          Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectFiles    ProjectFiles[]
+}
+
+model Client {
+  id               String    @id @default(uuid())
+  company          String
+  vat_number       String    @unique
+  phone            String
+  website          String?
+  groups           String[]
+  currency         String[]
+  default_language String[]
+  address          String
+  country          String
+  state            String
+  city             String
+  zip_code         String
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  Project          Project[]
 }
 
 model Deductions {
