@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  // directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Admin {
@@ -477,4 +477,4 @@ model Client {
 enum StatusType {
   active
   inactive
-}
+} 
