@@ -94,6 +94,7 @@ const updateStaffBgVerifcation = async (req, res) => {
 
         const { id, verificationType } = req.params;
         const verificationData = req.body;
+         
         const verificationFile = req.file;
 
 

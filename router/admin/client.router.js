@@ -3,17 +3,19 @@ const { addNewClient, fetchAllClients, updateSpecificClient, fetchClientInfoSpec
 
 const clientRouter = Router();
 
-// Create a new Role
+// create a new client
 clientRouter.post("/", addNewClient);
 
 // Get all Roles
 clientRouter.get("/", fetchAllClients);
 
-// Update a Role
+// upate a client with specific id
 clientRouter.put("/:id", updateSpecificClient);
 
-// Fetch a Role with role ID
+// Fetch a client with specific id
 clientRouter.get("/:id", fetchClientInfoSpecificID);
+
+// delete a client with specific id
 clientRouter.delete("/:id", deleteSpecificClient);
 
 module.exports = clientRouter;

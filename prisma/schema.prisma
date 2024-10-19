@@ -22,7 +22,7 @@ model AttendanceAutomationRule {
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
   staffId             String   @unique
-  staff               Staff    @relation(fields: [staffId], references: [id])
+  staff               Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model AttendanceMode {
@@ -35,7 +35,7 @@ model AttendanceMode {
   created_at                DateTime           @default(now())
   updated_at                DateTime           @updatedAt
   staffId                   String             @unique
-  staff                     Staff              @relation(fields: [staffId], references: [id])
+  staff                     Staff              @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum MarkAttendenceType {
@@ -107,7 +107,7 @@ model StaffBackgroundVerification {
   permanent_address           String?
   address_status              String?  @default("Not Verified")
   address_file                String?
-  staff                       Staff?   @relation(fields: [staffId], references: [id])
+  staff                       Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId                     String?  @unique
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt

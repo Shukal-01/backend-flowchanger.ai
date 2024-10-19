@@ -9,3 +9,4 @@ attendenceRouter.get("/mode", fetchAttendenceModeForAllStaff);
 attendenceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
 
 module.exports = attendenceRouter;
+ 
