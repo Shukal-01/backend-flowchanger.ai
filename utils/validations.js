@@ -203,6 +203,7 @@ const clientSchema = z.object({
   status: z.enum(["active", "inactive"]).default("inactive"),
   zip_code: z.string().regex(/^\d{4,10}$/, "ZIP code must be 4 to 10 digits"),
 });
+
 const staffSchema = z.object({
   name: z.string({
     required_error: "Name is required",
@@ -506,4 +507,8 @@ module.exports = {
   PunchInSchema,
   PunchOutSchema,
   PunchRecordsSchema,
+  TaskTypeSchema,
+  TaskStatusSchema,
+  TaskPrioritySchema,
+  TaskDetailSchema
 };
