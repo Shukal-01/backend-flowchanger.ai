@@ -8,7 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-<<<<<<< HEAD
 model Admin {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -60,34 +59,18 @@ model Staff {
   LeavePolicy   LeavePolicy[]
   LeaveBalance  LeaveBalance[]
   LeaveRequest  LeaveRequest[]
-=======
-
-model Staff {
-  id                      String                  @id @default(uuid())
-  name                    String
-  job_title               String
-  branch                  String
-  departmentId            Int
-  roleId                  Int
-  mobile                  String
-  login_otp               String
-  gender                  String
-  official_email          String
-  // date_of_joining         DateTime
-  address                 String
-  BankDetails             BankDetails[]
-  panaltyOvertimeDetailId PanaltyOvertimeDetails?
   FixedShift   FixedShift[]
   FlexibleShift  FlexibleShift[]
   PunchIn     PunchIn[]
   PunchOut    PunchOut[]
->>>>>>> 342586a3f0a9dd4c97358ada1550e932393b3fd2
+  panaltyOvertimeDetailId PanaltyOvertimeDetails?
 }
+
+
 
 model BankDetails {
   id             String   @id @default(uuid())
   staffId        String
-<<<<<<< HEAD
   bank_name      String?
   account_number String?
   branch_name    String?
@@ -168,14 +151,6 @@ enum VerificationStatus {
   PENDING
   APPROVED
   REJECTED
-=======
-  bank_name      String
-  account_number String
-  branch_name    String
-  ifsc_code      String
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
-  staff          Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model PanaltyOvertimeDetails {
@@ -225,7 +200,6 @@ model OvertimePolicy {
 
   panaltyOvertimeDetail   PanaltyOvertimeDetails? @relation(fields: [panaltyOvertimeDetailId], references: [id], onDelete: Cascade)
   panaltyOvertimeDetailId String?                 @unique
->>>>>>> 342586a3f0a9dd4c97358ada1550e932393b3fd2
 }
 
 model Role {
@@ -361,7 +335,6 @@ model Permissions {
   roleId                  String?                @unique
   Role                    Role?                  @relation(fields: [roleId], references: [id], onDelete: Cascade)
   created_at              DateTime               @default(now())
-<<<<<<< HEAD
   updated_at              DateTime               @updatedAt
 }
 
@@ -393,7 +366,6 @@ model Deductions {
   calculation   String[]
   amount        Float[]
   SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
-=======
   updated_at              DateTime           @updatedAt
 }
 
@@ -480,5 +452,4 @@ model PunchOut {
   PunchRecords           PunchRecords?
   staffId         String   // Foreign key to User table
   staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
->>>>>>> 342586a3f0a9dd4c97358ada1550e932393b3fd2
 }

@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Staff" ALTER COLUMN "departmentId" SET DATA TYPE TEXT,
-ALTER COLUMN "roleId" SET DATA TYPE TEXT;

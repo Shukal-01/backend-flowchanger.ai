@@ -1,184 +1,207 @@
-const zod = require("zod");
+const z = require("zod");
 
-const roleNameSchema = zod
-    .string()
-    .regex(/^[a-zA-Z\s]+$/, "Role name can only contain alphabets and spaces");
-const idSchema = zod
-    .string()
-    .uuid("Role name can only contain alphabets and spaces");
+const roleNameSchema = z
+  .string()
+  .regex(/^[a-zA-Z\s]+$/, "Role name can only contain alphabets and spaces");
 
-const allPermissionSchema = zod.object({
-    clients_permission: zod
-        .object({
-            create: zod.boolean().default(false).optional(),
-            edit: zod.boolean().default(false).optional(),
-            delete: zod.boolean().default(false).optional(),
-            view_global: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    projects_permissions: zod
-        .object({
-            create: zod.boolean().default(false).optional(),
-            edit: zod.boolean().default(false).optional(),
-            delete: zod.boolean().default(false).optional(),
-            view_global: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    report_permissions: zod
-        .object({
-            view_global: zod.boolean().default(false).optional(),
-            view_time_sheets: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    staff_role_permission: zod
-        .object({
-            create: zod.boolean().default(false).optional(),
-            edit: zod.boolean().default(false).optional(),
-            delete: zod.boolean().default(false).optional(),
-            view_global: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    settings_permissions: zod
-        .object({
-            view_global: zod.boolean().default(false).optional(),
-            view_time_sheets: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    staff_permissions: zod
-        .object({
-            create: zod.boolean().default(false).optional(),
-            edit: zod.boolean().default(false).optional(),
-            delete: zod.boolean().default(false).optional(),
-            view_global: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    task_permissions: zod
-        .object({
-            create: zod.boolean().default(false).optional(),
-            edit: zod.boolean().default(false).optional(),
-            delete: zod.boolean().default(false).optional(),
-            view_global: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    sub_task_permissions: zod
-        .object({
-            create: zod.boolean().default(false).optional(),
-            edit: zod.boolean().default(false).optional(),
-            delete: zod.boolean().default(false).optional(),
-            view_global: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    chat_module_permissions: zod
-        .object({
-            grant_access: zod.boolean().default(false).optional(),
-        })
-        .optional(),
-    ai_permissions: zod
-        .object({
-            grant_access: zod.boolean().default(false).optional(),
-        })
-        .optional(),
+const idSchema = z.string().uuid("Invalid UUID format");
+
+const allPermissionSchema = z.object({
+  clients_permission: z
+    .object({
+      create: z.boolean().default(false).optional(),
+      edit: z.boolean().default(false).optional(),
+      delete: z.boolean().default(false).optional(),
+      view_global: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  projects_permissions: z
+    .object({
+      create: z.boolean().default(false).optional(),
+      edit: z.boolean().default(false).optional(),
+      delete: z.boolean().default(false).optional(),
+      view_global: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  report_permissions: z
+    .object({
+      view_global: z.boolean().default(false).optional(),
+      view_time_sheets: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  staff_role_permission: z
+    .object({
+      create: z.boolean().default(false).optional(),
+      edit: z.boolean().default(false).optional(),
+      delete: z.boolean().default(false).optional(),
+      view_global: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  settings_permissions: z
+    .object({
+      view_global: z.boolean().default(false).optional(),
+      view_time_sheets: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  staff_permissions: z
+    .object({
+      create: z.boolean().default(false).optional(),
+      edit: z.boolean().default(false).optional(),
+      delete: z.boolean().default(false).optional(),
+      view_global: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  task_permissions: z
+    .object({
+      create: z.boolean().default(false).optional(),
+      edit: z.boolean().default(false).optional(),
+      delete: z.boolean().default(false).optional(),
+      view_global: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  sub_task_permissions: z
+    .object({
+      create: z.boolean().default(false).optional(),
+      edit: z.boolean().default(false).optional(),
+      delete: z.boolean().default(false).optional(),
+      view_global: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  chat_module_permissions: z
+    .object({
+      grant_access: z.boolean().default(false).optional(),
+    })
+    .optional(),
+  ai_permissions: z
+    .object({
+      grant_access: z.boolean().default(false).optional(),
+    })
+    .optional(),
 });
 
-const newRoleSchema = zod.object({
-    role_name: roleNameSchema.min(2, "role name is required"),
-    permissions: allPermissionSchema.optional(),
+const newRoleSchema = z.object({
+  role_name: roleNameSchema.min(2, "role name is required"),
+  permissions: allPermissionSchema.optional(),
 });
 
-const updateRoleSchema = zod.object({
-    role_name: roleNameSchema.optional(),
-    permissions: allPermissionSchema.optional(),
+const updateRoleSchema = z.object({
+  role_name: roleNameSchema.optional(),
+  permissions: allPermissionSchema.optional(),
 });
 
-const staffIds = zod
-    .array(zod.string().uuid())
-    .min(1, "staff ids are required");
+const staffIds = z.array(z.string().uuid()).min(1, "staff ids are required");
 
-const attendenceAutomationRuleSchema = zod.object({
-    staff_ids: staffIds,
-    automation_rules: zod
-        .object({
-            auto_absent: zod.boolean().optional(),
-            present_on_punch: zod.boolean().optional(),
-            auto_half_day: zod.string().optional(),
-            mandatory_half_day: zod.string().optional(),
-            mandatory_full_day: zod.string().optional(),
-        })
-        .optional(),
+const attendenceAutomationRuleSchema = z.object({
+  staff_ids: staffIds,
+  automation_rules: z
+    .object({
+      auto_absent: z.boolean().optional(),
+      present_on_punch: z.boolean().optional(),
+      auto_half_day: z.string().optional(),
+      mandatory_half_day: z.string().optional(),
+      mandatory_full_day: z.string().optional(),
+    })
+    .optional(),
 });
 
-const attendanceModeSchema = zod.object({
-    staff_ids: staffIds,
-    attendence_mode: zod.object({
-        selfie_attendance: zod.boolean().default(false),
-        qr_attendance: zod.boolean().default(false),
-        gps_attendance: zod.boolean().default(false),
-        mark_attendance: zod.enum(["Office", "Anywhere"]).default("Office"),
-        allow_punch_in_for_mobile: zod.boolean().default(false),
-    }),
+const attendanceModeSchema = z.object({
+  staff_ids: staffIds,
+  attendence_mode: z.object({
+    selfie_attendance: z.boolean().default(false),
+    qr_attendance: z.boolean().default(false),
+    gps_attendance: z.boolean().default(false),
+    mark_attendance: z.enum(["Office", "Anywhere"]).default("Office"),
+    allow_punch_in_for_mobile: z.boolean().default(false),
+  }),
 });
 
-const multipleStaffBankDetailSchema = zod.array(zod.object({
-    staff_id: zod.string().uuid("Invalid staff ID"),
-    bank_name: zod.string().min(1, "Bank name is required"),
-    account_number: zod.string()
-        .length(12, "Account number must be exactly 12 digits") // Assuming a fixed length based on provided data
-        .regex(/^\d{12}$/, "Account number should only contain digits"),
-    account_holder_name: zod.string().min(3, "Account holder name must be at least 3 characters"),
-    branch_name: zod.string().min(3, "Branch name should have at least 3 characters").max(60, "Branch name should have at most 60 characters"),
-    ifsc_code: zod.string()
-        .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code")
-        .length(11, "IFSC code must be exactly 11 characters"),
-}));
+const multipleStaffBankDetailSchema = z.array(
+  z.object({
+    staff_id: z.string().uuid("Invalid staff ID"),
+    bank_name: z.string().min(1, "Bank name is required"),
+    account_number: z
+      .string()
+      .length(12, "Account number must be exactly 12 digits") // Assuming a fixed length based on provided data
+      .regex(/^\d{12}$/, "Account number should only contain digits"),
+    account_holder_name: z
+      .string()
+      .min(3, "Account holder name must be at least 3 characters"),
+    branch_name: z
+      .string()
+      .min(3, "Branch name should have at least 3 characters")
+      .max(60, "Branch name should have at most 60 characters"),
+    ifsc_code: z
+      .string()
+      .regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code")
+      .length(11, "IFSC code must be exactly 11 characters"),
+  })
+);
 
 const aadhaarNumberPattern = /^\d{4}-\d{4}-\d{4}$/; // Format: 1234-5678-9012
 const panNumberPattern = /^[A-Z]{5}\d{4}[A-Z]$/; // Format: ABCDE1234F
 const uanNumberPattern = /^\d{12}$/; // 12 digits
 const drivingLicensePattern = /^[A-Z]{2}[0-9]{2}[0-9]{1,11}$/;
 
-const staffBackgroundVerificationSchema = zod.object({
-    aadhaar_number: zod.string().regex(aadhaarNumberPattern, "invalid Aadhaar number format").optional(),
-    aadhaar_verification_status: zod.string().default("Not Verified").optional(),
-    aadhaar_file: zod.string().optional(),
-    pan_number: zod.string().regex(panNumberPattern, "invalid pan number format").optional(),
-    pan_verification_status: zod.string().default("Not Verified").optional(),
-    pan_file: zod.string().optional(),
-    uan_number: zod.string().regex(uanNumberPattern, "Invalid uan number format").optional(),
-    uan_verification_status: zod.string().default("Not Verified").optional(),
-    uan_file: zod.string().optional(),
-    driving_license_number: zod.string().regex(drivingLicensePattern, "Invalid driving license number format").optional(),
-    driving_license_status: zod.string().default("Not Verified").optional(),
-    driving_license_file: zod.string().optional(),
-    face_file: zod.string().optional(),
-    face_verification_status: zod.string().default("Not Verified").optional(),
-    current_address: zod.string().optional(),
-    permanent_address: zod.string().optional(),
-    address_status: zod.string().default("Not Verified").optional(),
-    address_file: zod.string().optional(),
-    staffId: zod.string().optional(),
+const staffBackgroundVerificationSchema = z.object({
+  aadhaar_number: z
+    .string()
+    .regex(aadhaarNumberPattern, "invalid Aadhaar number format")
+    .optional(),
+  aadhaar_verification_status: z.string().default("Not Verified").optional(),
+  aadhaar_file: z.string().optional(),
+  pan_number: z
+    .string()
+    .regex(panNumberPattern, "invalid pan number format")
+    .optional(),
+  pan_verification_status: z.string().default("Not Verified").optional(),
+  pan_file: z.string().optional(),
+  uan_number: z
+    .string()
+    .regex(uanNumberPattern, "Invalid uan number format")
+    .optional(),
+  uan_verification_status: z.string().default("Not Verified").optional(),
+  uan_file: z.string().optional(),
+  driving_license_number: z
+    .string()
+    .regex(drivingLicensePattern, "Invalid driving license number format")
+    .optional(),
+  driving_license_status: z.string().default("Not Verified").optional(),
+  driving_license_file: z.string().optional(),
+  face_file: z.string().optional(),
+  face_verification_status: z.string().default("Not Verified").optional(),
+  current_address: z.string().optional(),
+  permanent_address: z.string().optional(),
+  address_status: z.string().default("Not Verified").optional(),
+  address_file: z.string().optional(),
+  staffId: z.string().optional(),
 });
 
-const clientSchema = zod.object({
-    company: zod.string().min(1, "Company name is required"),
-    vat_number: zod
-        .string()
-        .regex(/^[A-Z0-9]{8,12}$/, "VAT number must be 8-12 characters long, containing only uppercase letters and digits"),
-    phone: zod
-        .string()
-        .regex(/^\+?\d{7,15}$/, "Phone number must be 7 to 15 digits, with an optional '+' prefix"),
-    website: zod
-        .string(),
-    groups: zod.array(zod.string()).min(1, "At least one group is required"),
-    currency: zod.array(zod.string()).min(1, "At least one group is required"),
-    default_language: zod.array(zod.string()).min(1, "At least one group is required"),
-    address: zod.string().min(1, "Address is required"),
-    country: zod.string().min(2, "Country name is required"),
-    state: zod.string().min(2, "State name is required"),
-    city: zod.string().min(1, "City name is required"),
-    status: zod.enum(["active", "inactive"]).default("inactive"),
-    zip_code: zod
-        .string()
-        .regex(/^\d{4,10}$/, "ZIP code must be 4 to 10 digits"),
+const clientSchema = z.object({
+  company: z.string().min(1, "Company name is required"),
+  vat_number: z
+    .string()
+    .regex(
+      /^[A-Z0-9]{8,12}$/,
+      "VAT number must be 8-12 characters long, containing only uppercase letters and digits"
+    ),
+  phone: z
+    .string()
+    .regex(
+      /^\+?\d{7,15}$/,
+      "Phone number must be 7 to 15 digits, with an optional '+' prefix"
+    ),
+  website: z.string(),
+  groups: z.array(z.string()).min(1, "At least one group is required"),
+  currency: z.array(z.string()).min(1, "At least one group is required"),
+  default_language: z
+    .array(z.string())
+    .min(1, "At least one group is required"),
+  address: z.string().min(1, "Address is required"),
+  country: z.string().min(2, "Country name is required"),
+  state: z.string().min(2, "State name is required"),
+  city: z.string().min(1, "City name is required"),
+  status: z.enum(["active", "inactive"]).default("inactive"),
+  zip_code: z.string().regex(/^\d{4,10}$/, "ZIP code must be 4 to 10 digits"),
 });
 const staffSchema = z.object({
   name: z.string({
@@ -267,94 +290,166 @@ const createLeaveRequestSchema = leaveRequestSchema
 const updateLeaveRequestSchema = z.object({
   status: z.string().optional(),
 });
-s
-const EarlyLeavePolicySchema = zod.object({
-  fineType: zod.string().refine((value) => ["HOURLY", "DAILY"].includes(value), {
+const EarlyLeavePolicySchema = z.object({
+  fineType: z
+    .string()
+    .refine((value) => ["HOURLY", "DAILY"].includes(value), {
       message: "Fine Type must be either 'HOURLY' or 'DAILY'.",
-  }).optional(),
-  gracePeriodMins: zod.number().int({ message: "Grace Period must be an integer." }).optional(),
-  fineAmountMins: zod.number().int({ message: "Fine Amount must be an integer." }).optional(),
-  waiveOffDays: zod.number().int({ message: "Waive Off Days must be an integer." }).optional(),
-  panaltyOvertimeDetailId: zod.string().min(1, { message: "Staff ID is required." }),
+    })
+    .optional(),
+  gracePeriodMins: z
+    .number()
+    .int({ message: "Grace Period must be an integer." })
+    .optional(),
+  fineAmountMins: z
+    .number()
+    .int({ message: "Fine Amount must be an integer." })
+    .optional(),
+  waiveOffDays: z
+    .number()
+    .int({ message: "Waive Off Days must be an integer." })
+    .optional(),
+  panaltyOvertimeDetailId: z
+    .string()
+    .min(1, { message: "Staff ID is required." }),
 });
 
-const LateComingPolicySchema = zod.object({
-  fineType: zod.string().refine((value) => ["HOURLY", "DAILY"].includes(value), {
+const LateComingPolicySchema = z.object({
+  fineType: z
+    .string()
+    .refine((value) => ["HOURLY", "DAILY"].includes(value), {
       message: "Fine Type must be either 'HOURLY' or 'DAILY'.",
-  }).optional(),
-  gracePeriodMins: zod.number().int({ message: "Grace Period must be an integer." }).optional(),
-  fineAmountMins: zod.number().int({ message: "Fine Amount must be an integer." }).optional(),
-  waiveOffDays: zod.number().int({ message: "Waive Off Days must be an integer." }).optional(),
-  panaltyOvertimeDetailId: zod.string().min(1, { message: "Staff ID is required." }),
+    })
+    .optional(),
+  gracePeriodMins: z
+    .number()
+    .int({ message: "Grace Period must be an integer." })
+    .optional(),
+  fineAmountMins: z
+    .number()
+    .int({ message: "Fine Amount must be an integer." })
+    .optional(),
+  waiveOffDays: z
+    .number()
+    .int({ message: "Waive Off Days must be an integer." })
+    .optional(),
+  panaltyOvertimeDetailId: z
+    .string()
+    .min(1, { message: "Staff ID is required." }),
 });
 
-const OvertimePolicySchema = zod.object({
-  gracePeriodMins: zod.number().int({ message: "Grace Period must be an integer." }).optional(),
-  extraHoursPay: zod.number().int({ message: "Extra Hours Pay must be an integer." }).optional(),
-  publicHolidayPay: zod.number().int({ message: "Public Holiday Pay must be an integer." }).optional(),
-  weekOffPay: zod.number().int({ message: "Week Off Pay must be an integer." }).optional(),
-  panaltyOvertimeDetailId: zod.string().min(1, { message: "Staff ID is required." }),
+const OvertimePolicySchema = z.object({
+  gracePeriodMins: z
+    .number()
+    .int({ message: "Grace Period must be an integer." })
+    .optional(),
+  extraHoursPay: z
+    .number()
+    .int({ message: "Extra Hours Pay must be an integer." })
+    .optional(),
+  publicHolidayPay: z
+    .number()
+    .int({ message: "Public Holiday Pay must be an integer." })
+    .optional(),
+  weekOffPay: z
+    .number()
+    .int({ message: "Week Off Pay must be an integer." })
+    .optional(),
+  panaltyOvertimeDetailId: z
+    .string()
+    .min(1, { message: "Staff ID is required." }),
 });
 
-const FlexibleShiftSchema = zod.object({
-  day: zod.string().min(1, { message: "Day is required." }),
-  weekOff: zod.boolean().refine(val => typeof val === 'boolean', {
-      message: "Week Off must be a boolean.",
+const FlexibleShiftSchema = z.object({
+  day: z.string().min(1, { message: "Day is required." }),
+  weekOff: z.boolean().refine((val) => typeof val === "boolean", {
+    message: "Week Off must be a boolean.",
   }),
-  staffId: zod.string().min(1, { message: "Staff ID is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
-const FixedShiftSchema = zod.object({
-  day: zod.string().min(1,{ message: "Day is required." }),
-  weekOff: zod.boolean().refine(val => typeof val === 'boolean', {
-      message: "Week Off must be a boolean.",
+const FixedShiftSchema = z.object({
+  day: z.string().min(1, { message: "Day is required." }),
+  weekOff: z.boolean().refine((val) => typeof val === "boolean", {
+    message: "Week Off must be a boolean.",
   }),
-  staffId: zod.string().min(1, { message: "Staff ID is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
-
-const ShiftSchema = zod.object({
-  shiftName: zod.string().min(1, "Shift name is required"),
-  shiftStartTime: zod.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid shift start time format (HH:mm)"),
-  shiftEndTime: zod.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid shift end time format (HH:mm)"),
-  punchInTime: zod.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid punch in time format (HH:mm)"),
-  punchOutTime: zod.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid punch out time format (HH:mm)"),
-  punchInType: zod.string().refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
+const ShiftSchema = z.object({
+  shiftName: z.string().min(1, "Shift name is required"),
+  shiftStartTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid shift start time format (HH:mm)"
+    ),
+  shiftEndTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid shift end time format (HH:mm)"
+    ),
+  punchInTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid punch in time format (HH:mm)"
+    ),
+  punchOutTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Invalid punch out time format (HH:mm)"
+    ),
+  punchInType: z
+    .string()
+    .refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
       message: "PunchIn Type must be either 'ANYTIME' or 'ADDLIMIT'.",
-  }).optional(),
-  punchOutType: zod.string().refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
+    })
+    .optional(),
+  punchOutType: z
+    .string()
+    .refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
       message: "PunchOut Type must be either 'ANYTIME' or 'ADDLIMIT'.",
-  }).optional(),
-  flexibleId: zod.string().min(1, { message: "Staff ID is required." }),
-  fixedId: zod.string().min(1, { message: "Staff ID is required." })
+    })
+    .optional(),
+  flexibleId: z.string().min(1, { message: "Staff ID is required." }),
+  fixedId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
-
-const PunchInSchema = zod.object({
-  punchInMethod: zod.string().refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
-      message: "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
-  }).optional(),
-  biometricData: zod.string().optional(), // Only required for biometric
-  qrCodeValue: zod.string().optional(),   // Only required for QR scan
-  photoUrl: zod.string().optional(),       // Required for photo click
-  staffId: zod.string().min(1, { message: "Staff ID is required." }),
+const PunchInSchema = z.object({
+  punchInMethod: z
+    .string()
+    .refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
+      message:
+        "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
+    })
+    .optional(),
+  biometricData: z.string().optional(), // Only required for biometric
+  qrCodeValue: z.string().optional(), // Only required for QR scan
+  photoUrl: z.string().optional(), // Required for photo click
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
-const PunchOutSchema = zod.object({
-  punchOutMethod: zod.string().refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
-      message: "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
-  }).optional(),
-  biometricData: zod.string().optional(), // Only required for biometric
-  qrCodeValue: zod.string().optional(),   // Only required for QR scan
-  photoUrl: zod.string().optional(),       // Required for photo click
-  staffId: zod.string().min(1, { message: "Staff ID is required." }),
+const PunchOutSchema = z.object({
+  punchOutMethod: z
+    .string()
+    .refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
+      message:
+        "PunchInType Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
+    })
+    .optional(),
+  biometricData: z.string().optional(), // Only required for biometric
+  qrCodeValue: z.string().optional(), // Only required for QR scan
+  photoUrl: z.string().optional(), // Required for photo click
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
-const PunchRecordsSchema = zod.object({
-  punchInId: zod.string().min(1, { message: 'PunchInId is required.' }),
-  punchOutId: zod.string().min(1, { message: 'PunchOutId is required.' })
+const PunchRecordsSchema = z.object({
+  punchInId: z.string().min(1, { message: "PunchInId is required." }),
+  punchOutId: z.string().min(1, { message: "PunchOutId is required." }),
 });
-
 
 module.exports = {
   clientSchema,
@@ -374,12 +469,12 @@ module.exports = {
   createLeaveRequestSchema,
   updateLeaveRequestSchema,
   EarlyLeavePolicySchema,
-    LateComingPolicySchema,
-    OvertimePolicySchema,
-    FlexibleShiftSchema,
-    FixedShiftSchema,
-    ShiftSchema,
-    PunchInSchema,
-    PunchOutSchema,
-    PunchRecordsSchema
+  LateComingPolicySchema,
+  OvertimePolicySchema,
+  FlexibleShiftSchema,
+  FixedShiftSchema,
+  ShiftSchema,
+  PunchInSchema,
+  PunchOutSchema,
+  PunchRecordsSchema,
 };
