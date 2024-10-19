@@ -16,6 +16,9 @@ CREATE TYPE "PunchInMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 -- CreateEnum
 CREATE TYPE "PunchOutMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 
+-- CreateEnum
+CREATE TYPE "StatusType" AS ENUM ('active', 'inactive');
+
 -- CreateTable
 CREATE TABLE "Admin" (
     "id" TEXT NOT NULL,
@@ -351,6 +354,7 @@ CREATE TABLE "SalaryDetails" (
     "tds" DOUBLE PRECISION NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "staffId" TEXT NOT NULL,
 
     CONSTRAINT "SalaryDetails_pkey" PRIMARY KEY ("id")
 );
@@ -441,6 +445,28 @@ CREATE TABLE "PunchOut" (
     CONSTRAINT "PunchOut_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Client" (
+    "id" TEXT NOT NULL,
+    "company" TEXT NOT NULL,
+    "vat_number" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "website" TEXT,
+    "groups" TEXT[],
+    "currency" TEXT[],
+    "default_language" TEXT[],
+    "address" TEXT NOT NULL,
+    "country" TEXT NOT NULL,
+    "state" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "status" "StatusType" NOT NULL DEFAULT 'inactive',
+    "zip_code" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
 
@@ -497,6 +523,15 @@ CREATE UNIQUE INDEX "PunchRecords_punchInId_key" ON "PunchRecords"("punchInId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PunchRecords_punchOutId_key" ON "PunchRecords"("punchOutId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Client_vat_number_key" ON "Client"("vat_number");
+
+-- AddForeignKey
+ALTER TABLE "Staff" ADD CONSTRAINT "Staff_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Staff" ADD CONSTRAINT "Staff_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BankDetails" ADD CONSTRAINT "BankDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -563,6 +598,9 @@ ALTER TABLE "AIPermissions" ADD CONSTRAINT "AIPermissions_permissionsId_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "Permissions" ADD CONSTRAINT "Permissions_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SalaryDetails" ADD CONSTRAINT "SalaryDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_salaryId_fkey" FOREIGN KEY ("salaryId") REFERENCES "SalaryDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
