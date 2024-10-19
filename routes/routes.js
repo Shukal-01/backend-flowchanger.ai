@@ -16,6 +16,14 @@ const penaltyOvertimeDetailRouter = require("./admin/penaltyOvertimeDetail.route
 const shiftRouter = require("./admin/shift.router");
 const punchRouter = require("./admin/punch.router");
 const bankDetailsRouter = require("./admin/bankDetails.router.js");
+const projectRouter = require("./admin/project.router");
+const projectFilesRouter = require("./admin/projectFiles.router");
+const leaveBalanceRouter = require("./admin/staff/leaveBalance.router");
+const leavePolicyRouter = require("./admin/staff/leavePolicy.router");
+const leaveRequestRouter = require("./admin/staff/leaveRequest.router");
+const taskRouter = require("./admin/staff/task.router");
+
+
 
 rootRouter.use("/role", roleRouter);
 rootRouter.use("/attendance", attendanceRouter);
@@ -32,5 +40,11 @@ rootRouter.use("/policy", policyRouter);
 rootRouter.use("/penaltyOvertimeDetails", penaltyOvertimeDetailRouter);
 rootRouter.use("/shift", shiftRouter);
 rootRouter.use("/punch", punchRouter);
+rootRouter.use("/project", projectRouter);
+rootRouter.use("/project-files", projectFilesRouter);
+rootRouter.use("/leave-balance", leaveBalanceRouter);
+rootRouter.use("/leave-policy", leavePolicyRouter);
+rootRouter.use("/leave-request", leaveRequestRouter);
+rootRouter.use("/task", taskRouter);
 
 module.exports = rootRouter

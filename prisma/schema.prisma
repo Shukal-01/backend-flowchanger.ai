@@ -340,25 +340,25 @@ model Permissions {
 
 model SalaryDetails {
   id                 String       @id @default(uuid())
-  effective_date     DateTime
-  salary_type        String
-  ctc_amount         Float
-  basic              Float
-  hra                Float
-  dearness_allowance Float
-  employer_pf        Float
-  employer_esi       Float
-  employer_lwf       Float
-  employee_pf        Float
-  employee_esi       Float
-  professional_tax   Float
-  employee_lwf       Float
-  tds                Float
-  created_at         DateTime     @default(now())
-  updated_at         DateTime     @updatedAt
+  effective_date     DateTime?
+  salary_type        String?
+  ctc_amount         Float?
+  basic              Float?
+  hra                Float?
+  dearness_allowance Float?
+  employer_pf        Float?
+  employer_esi       Float?
+  employer_lwf       Float?
+  employee_pf        Float?
+  employee_esi       Float?
+  professional_tax   Float?
+  employee_lwf       Float?
+  tds                Float?
+  created_at         DateTime?    @default(now())
+  updated_at         DateTime?    @updatedAt
   staffId            String
-  staff              Staff        @relation(fields: [staffId], references: [id], onDelete: Cascade)
   Deductions         Deductions[]
+  Staff              Staff        @relation(fields: [staffId], references: [id])
 }
 
 model Deductions {

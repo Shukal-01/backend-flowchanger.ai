@@ -110,6 +110,20 @@ const adminSignup = async (req, res) => {
       const otpExpiresAt = new Date();
       otpExpiresAt.setMinutes(otpExpiresAt.getMinutes() + 5);
 
+      const profileImage = req.files.profile_image ? req.files.profile_image[0] : null;
+      const companyLogo = req.files.company_logo ? req.files.company_logo[0] : null;
+      console.log(profileImage);
+      let profileImageString = null;
+      let companyLogoString = null;
+
+      if (profileImage) {
+        profileImageString = `data:${profileImage.mimetype};base64,${fs.readFileSync(profileImage.path).toString('base64')}`;
+      }
+
+      if (companyLogo) {
+        companyLogoString = `data:${companyLogo.mimetype};base64,${fs.readFileSync(companyLogo.path).toString('base64')}`;
+      }
+
       const newAdmin = await prisma.admin.create({
         data: {
           email,
@@ -122,6 +136,8 @@ const adminSignup = async (req, res) => {
           week_formate: String(week_formate),
           package_id,
           company_name,
+          profile_image: profileImageString,
+          company_logo: companyLogoString,
           password: hashedPassword,
           otp: parseInt(otp),
           otpExpiresAt,

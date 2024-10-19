@@ -7,11 +7,6 @@ const storage = multer.diskStorage({
         cb(null, './uploads'); // Define where to store the images
     },
     filename: (req, file, cb) => {
-        // const uniqueFilename = Date.now() + path.extname(file.originalname); 
-        //         const uniqueFilename = ${ Date.now()
-        // } - ${ uuidv4() }${ path.extname(file.originalname) }; // Generate the unique filename with Date.now() and UUID
-        // req.savedFilename = uniqueFilename;
-        // cb(null, uniqueFilename);
         cb(null, Date.now() + path.extname(file.originalname)); // File naming convention
     },
 });
