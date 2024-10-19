@@ -13,7 +13,7 @@ const deductionsRouter = require("./admin/salaryDetails.router");
 const customDetailsRouter = require("./admin/customDetails.router");
 const policyRouter = require("./admin/policy.router");
 const penaltyOvertimeDetailRouter = require("./admin/penaltyOvertimeDetail.router");
-const shiftRouter = require("./admin/shiftRouter");
+const shiftRouter = require("./admin/shift.router");
 const punchRouter = require("./admin/punch.router");
 const bankDetailsRouter = require("./admin/bankDetails.router.js");
 
@@ -33,4 +33,4 @@ rootRouter.use("/penaltyOvertimeDetails", penaltyOvertimeDetailRouter);
 rootRouter.use("/shift", shiftRouter);
 rootRouter.use("/punch", punchRouter);
 
-module.exports = rootRouter;
+module.exports = rootRouter

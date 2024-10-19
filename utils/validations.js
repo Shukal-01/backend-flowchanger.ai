@@ -449,7 +449,36 @@ const PunchOutSchema = z.object({
 const PunchRecordsSchema = z.object({
   punchInId: z.string().min(1, { message: "PunchInId is required." }),
   punchOutId: z.string().min(1, { message: "PunchOutId is required." }),
+  staffId: z.string().min(1, { message: 'StaffId is required.' }),
 });
+
+const TaskTypeSchema = z.object({
+  taskTypeName: z.string().min(1, "Task Type name is required"),
+});
+
+const TaskStatusSchema = z.object({
+  taskStatusName: z.string().min(1, "Task Status name is required"),
+});
+
+const TaskPrioritySchema = z.object({
+  taskPriorityName: z.string().min(1, "Task Priority name is required"),
+});
+
+const TaskDetailSchema = z.object({
+  taskName: z.string().min(1, { message: "Task name is required" }),
+  taskStatusId: z.string().uuid({ message: "Invalid task status ID" }),
+  taskTypeId: z.string().uuid({ message: "Invalid task type ID" }),
+  taskPriorityId: z.string().uuid({ message: "Invalid task priority ID" }),
+  startDate: z.string(),
+  endDate: z.string(),
+  dueDate: z.string().optional(),
+  selectProject: z.string().min(1, { message: "Project selection is required" }),
+  selectDepartment: z.string().min(1, { message: "Department selection is required" }),
+  taskAssign: z.string().min(1, { message: "Task assignee is required" }),
+  taskDescription: z.string().optional(),
+  attachFile: z.string().optional(),
+});
+
 
 module.exports = {
   clientSchema,

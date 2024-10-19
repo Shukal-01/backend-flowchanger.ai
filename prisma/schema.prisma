@@ -27,12 +27,6 @@ model Admin {
   otpExpiresAt DateTime
 }
 
-model Department {
-  id              String  @id @default(uuid())
-  department_name String
-  staffs          Staff[]
-}
-
 model Staff {
   id                         String    @id @default(uuid())
   name                       String
@@ -66,6 +60,13 @@ model Staff {
   PunchOut                PunchOut[]
   panaltyOvertimeDetailId PanaltyOvertimeDetails?
   SalaryDetails           SalaryDetails[]
+  PunchRecords            PunchRecords[]
+}
+
+model Department {
+  id              String  @id @default(uuid())
+  department_name String
+  staffs          Staff[]
 }
 
 model BankDetails {
@@ -356,7 +357,7 @@ model SalaryDetails {
   created_at         DateTime     @default(now())
   updated_at         DateTime     @updatedAt
   staffId            String
-  staff   Staff   @relation(fields: [staffId], references: [id])
+  staff              Staff        @relation(fields: [staffId], references: [id], onDelete: Cascade)
   Deductions         Deductions[]
 }
 
@@ -415,6 +416,8 @@ model PunchRecords {
   punchIn    PunchIn  @relation(fields: [punchInId], references: [id], onDelete: Cascade)
   punchOutId String   @unique
   punchOut   PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  staffId    String?
+  staff      Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchInMethod {
@@ -453,4 +456,41 @@ model PunchOut {
   PunchRecords   PunchRecords?
   staffId        String // Foreign key to User table
   staff          Staff          @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model TaskType {
+  id           String       @id @default(uuid())
+  taskTypeName String
+  TaskDetail   TaskDetail[]
+}
+
+model TaskStatus {
+  id             String       @id @default(uuid())
+  taskStatusName String
+  TaskDetail     TaskDetail[]
+}
+
+model TaskPriority {
+  id               String       @id @default(uuid())
+  taskPriorityName String
+  TaskDetail       TaskDetail[]
+}
+
+model TaskDetail {
+  id               String       @id @default(uuid())
+  taskName         String
+  taskStatusId     String
+  taskTypeId       String
+  taskPriorityId   String
+  taskPriority     TaskPriority @relation(fields: [taskPriorityId], references: [id], onDelete: Cascade)
+  taskType         TaskType     @relation(fields: [taskTypeId], references: [id], onDelete: Cascade)
+  taskStatus       TaskStatus   @relation(fields: [taskStatusId], references: [id], onDelete: Cascade)
+  startDate        String
+  endDate          String
+  dueDate          String
+  selectProject    String
+  selectDepartment String
+  taskAssign       String
+  taskDescription  String
+  attachFile       String
 }

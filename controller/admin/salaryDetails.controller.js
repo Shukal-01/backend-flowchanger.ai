@@ -1,6 +1,6 @@
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const { param } = require('../../router/routes');
+// const { param } = require('../../routes/routes');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -60,15 +60,15 @@ const addSalaryDetails = async (req, res) => {
 
 // Salary Data Fetch By Id:
 
-const getSalaryDetailsById = async (req,res) => {
-    const {id} = req.params;
-    try{
+const getSalaryDetailsById = async (req, res) => {
+    const { id } = req.params;
+    try {
         const getById = await prisma.salaryDetails.findUnique({
-            where:{id},            
+            where: { id },
         });
-        return res.status(200).json({status:200,message:"Get Salaary Data By ID!", data:getById});
-    }catch(error){
-        return res.status(500).json({status:500, message:"Failed To get Salary Data By ID!"});
+        return res.status(200).json({ status: 200, message: "Get Salaary Data By ID!", data: getById });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "Failed To get Salary Data By ID!" });
     }
 }
 
@@ -76,21 +76,21 @@ const getSalaryDetailsById = async (req,res) => {
 
 const getAllSalaryData = async (req, res) => {
     try {
-        const salaryData = await prisma.salaryDetails.findMany({});        
+        const salaryData = await prisma.salaryDetails.findMany({});
         if (salaryData.length === 0) {
-            return res.status(404).json({status: 404,message: "No salary data found.",data: []});
+            return res.status(404).json({ status: 404, message: "No salary data found.", data: [] });
         }
-        return res.status(200).json({status: 200,message: "Successfully retrieved all salary data.",data: salaryData});
-    } catch (error) {        
-        return res.status(500).json({status: 500,message: "An error occurred while fetching salary data.",error: error.message });
+        return res.status(200).json({ status: 200, message: "Successfully retrieved all salary data.", data: salaryData });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "An error occurred while fetching salary data.", error: error.message });
     }
 };
 
 // Update Salary Data
 
-const updateSalaryData = async(req, res) => {
-    const {id} = req.params;
-    const{
+const updateSalaryData = async (req, res) => {
+    const { id } = req.params;
+    const {
         effective_date,
         salary_type,
         ctc_amount,
@@ -105,11 +105,11 @@ const updateSalaryData = async(req, res) => {
         professional_tax,
         employee_lwf,
         tds
-    }=req.body;
-    try{
+    } = req.body;
+    try {
         const update = await prisma.salaryDetails.update({
             where: { id },
-            data:{
+            data: {
                 effective_date: new Date(effective_date),
                 salary_type,
                 ctc_amount,
@@ -126,23 +126,23 @@ const updateSalaryData = async(req, res) => {
                 tds
             }
         });
-        return res.status(200).json({status:200, message:"Salary Data Succesfully Updated!",data:update});
-    }catch(error){
-        return res.status(500).json({status:500, message:"This Data (" + id + ") ID Not Found!"});
+        return res.status(200).json({ status: 200, message: "Salary Data Succesfully Updated!", data: update });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "This Data (" + id + ") ID Not Found!" });
     }
 }
 
 // Delete Salary Data Record By ID
 
-const deleteSalaryRecord = async(req,res)=>{
-    const {id} = req.params;
-    try{
+const deleteSalaryRecord = async (req, res) => {
+    const { id } = req.params;
+    try {
         const deleteRecord = await prisma.salaryDetails.delete({
-            where:{id}
+            where: { id }
         });
-        return res.status(200).json({status:200,message:"Salary Record Deleted Successfully!",data:deleteRecord});
-    }catch(error){
-        return res.status(500).json({status:500,message:"This Data (" +id+ ") ID Not Found!"});
+        return res.status(200).json({ status: 200, message: "Salary Record Deleted Successfully!", data: deleteRecord });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "This Data (" + id + ") ID Not Found!" });
     }
 }
 
@@ -153,7 +153,7 @@ const deleteSalaryRecord = async(req,res)=>{
 const deductions = async (req, res) => {
     try {
         // Destructure headers, calculation, and amount from req.body
-        const {heads,calculation,amount} = req.body;                
+        const { heads, calculation, amount } = req.body;
         const addDeductions = await prisma.deductions.create({
             data: {
                 heads,
@@ -178,58 +178,58 @@ const deductions = async (req, res) => {
 
 // Get All Deductions Data
 
-const getAllDeductions = async(req,res) => {
-    const {id} = req.params;
-    try{
+const getAllDeductions = async (req, res) => {
+    const { id } = req.params;
+    try {
         const getDeductions = await prisma.deductions.findMany({});
-        return res.status(200).json({status:200,message:"Get All Deductions!",data:getDeductions});
-    }catch(error){
-        return res.status(500).json({status:500,message:"Deduction Not Found This Id (" + id});
+        return res.status(200).json({ status: 200, message: "Get All Deductions!", data: getDeductions });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "Deduction Not Found This Id (" + id });
     }
 }
 
 // Get Deductions By Id
 
-const getDeductionsById = async(req,res) => {
-    const {id} = req.params;
-    try{
+const getDeductionsById = async (req, res) => {
+    const { id } = req.params;
+    try {
         const getDeductionsById = await prisma.deductions.findUnique({
-            where: {id},
+            where: { id },
         });
-        return res.status(200).json({status:200,message:"Get Deductions By ID",data:getDeductionsById});
-    }catch(error){
-        return res.status(500).json({status:500,message:"Deductions Not Found"});
+        return res.status(200).json({ status: 200, message: "Get Deductions By ID", data: getDeductionsById });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "Deductions Not Found" });
     }
 }
 
 // Update Deductions By ID
 
-const updateDeductions = async(req,res) => {
-    const{heads,calculation,amount}=req.body;
-    const {id} = req.params;
-    try{        
+const updateDeductions = async (req, res) => {
+    const { heads, calculation, amount } = req.body;
+    const { id } = req.params;
+    try {
         const update = await prisma.deductions.update({
-            where: {id},
-            data:{
-                heads,calculation,amount
-            }            
+            where: { id },
+            data: {
+                heads, calculation, amount
+            }
         });
-        return res.status(200).json({status:200,message:"Deductions Successfully Updated!"});
-    }catch(error){
-        return res.status(500).json({status:500,message:"Deductions Not Found (" + id});
+        return res.status(200).json({ status: 200, message: "Deductions Successfully Updated!" });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "Deductions Not Found (" + id });
     }
 }
 
-const deleteDeductions = async(req,res)=> {
-    const {id} = req.params;
-    try{
+const deleteDeductions = async (req, res) => {
+    const { id } = req.params;
+    try {
         const deletedData = await prisma.deductions.delete({
-            where:{id},
+            where: { id },
         });
-        return res.status(200).json({status:200,message:"Deduction Deleted From This ID (" +id+ ")"});
-    }catch(error){
-        return res.status(500).json({status:500,message:"Deduction Not Found From This Id (" +id+ ")"});
+        return res.status(200).json({ status: 200, message: "Deduction Deleted From This ID (" + id + ")" });
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "Deduction Not Found From This Id (" + id + ")" });
     }
 }
 
-module.exports = { addSalaryDetails, deductions,getAllSalaryData,updateSalaryData,getSalaryDetailsById,deleteSalaryRecord ,getAllDeductions, updateDeductions, getDeductionsById,deleteDeductions};
+module.exports = { addSalaryDetails, deductions, getAllSalaryData, updateSalaryData, getSalaryDetailsById, deleteSalaryRecord, getAllDeductions, updateDeductions, getDeductionsById, deleteDeductions };
