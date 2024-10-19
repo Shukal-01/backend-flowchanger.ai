@@ -25,11 +25,12 @@ model Admin {
   is_verified  Boolean  @default(false)
   otp          Int
   otpExpiresAt DateTime
-} 
+}
 
 model Department {
-  id              String @id @default(uuid())
+  id              String  @id @default(uuid())
   department_name String
+  staffs          Staff[]
 }
 
 model Staff {
@@ -52,21 +53,19 @@ model Staff {
   emergency_contact_relation String?
   emergency_contact_address  String?
 
-  // department         Department @relation(fields: [departmentId], references: [id])/
-  // role               Role       @relation(fields: [roleId], references: [id])
-  verifications Verification[]
-  BankDetails   BankDetails[]
-  LeavePolicy   LeavePolicy[]
-  LeaveBalance  LeaveBalance[]
-  LeaveRequest  LeaveRequest[]
-  FixedShift   FixedShift[]
-  FlexibleShift  FlexibleShift[]
-  PunchIn     PunchIn[]
-  PunchOut    PunchOut[]
+  department              Department?             @relation(fields: [departmentId], references: [id])
+  role                    Role?                   @relation(fields: [roleId], references: [id])
+  verifications           Verification[]
+  BankDetails             BankDetails[]
+  LeavePolicy             LeavePolicy[]
+  LeaveBalance            LeaveBalance[]
+  LeaveRequest            LeaveRequest[]
+  FixedShift              FixedShift[]
+  FlexibleShift           FlexibleShift[]
+  PunchIn                 PunchIn[]
+  PunchOut                PunchOut[]
   panaltyOvertimeDetailId PanaltyOvertimeDetails?
 }
-
-
 
 model BankDetails {
   id             String   @id @default(uuid())
@@ -126,15 +125,14 @@ model LeaveRequest {
 model Verification {
   id          String             @id @default(uuid())
   staffId     String
-  type        VerificationType 
-  status      VerificationStatus 
-  documentUrl String? 
+  type        VerificationType
+  status      VerificationStatus
+  documentUrl String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  staff Staff @relation(fields: [staffId], references: [id]) 
+  staff Staff @relation(fields: [staffId], references: [id])
 }
-
 
 enum VerificationType {
   AADHAAR
@@ -145,7 +143,6 @@ enum VerificationType {
   ADDRESS
   PAST_EMPLOYMENT
 }
-
 
 enum VerificationStatus {
   PENDING
@@ -208,6 +205,7 @@ model Role {
   permissions Permissions?
   created_at  DateTime     @default(now())
   updated_at  DateTime     @updatedAt
+  staffs      Staff[]
 }
 
 model ClientsPermissions {
@@ -366,22 +364,22 @@ model Deductions {
   calculation   String[]
   amount        Float[]
   SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
-  updated_at              DateTime           @updatedAt
+  updated_at    DateTime       @updatedAt
 }
 
 model Shifts {
-  id            String      @id @default(uuid())
-  shiftName     String
-  shiftStartTime  String
-  shiftEndTime    String
-  punchInTime   String
+  id             String        @id @default(uuid())
+  shiftName      String
+  shiftStartTime String
+  shiftEndTime   String
+  punchInTime    String
   punchOutTime   String
-  punchInType  PunchTime @default(ANYTIME)
-  punchOutType  PunchTime @default(ANYTIME)
-  fixed  FixedShift   @relation(fields: [fixedId], references: [id], onDelete: Cascade)
-  fixedId  String
-  flexible  FlexibleShift   @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
-  flexibleId  String
+  punchInType    PunchTime     @default(ANYTIME)
+  punchOutType   PunchTime     @default(ANYTIME)
+  fixed          FixedShift    @relation(fields: [fixedId], references: [id], onDelete: Cascade)
+  fixedId        String
+  flexible       FlexibleShift @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
+  flexibleId     String
 }
 
 enum PunchTime {
@@ -390,30 +388,30 @@ enum PunchTime {
 }
 
 model FixedShift {
-  id      String    @id  @default(uuid())
-  day   String
-  weekOff   Boolean
-  staff   Staff?      @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String?
-  Shifts   Shifts[]
+  id      String   @id @default(uuid())
+  day     String
+  weekOff Boolean
+  staff   Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId String?
+  Shifts  Shifts[]
 }
 
 model FlexibleShift {
-  id      String    @id  @default(uuid())
-  day   String
-  weekOff   Boolean
-  staff   Staff      @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String
-  Shifts    Shifts[]
+  id      String   @id @default(uuid())
+  day     String
+  weekOff Boolean
+  staff   Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId String
+  Shifts  Shifts[]
 }
 
 model PunchRecords {
-  id      String  @id @default(uuid())
-  punchDate   DateTime @default(now())
-  punchInId  String @unique
-  punchIn     PunchIn @relation(fields: [punchInId], references: [id], onDelete: Cascade)
-  punchOutId     String @unique
-  punchOut    PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  punchDate  DateTime @default(now())
+  punchInId  String   @unique
+  punchIn    PunchIn  @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId String   @unique
+  punchOut   PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
 }
 
 enum PunchInMethod {
@@ -423,16 +421,16 @@ enum PunchInMethod {
 }
 
 model PunchIn {
-  id              String   @id @default(uuid())
-  punchInMethod   PunchInMethod @default(PHOTOCLICK)
-  punchInTime     DateTime @default(now())
-  punchInDate     DateTime @default(now())
-  biometricData   String?  // Store biometric signature, nullable
-  qrCodeValue     String?  // Store QR scan result, nullable
-  photoUrl        String?  // Store the URL of the photo taken, nullable
-  PunchRecords           PunchRecords?
-  staffId         String   // Foreign key to User table
-  staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  id            String        @id @default(uuid())
+  punchInMethod PunchInMethod @default(PHOTOCLICK)
+  punchInTime   DateTime      @default(now())
+  punchInDate   DateTime      @default(now())
+  biometricData String? // Store biometric signature, nullable
+  qrCodeValue   String? // Store QR scan result, nullable
+  photoUrl      String? // Store the URL of the photo taken, nullable
+  PunchRecords  PunchRecords?
+  staffId       String // Foreign key to User table
+  staff         Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchOutMethod {
@@ -442,14 +440,14 @@ enum PunchOutMethod {
 }
 
 model PunchOut {
-  id              String   @id @default(uuid())
-  punchOutMethod   PunchOutMethod @default(PHOTOCLICK)
-  punchOutTime    DateTime  @default(now())
-  punchOutDate    DateTime @default(now())
-  biometricData   String?  // Store biometric signature, nullable
-  qrCodeValue     String?  // Store QR scan result, nullable
-  photoUrl        String?  // Store the URL of the photo taken, nullable
-  PunchRecords           PunchRecords?
-  staffId         String   // Foreign key to User table
-  staff           Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  id             String         @id @default(uuid())
+  punchOutMethod PunchOutMethod @default(PHOTOCLICK)
+  punchOutTime   DateTime       @default(now())
+  punchOutDate   DateTime       @default(now())
+  biometricData  String? // Store biometric signature, nullable
+  qrCodeValue    String? // Store QR scan result, nullable
+  photoUrl       String? // Store the URL of the photo taken, nullable
+  PunchRecords   PunchRecords?
+  staffId        String // Foreign key to User table
+  staff          Staff          @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
