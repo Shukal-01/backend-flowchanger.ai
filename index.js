@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.use("/", rootRouter);
+app.use("/api/", rootRouter);
 
 
 app.listen(PORT, () => {
