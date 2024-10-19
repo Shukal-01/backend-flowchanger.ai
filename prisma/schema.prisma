@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Admin {
@@ -213,52 +213,90 @@ model SalaryDetails {
 }
 
 model Staff {
-  id              String          @id @default(uuid())
-  name            String
-  job_title       String
-  branch          String
-  departmentId    Int
-  roleId          Int
-  mobile          String
-  login_otp       String
-  gender          String
-  official_email  String
-  date_of_joining DateTime
-  address         String
-  BankDetails     BankDetails[]
-  CustomDetails   CustomDetails[]
-  SalaryDetails   SalaryDetails[]
+  id                String              @id @default(uuid())
+  name              String
+  job_title         String
+  branch            String
+  departmentId      Int
+  roleId            Int
+  mobile            String
+  login_otp         String
+  gender            String
+  official_email    String
+  date_of_joining   DateTime
+  address           String
+  BankDetails       BankDetails[]
+  CustomDetails     CustomDetails[]
+  SalaryDetails     SalaryDetails[]
+  TicketInformation TicketInformation[]
+
 }
 
 model ProjectFiles {
   id                  String   @id @default(uuid())
   file_name           String
   file_type           String
-  last_activity       String? // Optional field
-  total_comments      String? // Optional field
-  visible_to_customer Boolean @default(false) // Optional field
+  last_activity       String?
+  total_comments      String?
+  visible_to_customer Boolean  @default(false)
   uploaded_by         String
-  date_uploaded       DateTime // Use DateTime for better date handling
-  projectId           String // Renamed for clarity
+  date_uploaded       DateTime
+  projectId           String
   project_files       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Project {
-  id              String         @id @default(uuid())
-  project_name    String
-  customer        String
-  billing_type    String
-  status          String
-  total_rate      Int
-  estimated_hours Int
-  start_Date      String
-  department      String
-  deadline        String
-  tags            String[]
-  description     String
-  clientId        String
-  client          Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  projectFiles    ProjectFiles[]
+  id                String              @id @default(uuid())
+  project_name      String
+  customer          String
+  billing_type      String
+  status            String
+  total_rate        Int
+  estimated_hours   Int
+  start_Date        String
+  department        String
+  deadline          String
+  tags              String[]
+  description       String
+  clientId          String
+  client            Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectFiles      ProjectFiles[]
+  discussion        Discussion[]
+  ticketInformation TicketInformation[]
+}
+
+model TicketInformation {
+  id                String   @id @default(uuid())
+  subject           String
+  contact           String
+  name              String
+  email             String
+  department        String
+  cc                String
+  tags              String[]
+  asign_ticket      String
+  priority          String
+  service           String
+  project           String
+  ticket_body       String
+  insert_link       String
+  personal_notes    String
+  insert_files      String
+  ticketInformation Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String?
+  staffIdd           String?
+  staff             Staff?   @relation(fields: [staffIdd], references: [id], onDelete: Cascade)
+}
+
+model Discussion {  
+  id                  String   @id @default(uuid())
+  subject             String
+  discription         String
+  last_activity       String
+  total_comments      String
+  visible_to_customer String
+  discussion          Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId           String?
 }
 
 model Client {

@@ -1,6 +1,6 @@
 const express = require('express');
 const projectFilesRouter = express.Router();
-const projectFilesController = require("../../controller/admin/client/projectFiles.controller.js");
+const projectFilesController = require("../../controller/admin/project/projectFiles.controller");
 const upload = require("../../middleware/upload.js")
 
 projectFilesRouter.post('/', upload.single("file"), projectFilesController.addProjectFiles)

@@ -10,6 +10,8 @@ const customDetailsRouter = require("./admin/customDetails.router");
 const projectRouter = require("./admin/project.router");
 const clientRouter = require("./admin/client.router");
 const projectFilesRouter = require("./admin/projectFiles.router");
+const discussionRouter = require("./admin/discussions.router");
+const ticketRouter = require("./admin/ticketInformation.router");
 
 rootRouter.use("/admin", adminRouter);
 rootRouter.use("/department", department);
@@ -20,5 +22,7 @@ rootRouter.use("/custom-details", customDetailsRouter);
 rootRouter.use("/project", projectRouter);
 rootRouter.use("/client", clientRouter);
 rootRouter.use("/project-files", projectFilesRouter);
+rootRouter.use("/discussions", discussionRouter);
+rootRouter.use("/ticket", ticketRouter);
 
 module.exports = rootRouter;
