@@ -140,7 +140,6 @@ const getAllStaff = async (req, res) => {
         LeavePolicy: true,
         FixedShift: true,
         FlexibleShift: true,
-        Shift: true,
         panaltyOvertimeDetailId: true,
         PunchIn: true,
         PunchOut: true,
@@ -169,6 +168,7 @@ const getStaffById = async (req, res) => {
       res.status(404).json({ error: "Staff member not found" });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       error: "Failed to fetch staff member",
       details: error.message,

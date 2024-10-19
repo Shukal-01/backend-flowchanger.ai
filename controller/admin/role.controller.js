@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 const {
   newRoleSchema,
   updateRoleSchema,
-  roleNameSchema,
+  idSchema,
 } = require("../../utils/validations.js");
 
 // fetch all roles
@@ -58,7 +58,7 @@ const fetchRoleWithId = async (req, res) => {
 
     // Find role by id
     const findRole = await prisma.role.findFirst({
-      where: { id: parseInt(id) },
+      where: { id: id },
       include: {
         permissions: {
           include: {
@@ -525,6 +525,15 @@ const deleteRole = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "Role ID is required",
+      });
+    }
+    // Validate the id parameter
+    const validateId = idSchema.safeParse(id);
+
+    if (!validateId.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role ID format provided in params",
       });
     }
 

@@ -494,3 +494,27 @@ model TaskDetail {
   taskDescription  String
   attachFile       String
 }
+
+model Client {
+  id               String     @id @default(uuid())
+  company          String
+  vat_number       String     @unique
+  phone            String
+  website          String?
+  groups           String[]
+  currency         String[]
+  default_language String[]
+  address          String
+  country          String
+  state            String
+  city             String
+  status           StatusType @default(inactive)
+  zip_code         String
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+}
+
+enum StatusType {
+  active
+  inactive
+}
