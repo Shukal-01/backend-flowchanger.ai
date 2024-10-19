@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Admin {
@@ -453,4 +453,28 @@ model PunchOut {
   PunchRecords   PunchRecords?
   staffId        String // Foreign key to User table
   staff          Staff          @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model Client {
+  id               String     @id @default(uuid())
+  company          String
+  vat_number       String     @unique
+  phone            String
+  website          String?
+  groups           String[]
+  currency         String[]
+  default_language String[]
+  address          String
+  country          String
+  state            String
+  city             String
+  status           StatusType @default(inactive)
+  zip_code         String
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+}
+
+enum StatusType {
+  active
+  inactive
 }

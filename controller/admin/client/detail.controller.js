@@ -47,14 +47,14 @@ const addNewClient = async (req, res) => {
 
 const fetchAllClients = async (req, res) => {
     try {
-        const clients = await prisma.client.findMany({});
+        const clients = await prisma.client.findMany();
         if (!clients) {
             return res.status(404).json({ status: false, message: "No client found!" });
         }
         return res.status(200).json({ status: true, data: clients, message: "Fetch all client data successfully" });
     } catch (error) {
         console.error("Error in fetching all clients data:", error);
-        return res.status(500).json({ status: false, message: "An error occurred while fetching all clients." });
+        return res.status(500).json({ status: false, message: "An error occurred while fetching all clients."+ error.message });
     }
 };
 
