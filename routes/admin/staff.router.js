@@ -4,7 +4,7 @@ const { createStaff, getAllStaff, getStaffById, updateStaff, deleteStaff } = req
 
 const staffRouter = express.Router();
 
-staffRouter.post("/create", createStaff);
+staffRouter.post("/", createStaff);
 
 staffRouter.get("/", getAllStaff);
 
