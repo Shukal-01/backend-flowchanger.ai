@@ -44,8 +44,8 @@ const createStaff = async (req, res) => {
         login_otp,
         gender,
         official_email,
-        // date_of_joining: date_of_joining ? new Date(date_of_joining) : null,
-        // date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+        date_of_joining: date_of_joining ? new Date(date_of_joining) : null,
+        date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
         current_address,
         permanent_address,
         emergency_contact_name,
@@ -109,8 +109,8 @@ const updateStaff = async (req, res) => {
         login_otp,
         gender,
         official_email,
-        // date_of_joining: date_of_joining ? new Date(date_of_joining) : null,
-        // date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+        date_of_joining: date_of_joining ? new Date(date_of_joining) : null,
+        date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
         current_address,
         permanent_address,
         emergency_contact_name,
@@ -130,7 +130,23 @@ const updateStaff = async (req, res) => {
 
 const getAllStaff = async (req, res) => {
   try {
-    const staff = await prisma.staff.findMany();
+    const staff = await prisma.staff.findMany({
+      include: {
+        department: true,
+        role: true,
+        verifications: true,
+        BankDetails: true,
+        LeaveBalance: true,
+        LeavePolicy: true,
+        FixedShift: true,
+        FlexibleShift: true,
+        Shift: true,
+        panaltyOvertimeDetailId: true,
+        PunchIn: true,
+        PunchOut: true,
+        SalaryDetails: true,
+      },
+    });
     res.status(200).json(staff);
   } catch (error) {
     res.status(500).json({
