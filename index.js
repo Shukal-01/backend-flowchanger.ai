@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const routeRoutes = require("./routes/routes.js");
+const rootRouter = require("./routes/routes.js");
 const cors = require("cors");
 const dotenv = require("dotenv");
 // const helmet = require('helmet');
@@ -16,7 +16,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/", routeRoutes);
+app.use("/", rootRouter);
 
 const PORT = process.env.PORT || 3000;
 

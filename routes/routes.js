@@ -5,12 +5,12 @@ const shiftRouter = require("./admin/shift.router");
 const punchRouter = require("./admin/punch.router");
 const taskRouter = require("./admin/task.router");
 
-const rootRoutes = Router();
+const rootRouter = Router();
 
-rootRoutes.use("/policy", policyRouter);
-rootRoutes.use("/panaltyOvertimeDetails", penaltyOvertimeDetailRouter);
-rootRoutes.use("/shift", shiftRouter);
-rootRoutes.use("/punch", punchRouter);
-rootRoutes.use("/task", taskRouter);
+rootRouter.use("/policy", policyRouter);
+rootRouter.use("/panaltyOvertimeDetails", penaltyOvertimeDetailRouter);
+rootRouter.use("/shift", shiftRouter);
+rootRouter.use("/punch", punchRouter);
+rootRouter.use("/task", taskRouter);
 
-module.exports = rootRoutes
+module.exports = rootRouter
