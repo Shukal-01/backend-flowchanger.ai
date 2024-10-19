@@ -47,26 +47,86 @@ model Staff {
   emergency_contact_relation String?
   emergency_contact_address  String?
 
-  department              Department?             @relation(fields: [departmentId], references: [id])
-  role                    Role?                   @relation(fields: [roleId], references: [id])
-  verifications           Verification[]
-  BankDetails             BankDetails[]
-  LeavePolicy             LeavePolicy[]
-  LeaveBalance            LeaveBalance[]
-  LeaveRequest            LeaveRequest[]
-  FixedShift              FixedShift[]
-  FlexibleShift           FlexibleShift[]
-  PunchIn                 PunchIn[]
-  PunchOut                PunchOut[]
-  panaltyOvertimeDetailId PanaltyOvertimeDetails?
-  SalaryDetails           SalaryDetails[]
-  PunchRecords            PunchRecords[]
+  department               Department?                  @relation(fields: [departmentId], references: [id])
+  role                     Role?                        @relation(fields: [roleId], references: [id])
+  verifications            Verification[]
+  BankDetails              BankDetails[]
+  LeavePolicy              LeavePolicy[]
+  LeaveBalance             LeaveBalance[]
+  LeaveRequest             LeaveRequest[]
+  FixedShift               FixedShift[]
+  FlexibleShift            FlexibleShift[]
+  PunchIn                  PunchIn[]
+  PunchOut                 PunchOut[]
+  panaltyOvertimeDetailId  PanaltyOvertimeDetails?
+  SalaryDetails            SalaryDetails[]
+  PunchRecords             PunchRecords[]
+  attendanceAutomationRule AttendanceAutomationRule?
+  AttendenceMode           AttendanceMode?
+  staff_bg_verification    StaffBackgroundVerification?
 }
 
 model Department {
   id              String  @id @default(uuid())
   department_name String
   staffs          Staff[]
+}
+
+model AttendanceAutomationRule {
+  id                  String   @id @default(uuid())
+  auto_absent         Boolean  @default(false)
+  present_on_punch    Boolean  @default(false)
+  auto_half_day       String?
+  manadatory_half_day String?
+  manadatory_full_day String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  staffId             String   @unique
+  staff               Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model AttendanceMode {
+  id                        String             @id @default(uuid())
+  selfie_attendance         Boolean            @default(false)
+  qr_attendance             Boolean            @default(false)
+  gps_attendance            Boolean            @default(false)
+  mark_attendance           MarkAttendenceType @default(Office)
+  allow_punch_in_for_mobile Boolean            @default(false) // Allows punch-in from mobile devices
+  created_at                DateTime           @default(now())
+  updated_at                DateTime           @updatedAt
+  staffId                   String             @unique
+  staff                     Staff              @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+enum MarkAttendenceType {
+  Office
+  Anywhere
+}
+
+model StaffBackgroundVerification {
+  id                          String   @id @default(uuid())
+  aadhaar_number              String?
+  aadhaar_verification_status String?  @default("Not Verified")
+  aadhaar_file                String?
+  pan_number                  String?
+  pan_verification_status     String?  @default("Not Verified")
+  pan_file                    String?
+  uan_number                  String?
+  uan_verification_status     String?  @default("Not Verified")
+  uan_file                    String?
+  driving_license_number      String?
+  driving_license_status      String?  @default("Not Verified")
+  driving_license_file        String?
+  face_file                   String?
+  face_verification_status    String?  @default("Not Verified")
+  current_address             String?
+  permanent_address           String?
+  address_status              String?  @default("Not Verified")
+  address_file                String?
+  staff                       Staff?   @relation(fields: [staffId], references: [id])
+  staffId                     String?  @unique
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
 }
 
 model BankDetails {
@@ -133,7 +193,7 @@ model Verification {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  staff Staff @relation(fields: [staffId], references: [id])
+  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum VerificationType {

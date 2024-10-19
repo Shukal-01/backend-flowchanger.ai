@@ -18,10 +18,10 @@ const punchRouter = require("./admin/punch.router");
 const bankDetailsRouter = require("./admin/bankDetails.router.js");
 const projectRouter = require("./admin/project.router");
 const projectFilesRouter = require("./admin/projectFiles.router");
-const leaveBalanceRouter = require("./admin/staff/leaveBalance.router");
-const leavePolicyRouter = require("./admin/staff/leavePolicy.router");
-const leaveRequestRouter = require("./admin/staff/leaveRequest.router");
-const taskRouter = require("./admin/staff/task.router");
+const leaveBalanceRouter = require("./admin/leaveBalance.router");
+const leavePolicyRouter = require("./admin/leavePolicy.router");
+const leaveRequestRouter = require("./admin/leaveRequest.router");
+const taskRouter = require("./admin/task.router");
 
 
 
