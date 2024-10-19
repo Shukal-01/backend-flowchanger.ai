@@ -1,9 +1,13 @@
 const { PrismaClient } = require("@prisma/client");
 const { staffSchema } = require("../../../utils/validations");
+const { ZodError } = require("zod");
 const prisma = new PrismaClient();
 
 const createStaff = async (req, res) => {
   const validation = staffSchema.safeParse(req.body);
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({ error: "Request body is empty" });
+  }
   // const validation = req.body
 
   if (!validation.success) {
@@ -64,6 +68,7 @@ const createStaff = async (req, res) => {
     });
   }
 };
+
 
 const updateStaff = async (req, res) => {
   const { id } = req.params;

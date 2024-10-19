@@ -1,10 +1,10 @@
 
 const express = require('express');
-const {createStaff,getAllStaff,getStaffById,updateStaff,deleteStaff,} = require("../../controller/admin/staff/staff.controller");
+const { createStaff, getAllStaff, getStaffById, updateStaff, deleteStaff } = require('../../controller/admin/staff/staff.controller');
 
 const staffRouter = express.Router();
 
-staffRouter.post("/", createStaff);
+staffRouter.post("/create", createStaff);
 
 staffRouter.get("/", getAllStaff);
 
