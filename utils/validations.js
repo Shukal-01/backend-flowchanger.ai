@@ -1,13 +1,9 @@
 const z = require("zod");
 
-const roleNameSchema = z
-  .string()
-  .regex(/^[a-zA-Z\s]+$/, "Role name can only contain alphabets and spaces");
-
 const idSchema = z.string().uuid("Invalid UUID format");
 
 const allPermissionSchema = z.object({
-  clients_permission: z
+  clients_permissions: z
     .object({
       create: z.boolean().default(false).optional(),
       edit: z.boolean().default(false).optional(),
@@ -29,7 +25,7 @@ const allPermissionSchema = z.object({
       view_time_sheets: z.boolean().default(false).optional(),
     })
     .optional(),
-  staff_role_permission: z
+  staff_role_permissions: z
     .object({
       create: z.boolean().default(false).optional(),
       edit: z.boolean().default(false).optional(),
@@ -79,8 +75,12 @@ const allPermissionSchema = z.object({
     .optional(),
 });
 
+const roleNameSchema = z
+  .string()
+  .regex(/^[a-zA-Z\s]+$/, "Role name can only contain alphabets and spaces");
+
 const newRoleSchema = z.object({
-  role_name: roleNameSchema.min(2, "role name is required"),
+  roleName: roleNameSchema.min(2, "role name is required"),
   permissions: allPermissionSchema.optional(),
 });
 
