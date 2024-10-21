@@ -128,6 +128,7 @@ async function createTaskDetail(req, res) {
                 // attachFile: req.savedFileName
             }
         });
+        console.log(taskDetail)
         res.status(201).json(taskDetail);
     } catch (error) {
         if (error instanceof ZodError) {

@@ -528,6 +528,12 @@ model TaskStatus {
   id             String       @id @default(uuid())
   taskStatusName String
   TaskDetail     TaskDetail[]
+  // StatusColor
+  // StatusOrder
+  // isHiddenId   staff id relation
+  // canBeChanged   staff id relation
+
+  // remove task type and its relation
 }
 
 model TaskPriority {

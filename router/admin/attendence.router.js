@@ -1,11 +1,17 @@
-// const { Router } = require("express");
-// const { fetchAllStaftAutomationAttendence, addAndUpdateAutomationRuleForStaffs } = require("../../controller/admin/staff/attendence/automationRules.controller.js");
-// const { fetchAttendenceModeForAllStaff, addAndUpdateAttendenceModeForStaffs } = require("../../controller/admin/staff/attendence/mode.controller.js");
-// const attendenceRouter = Router();
+const { Router } = require("express");
+const {
+  fetchAllStaftAutomationAttendence,
+  addAndUpdateAutomationRuleForStaffs,
+} = require("../../controller/admin/staff/attendence/automationRules.controller.js");
+const {
+  fetchAttendenceModeForAllStaff,
+  addAndUpdateAttendenceModeForStaffs,
+} = require("../../controller/admin/staff/attendence/mode.controller.js");
+const attendanceRouter = Router();
 
-// attendenceRouter.get("/automation", fetchAllStaftAutomationAttendence);
-// attendenceRouter.put("/automation", addAndUpdateAutomationRuleForStaffs);
-// attendenceRouter.get("/mode", fetchAttendenceModeForAllStaff);
-// attendenceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
+attendanceRouter.get("/automation", fetchAllStaftAutomationAttendence);
+attendanceRouter.put("/automation", addAndUpdateAutomationRuleForStaffs);
+attendanceRouter.get("/mode", fetchAttendenceModeForAllStaff);
+attendanceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
 
-// module.exports = attendenceRouter;
+module.exports = attendanceRouter;
