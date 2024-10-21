@@ -3,44 +3,26 @@ const prisma = new PrismaClient();
 
 const customFieldDetails = async (req, res) => {
     try {
-        const { id, staffId, field_name, field_value } = req.body;
-        const isCustomField = await prisma.customDetails.findFirst({
-            where: {
-                id: id,
-            }
-        });
-        let newCustomDetails;
-        if (isCustomField) {
-            newCustomDetails = await prisma.customDetails.update({
-                where: {
-                    id: id
-                },
-                data: {
-                    staffId,
-                    field_name,
-                    field_value
-                },
-            });
-        } else {
+        const { id, staffId, field_name, field_value } = req.body;                                                  
             newCustomDetails = await prisma.customDetails.create({
                 data: {
                     staffId,
                     field_name,
                     field_value
-                },
+                }
             });
-
+            res.status(201).json({ message: "Custom field created successfully", data: newCustomDetails });
         }
-        res.status(201).json(newCustomDetails);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to create custom details!" });
+    catch (error) {
+        console.error("Error processing custom field:", error);
+        res.status(500).json({ message: "Failed to process custom details!", error: error.message });
     }
-}
+};
+
+
 
 // Get All Custom Fields
-
-const getAllCustomfieldDetails = async (req, res) => {
+const getAllCustomFields = async (req, res) => {
     try {
         const customDetails = await prisma.customDetails.findMany({});
         res.status(200).json(customDetails);
@@ -48,7 +30,27 @@ const getAllCustomfieldDetails = async (req, res) => {
         console.log(error);
         res.status(500).json({ error: "Failed to fetch custom details", details: error.message });
     }
-};
+}
+
+// update custom fields by id
+const updateCustomFields = async (req, res) => {
+    const { id } = req.params;
+    const { staffId, field_name, field_value } = req.body;
+    try {
+        const update = await prisma.customDetails.update({
+            where: { id },
+            data: {
+                staffId,
+                field_name,
+                field_value
+            },
+        });
+        return res.status(200).json({ status: 200, message: "custom fields Successfully Updated!" });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ status: 500, message: "custom fields Not Found (" + id + ")" });
+    }
+}
 
 // Get Custom Fields By ID
 
@@ -88,4 +90,4 @@ const deleteCustomFields = async (req, res) => {
     }
 }
 
-module.exports = { customFieldDetails, getAllCustomfieldDetails, getCustomFieldById, deleteCustomFields }
+module.exports = { customFieldDetails, getAllCustomFields, getCustomFieldById, deleteCustomFields,updateCustomFields }

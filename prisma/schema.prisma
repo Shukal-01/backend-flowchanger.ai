@@ -21,6 +21,7 @@ model Admin {
   package_id   String
   company_name String
   company_logo String?
+  profile_image String?
   password     String
   is_verified  Boolean  @default(false)
   otp          Int
@@ -34,10 +35,10 @@ model Department {
 
 model CustomDetails {
   id          String @id @default(uuid())
-  staffId     String
+  staffId     String?
   field_name  String
   field_value String
-  staff       Staff  @relation(fields: [staffId], references: [id])
+  staff       Staff?  @relation(fields: [staffId], references: [id])
 }
 
 model BankDetails {
@@ -228,7 +229,7 @@ model Staff {
   BankDetails       BankDetails[]
   CustomDetails     CustomDetails[]
   SalaryDetails     SalaryDetails[]
-  TicketInformation TicketInformation[]
+  TicketInformation TicketInformation[]  
 
 }
 

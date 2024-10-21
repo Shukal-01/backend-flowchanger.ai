@@ -2,6 +2,7 @@ const express = require('express');
 const { PrismaClient } = require('@prisma/client');
 const upload = require('../../../middleware/upload');
 const nodemailer = require('nodemailer');
+const { ticketInformationSchema } = require("../../../utils/validations");
 const path = require('path');
 const app = express();
 const prisma = new PrismaClient();
@@ -17,6 +18,14 @@ const transporter = nodemailer.createTransport({
 });
 
 const addTicketInformation = async (req, res) => {
+    const validation = ticketInformationSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    return res.status(400).json({
+      error: "Invalid data format",
+      issues: validation.error.format(),
+    });
+  }
     const {
         subject,
         contact,

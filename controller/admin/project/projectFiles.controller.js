@@ -16,7 +16,7 @@ const addProjectFiles = async (req, res) => {
     const file_type = req.file.mimetype;
     const date_uploaded = new Date();
 
-    console.log(file_name, file_type, date_uploaded);
+    // console.log(file_name, file_type, date_uploaded);
 
     try {
         const newFilesData = await prisma.projectFiles.create({

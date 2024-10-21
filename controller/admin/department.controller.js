@@ -10,10 +10,10 @@ app.use(express.json());
 
 const addDepartment = async (req, res) => {
     try {
-        const { departmentName } = req.body;
+        const { department_name } = req.body;
         const addNewDepartment = await prisma.department.create({
             data: {
-                department_name: departmentName
+                department_name,
             },
         });
         res.status(200).json({ success: true, message: "Department Add Successfully", data: addNewDepartment });
@@ -28,13 +28,13 @@ const addDepartment = async (req, res) => {
 const updateDepartment = async (req, res) => {
     const { id } = req.params;
     try {
-        const { departmentName } = req.body;
+        const { department_name } = req.body;
         await prisma.department.update({
             where: {
-                id
+                id:id,
             },
             data: {
-                department_name: departmentName,
+                department_name: department_name,
             }
         });
         return res.status(200).json({ status: true, message: "Department Name Successfully Updated!(" + id + ")" })

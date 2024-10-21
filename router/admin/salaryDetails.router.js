@@ -10,12 +10,5 @@ salaryController.delete('/:id', salaryDetailsController.deleteSalaryRecord)
 salaryController.get('/:id', salaryDetailsController.getSalaryDetailsById)
 
 
-// deduction
-salaryController.post('/', salaryDetailsController.deductions)
-salaryController.get('/', salaryDetailsController.getAllDeductions)
-salaryController.get('/:id', salaryDetailsController.getDeductionsById)
-salaryController.put('/:id', salaryDetailsController.updateDeductions)
-salaryController.delete('/:id', salaryDetailsController.deleteDeductions)
-
 
 module.exports = salaryController;
