@@ -5,15 +5,11 @@ const prisma = new PrismaClient();
 
 const createStaff = async (req, res) => {
   const validation = staffSchema.safeParse(req.body);
-  if (Object.keys(req.body).length === 0) {
-    return res.status(400).json({ error: "Request body is empty" });
-  }
-  // const validation = req.body
 
   if (!validation.success) {
     return res.status(400).json({
       error: "Invalid data format",
-      // issues: validation.error.format(),
+      issues: validation.error.format(),
     });
   }
 
@@ -36,7 +32,7 @@ const createStaff = async (req, res) => {
     emergency_contact_relation,
     emergency_contact_address,
   } = validation.data;
-  console.log(validation)
+  // console.log(validation)
   try {
     const staff = await prisma.staff.create({
       data: {
