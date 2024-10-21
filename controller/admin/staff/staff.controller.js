@@ -65,7 +65,6 @@ const createStaff = async (req, res) => {
   }
 };
 
-
 const updateStaff = async (req, res) => {
   const { id } = req.params;
 
@@ -134,15 +133,15 @@ const getAllStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
       include: {
-        department: true,
-        role: true,
+        department: true || undefined,
+        role: true || undefined,
         verifications: true,
         BankDetails: true,
         LeaveBalance: true,
         LeavePolicy: true,
         FixedShift: true,
         FlexibleShift: true,
-        panaltyOvertimeDetailId: true,
+        panaltyOvertimeDetailId: true || undefined,
         PunchIn: true,
         PunchOut: true,
         SalaryDetails: true,
