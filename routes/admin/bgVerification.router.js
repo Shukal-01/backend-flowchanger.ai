@@ -8,7 +8,7 @@ const upload = require("../../middleware/upload.js");
 const bgVerificationRouter = Router();
 bgVerificationRouter.get("/:id/verfiy", fetchAllStaffBgVerification);
 bgVerificationRouter.put(
-  "/:id/verfiy/:verificationType",
+  "/:id/verify/:verificationType",
   upload.single("file"),
   updateStaffBgVerifcation
 );
