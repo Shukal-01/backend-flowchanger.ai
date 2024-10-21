@@ -64,6 +64,7 @@ model Staff {
   attendanceAutomationRule AttendanceAutomationRule?
   AttendenceMode           AttendanceMode?
   staff_bg_verification    StaffBackgroundVerification?
+  CustomDetails            CustomDetails[]
 }
 
 model Department {
@@ -194,6 +195,14 @@ model Verification {
   updatedAt   DateTime           @updatedAt
 
   staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model CustomDetails {
+  id          String @id @default(uuid())
+  staffId     String
+  field_name  String
+  field_value String
+  staff       Staff  @relation(fields: [staffId], references: [id])
 }
 
 enum VerificationType {

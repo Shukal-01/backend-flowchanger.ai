@@ -65,7 +65,6 @@ const createStaff = async (req, res) => {
   }
 };
 
-
 const updateStaff = async (req, res) => {
   const { id } = req.params;
 
@@ -138,14 +137,18 @@ const getAllStaff = async (req, res) => {
         role: true,
         verifications: true,
         BankDetails: true,
-        LeaveBalance: true,
         LeavePolicy: true,
+        LeaveBalance: true,
         FixedShift: true,
         FlexibleShift: true,
         panaltyOvertimeDetailId: true,
         PunchIn: true,
         PunchOut: true,
         SalaryDetails: true,
+        PunchRecords: true,
+        attendanceAutomationRule: true,
+        AttendenceMode: true,
+        staff_bg_verification: true,
       },
     });
     res.status(200).json(staff);

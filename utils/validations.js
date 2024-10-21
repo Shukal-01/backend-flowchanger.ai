@@ -117,7 +117,8 @@ const attendanceModeSchema = z.object({
 
 const multipleStaffBankDetailSchema = z.array(
   z.object({
-    staff_id: z.string().uuid("Invalid staff ID"),
+    id: z.string().uuid("Invalid ID"),
+    staffId: z.string().uuid("Invalid staff ID"),
     bank_name: z.string().min(1, "Bank name is required"),
     account_number: z
       .string()
