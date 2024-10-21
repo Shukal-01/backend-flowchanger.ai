@@ -11,7 +11,7 @@ bankDetailsRouter.get(
   bankDetailsController.getBankDetailsByStaffId
 );
 
-bankDetailsRouter.put("/:id", bankDetailsController.updateBankDetails);
+bankDetailsRouter.put("/:id?", bankDetailsController.updateBankDetails);
 
 bankDetailsRouter.delete("/:id", bankDetailsController.deleteBankDetails);
 
