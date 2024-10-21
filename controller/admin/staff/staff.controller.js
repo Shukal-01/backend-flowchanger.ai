@@ -133,18 +133,22 @@ const getAllStaff = async (req, res) => {
   try {
     const staff = await prisma.staff.findMany({
       include: {
-        department: true || undefined,
-        role: true || undefined,
+        department: true,
+        role: true,
         verifications: true,
         BankDetails: true,
-        LeaveBalance: true,
         LeavePolicy: true,
+        LeaveBalance: true,
         FixedShift: true,
         FlexibleShift: true,
-        panaltyOvertimeDetailId: true || undefined,
+        panaltyOvertimeDetailId: true,
         PunchIn: true,
         PunchOut: true,
         SalaryDetails: true,
+        PunchRecords: true,
+        attendanceAutomationRule: true,
+        AttendenceMode: true,
+        staff_bg_verification: true,
       },
     });
     res.status(200).json(staff);
