@@ -67,6 +67,7 @@ model Staff {
   staff_bg_verification    StaffBackgroundVerification?
   CustomDetails            CustomDetails[]
   TicketInformation        TicketInformation[]
+  UpiDetails               UpiDetails?
 }
 
 model Department {
@@ -660,4 +661,10 @@ model Client {
 enum StatusType {
   active
   inactive
+}
+
+model UpiDetails {
+  UpiId   String @id
+  staffId String @unique
+  staff   Staff  @relation(fields: [staffId], references: [id])
 }
