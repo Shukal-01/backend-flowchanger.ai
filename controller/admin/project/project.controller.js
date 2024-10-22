@@ -44,7 +44,7 @@ const addProject = async (req, res) => {
     } catch (error) {
         console.error("Error creating project:", error);
 
-        if (error.code === "P2002") {  // Prisma error for unique constraint violation
+        if (error.code === "P2002") { 
             return res.status(400).json({ status: 400, msg: "Duplicate entry", error: error.meta.target });
         }
 

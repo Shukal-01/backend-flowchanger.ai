@@ -3,28 +3,29 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
 }
 
 model Admin {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  first_name   String
-  last_name    String
-  mobile       String
-  time_zone    String
-  time_formate String
-  date_formate String
-  week_formate String
-  package_id   String
-  company_name String
-  company_logo String?
-  password     String
-  is_verified  Boolean  @default(false)
-  otp          Int
-  otpExpiresAt DateTime
+  id            String   @id @default(uuid())
+  email         String   @unique
+  first_name    String
+  last_name     String
+  mobile        String
+  time_zone     String
+  time_formate  String
+  date_formate  String
+  week_formate  String
+  package_id    String
+  company_name  String
+  company_logo  String?
+  profile_image String?
+  password      String
+  is_verified   Boolean  @default(false)
+  otp           Int
+  otpExpiresAt  DateTime
 }
 
 model Staff {
@@ -65,6 +66,7 @@ model Staff {
   AttendenceMode           AttendanceMode?
   staff_bg_verification    StaffBackgroundVerification?
   CustomDetails            CustomDetails[]
+  TicketInformation        TicketInformation[]
 }
 
 model Department {
@@ -198,11 +200,11 @@ model Verification {
 }
 
 model CustomDetails {
-  id          String @id @default(uuid())
-  staffId     String
+  id          String  @id @default(uuid())
+  staffId     String?
   field_name  String
   field_value String
-  staff       Staff  @relation(fields: [staffId], references: [id])
+  staff       Staff?  @relation(fields: [staffId], references: [id])
 }
 
 enum VerificationType {
@@ -570,6 +572,73 @@ model TaskDetail {
   attachFile       String
 }
 
+model ProjectFiles {
+  id                  String   @id @default(uuid())
+  file_name           String
+  file_type           String
+  last_activity       String?
+  total_comments      String?
+  visible_to_customer Boolean  @default(false)
+  uploaded_by         String
+  date_uploaded       DateTime
+  projectId           String
+  project_files       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id                String              @id @default(uuid())
+  project_name      String
+  customer          String
+  billing_type      String
+  status            String
+  total_rate        Int
+  estimated_hours   Int
+  start_Date        String
+  department        String
+  deadline          String
+  tags              String[]
+  description       String
+  clientId          String
+  client            Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  projectFiles      ProjectFiles[]
+  discussion        Discussion[]
+  ticketInformation TicketInformation[]
+}
+
+model TicketInformation {
+  id                String   @id @default(uuid())
+  subject           String
+  contact           String
+  name              String
+  email             String
+  department        String
+  cc                String
+  tags              String[]
+  asign_ticket      String
+  priority          String
+  service           String
+  project           String
+  ticket_body       String
+  insert_link       String
+  personal_notes    String
+  insert_files      String
+  ticketInformation Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String?
+  staffIdd          String?
+  staff             Staff?   @relation(fields: [staffIdd], references: [id], onDelete: Cascade)
+}
+
+model Discussion {
+  id                  String   @id @default(uuid())
+  subject             String
+  discription         String
+  last_activity       String
+  total_comments      String
+  visible_to_customer String
+  discussion          Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId           String?
+}
+
 model Client {
   id               String     @id @default(uuid())
   company          String
@@ -587,6 +656,7 @@ model Client {
   zip_code         String
   created_at       DateTime   @default(now())
   updated_at       DateTime   @updatedAt
+  Project          Project[]
 }
 
 enum StatusType {

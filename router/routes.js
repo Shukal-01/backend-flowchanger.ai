@@ -9,7 +9,7 @@ const adminRouter = require("./admin/admin.router");
 const department = require("./admin/department.router");
 const staffRouter = require("./admin/staff.router");
 const salaryDetailsRouter = require("./admin/salaryDetails.router");
-const deductionsRouter = require("./admin/salaryDetails.router");
+const deductionsRouter = require("./admin/deductions.router");
 const customDetailsRouter = require("./admin/customDetails.router");
 const policyRouter = require("./admin/policy.router");
 const penaltyOvertimeDetailRouter = require("./admin/penaltyOvertimeDetail.router");
@@ -22,6 +22,8 @@ const leaveBalanceRouter = require("./admin/leaveBalance.router");
 const leavePolicyRouter = require("./admin/leavePolicy.router");
 const leaveRequestRouter = require("./admin/leaveRequest.router");
 const taskRouter = require("./admin/task.router");
+const discussionRouter = require("./admin/discussions.router");
+const ticketRouter = require("./admin/ticketInformation.router");
 
 
 rootRouter.use("/role", roleRouter);
@@ -33,7 +35,7 @@ rootRouter.use("/admin", adminRouter);
 rootRouter.use("/department", department);
 rootRouter.use("/staff", staffRouter);
 rootRouter.use("/salary", salaryDetailsRouter);
-rootRouter.use("/salary-deduction", deductionsRouter);
+rootRouter.use("/deduction", deductionsRouter);
 rootRouter.use("/custom-details", customDetailsRouter);
 rootRouter.use("/policy", policyRouter);
 rootRouter.use("/penaltyOvertimeDetails", penaltyOvertimeDetailRouter);
@@ -45,5 +47,7 @@ rootRouter.use("/leave-balance", leaveBalanceRouter);
 rootRouter.use("/leave-policy", leavePolicyRouter);
 rootRouter.use("/leave-request", leaveRequestRouter);
 rootRouter.use("/task", taskRouter);
+rootRouter.use("/discussions", discussionRouter);
+rootRouter.use("/ticket", ticketRouter);
 
 module.exports = rootRouter
