@@ -200,11 +200,11 @@ model Verification {
 }
 
 model CustomDetails {
-  id          String  @id @default(uuid())
-  staffId     String?
+  id          String @id @default(uuid())
+  staffId     String
   field_name  String
   field_value String
-  staff       Staff?  @relation(fields: [staffId], references: [id])
+  staff       Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum VerificationType {
