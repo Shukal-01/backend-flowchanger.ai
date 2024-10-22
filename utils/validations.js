@@ -485,6 +485,44 @@ const TaskDetailSchema = z.object({
   attachFile: z.string().optional(),
 });
 
+const ticketInformationSchema = z.object({
+  name: z.string({
+    required_error: "Name is required",
+  }),
+  contact: z
+    .string()
+    .min(10, "Mobile number should be at least 10 digits")
+    .optional(),
+
+  email: z.string().email("Invalid email format").optional(),
+});
+
+// Admin Register 
+
+
+
+const adminSchema = z.object({
+  first_name: z
+    .string()
+    .min(1, "First Name is required"),
+  
+  last_name: z
+    .string()
+    .min(1, "Last Name is required"),
+
+  mobile: z
+    .string()
+    .length(10, "Mobile number must be exactly 10 digits")
+    .regex(/^\d+$/, "Mobile number must contain only digits")
+    .optional(),
+    
+  email: z
+    .string()
+    .email("Invalid email format")
+    .optional(),
+});
+
+
 
 module.exports = {
   clientSchema,
@@ -514,5 +552,13 @@ module.exports = {
   PunchRecordsSchema,
   TaskStatusSchema,
   TaskPrioritySchema,
-  TaskDetailSchema
+  TaskDetailSchema,
+  ticketInformationSchema,
+  adminSchema,  
 };
+
+
+
+
+
+

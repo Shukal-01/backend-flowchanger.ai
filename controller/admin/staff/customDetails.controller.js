@@ -4,67 +4,19 @@ const prisma = new PrismaClient();
 const customFieldDetails = async (req, res) => {
   try {
     const { id, staffId, field_name, field_value } = req.body;
-
-    let newCustomDetails;
-
-    if (id) {
-      // Pehle check karo ki given id ke sath koi record hai ya nahi
-      const existingCustomField = await prisma.customDetails.findFirst({
-        where: {
-          id: id,
-        },
+    newCustomDetails = await prisma.customDetails.create({
+      data: {
+        staffId,
+        field_name,
+        field_value,
+      },
+    });
+    res
+      .status(201)
+      .json({
+        message: "Custom field created successfully",
+        data: newCustomDetails,
       });
-
-      if (existingCustomField) {
-        // Agar record milta hai, to usko update karo
-        newCustomDetails = await prisma.customDetails.update({
-          where: {
-            id: id,
-          },
-          data: {
-            staffId,
-            field_name,
-            field_value,
-          },
-        });
-        res
-          .status(200)
-          .json({
-            message: "Custom field updated successfully",
-            data: newCustomDetails,
-          });
-      } else {
-        // Agar id milti nahi hai, to naya record create karo
-        newCustomDetails = await prisma.customDetails.create({
-          data: {
-            staffId,
-            field_name,
-            field_value,
-          },
-        });
-        res
-          .status(201)
-          .json({
-            message: "Custom field created successfully",
-            data: newCustomDetails,
-          });
-      }
-    } else {
-      // Agar id nahi di gayi hai to naya record create karo
-      newCustomDetails = await prisma.customDetails.create({
-        data: {
-          staffId,
-          field_name,
-          field_value,
-        },
-      });
-      res
-        .status(201)
-        .json({
-          message: "Custom field created successfully",
-          data: newCustomDetails,
-        });
-    }
   } catch (error) {
     console.error("Error processing custom field:", error);
     res
@@ -127,12 +79,10 @@ const getCustomFieldById = async (req, res) => {
     if (newCustomFieldsId) {
       return res.status(200).json({ status: 200, data: newCustomFieldsId });
     } else {
-      return res
-        .status(400)
-        .json({
-          status: 400,
-          message: "custom fields not found for this id (" + id + ")",
-        });
+      return res.status(400).json({
+        status: 400,
+        message: "custom fields not found for this id (" + id + ")",
+      });
     }
   } catch (error) {
     console.log(error);
@@ -151,12 +101,10 @@ const deleteCustomFields = async (req, res) => {
       where: { id },
     });
     if (deleteCustomFields) {
-      return res
-        .status(200)
-        .json({
-          status: 200,
-          message: "delete custom fields this id (" + id + ")",
-        });
+      return res.status(200).json({
+        status: 200,
+        message: "delete custom fields this id (" + id + ")",
+      });
     } else {
       return res
         .status(400)
@@ -164,12 +112,10 @@ const deleteCustomFields = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({
-        status: 500,
-        message: "failed to delete this (" + id + ") custom id!",
-      });
+    return res.status(500).json({
+      status: 500,
+      message: "failed to delete this (" + id + ") custom id!",
+    });
   }
 };
 

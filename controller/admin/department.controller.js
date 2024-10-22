@@ -1,19 +1,13 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
-
-const app = express();
 const prisma = new PrismaClient();
-
-app.use(express.json());
-
-// Add Department
 
 const addDepartment = async (req, res) => {
   try {
-    const { department_name } = req.body;
+    const { departmentName } = req.body;
     const addNewDepartment = await prisma.department.create({
       data: {
-        department_name: department_name,
+        department_name: departmentName,
       },
     });
     res.status(200).json({
@@ -50,6 +44,7 @@ const updateDepartment = async (req, res) => {
       message: "Department Name Successfully Updated!(" + id + ")",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: false,
       message: "Something Went Wrong!",
@@ -100,12 +95,12 @@ const deleteDepartment = async (req, res) => {
 const showDepartment = async (req, res) => {
   const { id } = req.params;
   try {
-    const showdepartment = await prisma.department.findUnique({
+    const showDepartment = await prisma.department.findUnique({
       where: {
         id,
       },
     });
-    if (!showdepartment) {
+    if (!showDepartment) {
       return res
         .status(404)
         .json({ status: false, message: "Department not found!" });
@@ -113,7 +108,7 @@ const showDepartment = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: "Department Show By ID!(" + id + ")",
-      data: showdepartment,
+      data: showDepartment,
     });
   } catch (error) {
     return res.status(500).json({
