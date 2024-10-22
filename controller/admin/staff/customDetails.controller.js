@@ -3,28 +3,24 @@ const prisma = new PrismaClient();
 
 const customFieldDetails = async (req, res) => {
   try {
-    const { id, staffId, field_name, field_value } = req.body;
-    newCustomDetails = await prisma.customDetails.create({
+    const { staffId, field_name, field_value } = req.body;
+    const newCustomDetails = await prisma.customDetails.create({
       data: {
         staffId,
         field_name,
         field_value,
       },
     });
-    res
-      .status(201)
-      .json({
-        message: "Custom field created successfully",
-        data: newCustomDetails,
-      });
+    res.status(201).json({
+      message: "Custom field created successfully",
+      data: newCustomDetails,
+    });
   } catch (error) {
     console.error("Error processing custom field:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to process custom details!",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to process custom details!",
+      error: error.message,
+    });
   }
 };
 
@@ -35,12 +31,10 @@ const getAllCustomFields = async (req, res) => {
     res.status(200).json(customDetails);
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        error: "Failed to fetch custom details",
-        details: error.message,
-      });
+    res.status(500).json({
+      error: "Failed to fetch custom details",
+      details: error.message,
+    });
   }
 };
 
