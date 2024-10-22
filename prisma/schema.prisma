@@ -205,7 +205,7 @@ model CustomDetails {
   staffId     String
   field_name  String
   field_value String
-  staff       Staff  @relation(fields: [staffId], references: [id])
+  staff       Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum VerificationType {
@@ -540,7 +540,7 @@ model TaskStatus {
   id             String       @id @default(uuid())
   taskStatusName String
   TaskDetail     TaskDetail[]
-  statusColor    String?
+  statusColor    String
   statusOrder    Int
   isHiddenId     String
   canBeChangedId String
