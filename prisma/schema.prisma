@@ -539,7 +539,7 @@ model TaskStatus {
   id             String       @id @default(uuid())
   taskStatusName String
   TaskDetail     TaskDetail[]
-  statusColor    String?
+  statusColor    String
   statusOrder    Int
   isHiddenId     String
   canBeChangedId String
