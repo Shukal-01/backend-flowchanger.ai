@@ -1,49 +1,49 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { ZodError } = require('zod');
-const { TaskPrioritySchema, TaskTypeSchema, TaskStatusSchema, TaskDetailSchema } = require('../../utils/validations');
+const { TaskPrioritySchema, TaskStatusSchema, TaskDetailSchema } = require('../../utils/validations');
 
-async function createTaskType(req, res) {
-    try {
-        const { taskTypeName } = req.body;
+// async function createTaskType(req, res) {
+//     try {
+//         const { taskTypeName } = req.body;
 
-        // Validate the taskTypeName using TaskTypeSchema
-        const taskTypeResult = TaskTypeSchema.safeParse({ taskTypeName });
+//         // Validate the taskTypeName using TaskTypeSchema
+//         const taskTypeResult = TaskTypeSchema.safeParse({ taskTypeName });
 
-        if (!taskTypeResult.success) {
-            return res.status(400).json({ message: taskTypeResult.error.issues[0].message });
-        }
+//         if (!taskTypeResult.success) {
+//             return res.status(400).json({ message: taskTypeResult.error.issues[0].message });
+//         }
 
-        const taskType = await prisma.taskType.create({
-            data: taskTypeResult.data
-        });
-        res.status(201).json(taskType);
-    } catch (error) {
-        if (error instanceof ZodError) {
-            res.status(400).json({ error: 'Invalid request data' });
-        } else {
-            console.log(error);
-            res.status(500).json({ error: 'Failed to create new task type' });
-        }
-    }
-}
+//         const taskType = await prisma.taskType.create({
+//             data: taskTypeResult.data
+//         });
+//         res.status(201).json(taskType);
+//     } catch (error) {
+//         if (error instanceof ZodError) {
+//             res.status(400).json({ error: 'Invalid request data' });
+//         } else {
+//             console.log(error);
+//             res.status(500).json({ error: 'Failed to create new task type' });
+//         }
+//     }
+// }
 
-async function getAllTaskType(req, res) {
-    try {
-        const taskTypes = await prisma.taskType.findMany();
-        res.status(200).json(taskTypes);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Failed to fetch task types' });
-    }
-}
+// async function getAllTaskType(req, res) {
+//     try {
+//         const taskTypes = await prisma.taskType.findMany();
+//         res.status(200).json(taskTypes);
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({ error: 'Failed to fetch task types' });
+//     }
+// }
 
 async function createTaskStatus(req, res) {
     try {
-        const { taskStatusName } = req.body;
+        const { taskStatusName, statusColor, statusOrder, isHiddenId, canBeChangedId } = req.body;
 
         // Validate the taskTypeName using TaskTypeSchema
-        const TaskStatusResult = TaskStatusSchema.safeParse({ taskStatusName });
+        const TaskStatusResult = TaskStatusSchema.safeParse({ taskStatusName, statusColor, statusOrder, isHiddenId, canBeChangedId });
 
         if (!TaskStatusResult.success) {
             return res.status(400).json({ message: TaskStatusResult.error.issues[0].message });
@@ -253,8 +253,6 @@ async function getTaskDetailById(req, res) {
 
 
 module.exports = {
-    createTaskType,
-    getAllTaskType,
     createTaskStatus,
     getAllTaskStatus,
     createTaskPriority,

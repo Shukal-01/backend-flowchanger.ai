@@ -454,12 +454,16 @@ const PunchRecordsSchema = z.object({
   staffId: z.string().min(1, { message: 'StaffId is required.' }),
 });
 
-const TaskTypeSchema = z.object({
-  taskTypeName: z.string().min(1, "Task Type name is required"),
-});
+// const TaskTypeSchema = z.object({
+//   taskTypeName: z.string().min(1, "Task Type name is required"),
+// });
 
 const TaskStatusSchema = z.object({
   taskStatusName: z.string().min(1, "Task Status name is required"),
+  statusColor: z.string().optional(),
+  statusOrder: z.number().min(1, "Status Order is required"),
+  isHiddenId: z.string().min(1, "Is Hidden Id is required"),
+  canBeChangedId: z.string().min(1, "Can Be Changed Id is required"),
 });
 
 const TaskPrioritySchema = z.object({
@@ -546,7 +550,6 @@ module.exports = {
   PunchInSchema,
   PunchOutSchema,
   PunchRecordsSchema,
-  TaskTypeSchema,
   TaskStatusSchema,
   TaskPrioritySchema,
   TaskDetailSchema,
