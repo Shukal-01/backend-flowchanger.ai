@@ -28,7 +28,7 @@ const upiRouter = require("./admin/upi.router.js");
 
 rootRouter.use("/role", roleRouter);
 rootRouter.use("/attendance", attendanceRouter);
-rootRouter.use("/bankDetails", bankDetailsRouter);
+rootRouter.use("/bank-details", bankDetailsRouter);
 rootRouter.use("/bg-verification", bgVerificationRouter);
 rootRouter.use("/client", clientRouter);
 rootRouter.use("/admin", adminRouter);

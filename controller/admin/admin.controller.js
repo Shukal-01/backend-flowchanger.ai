@@ -71,85 +71,61 @@ const sendOtp = async (email, otp) => {
 };
 
 const adminSignup = async (req, res) => {
-
   try {
-    upload(req, res, async (err) => {
-      if (err instanceof multer.MulterError || err) {
-        return res.status(400).json({ status: 400, message: err.message });
-      }
+    const { email, first_name, last_name, mobile, password } = req.body;
 
-      const {
+    // Validation for email and password
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 400,
+        message: "Email and password are required.",
+      });
+    }
+
+    // Check if admin already exists
+    const existingAdmin = await prisma.admin.findUnique({ where: { email } });
+    if (existingAdmin) {
+      return res.status(400).json({
+        status: 400,
+        message: "Email already exists!",
+      });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate OTP and set expiration time
+    const otp = generateOTP();
+    const otpExpiresAt = new Date();
+    otpExpiresAt.setMinutes(otpExpiresAt.getMinutes() + 5);
+
+    // Create the new admin entry in the database
+    const newAdmin = await prisma.admin.create({
+      data: {
         email,
         first_name,
         last_name,
         mobile,
-        time_formate,
-        time_zone,
-        date_formate,
-        week_formate,
-        package_id,
-        company_name,
-        password,
-      } = req.body;
+        password: hashedPassword,
+        otp: parseInt(otp),
+        otpExpiresAt,
+      },
+    });
 
-      if (!email || !password) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Email and password are required." });
-      }
+    // Send OTP via email
+    await sendOtp(email, otp);
 
-      const admin = await prisma.admin.findUnique({ where: { email } });
-      if (admin) {
-        return res
-          .status(400)
-          .json({ status: 400, message: "Email already exists!" });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      const otp = generateOTP();
-      const otpExpiresAt = new Date();
-      otpExpiresAt.setMinutes(otpExpiresAt.getMinutes() + 5);
-
-      const profileImage = req.files.profile_image ? req.files.profile_image[0].filename : null;
-      const companyLogo = req.files.company_logo ? req.files.company_logo[0].filename : null;
-
-      // console.log(profileImage);
-      let profileImageString = null;
-      let companyLogoString = null;
-
-      const newAdmin = await prisma.admin.create({
-        data: {
-          email,
-          first_name,
-          last_name,
-          mobile,
-          time_zone,
-          time_formate: String(time_formate),
-          date_formate: String(date_formate),
-          week_formate: String(week_formate),
-          package_id,
-          company_name,
-          profile_image: profileImage,
-          company_logo: companyLogo,
-          password: hashedPassword,
-          otp: parseInt(otp),
-          otpExpiresAt,
-        },
-      });
-
-      await sendOtp(email, otp);
-
-      return res.status(201).json({
-        status: 201,
-        message:
-          "An OTP has been sent to your email. Verify your email to activate your account.",
-        redirect: "/redirectAfterDelay.html"
-      });
+    return res.status(201).json({
+      status: 201,
+      message:
+        "An OTP has been sent to your email. Verify your email to activate your account.",
     });
   } catch (error) {
     console.error("Unexpected Error in adminSignup:", error);
-    return res.status(500).json({ status: 500, message: "Internal server error occurred. Please try again later.", });
+    return res.status(500).json({
+      status: 500,
+      message: "Internal server error occurred. Please try again later.",
+    });
   }
 };
 
@@ -175,13 +151,92 @@ const verifyOTP = async (req, res) => {
           is_verified: true,
         },
       });
-      return res.status(200).json({ status: 200, message: "OTP verified successfully." });
+      return res
+        .status(200)
+        .json({ status: 200, message: "OTP verified successfully." });
     } else {
-      return res.status(400).json({ status: 400, message: "Invalid or expired OTP." });
+      return res
+        .status(400)
+        .json({ status: 400, message: "Invalid or expired OTP." });
     }
   } catch (error) {
     console.error("Error during OTP verification:", error);
-    return res.status(500).json({ status: 500, message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal server error." });
+  }
+};
+
+const updateAdmin = async (req, res) => {
+  try {
+    // Handle file uploads with multer
+    upload(req, res, async (err) => {
+      if (err instanceof multer.MulterError || err) {
+        return res.status(400).json({ status: 400, message: err.message });
+      }
+
+      const { email } = req.body;
+
+      // Find the admin by email
+      const admin = await prisma.admin.findUnique({
+        where: { email },
+      });
+
+      if (!admin) {
+        return res
+          .status(404)
+          .json({ status: 404, message: "Admin not found." });
+      }
+
+      // Destructure the remaining fields from the request body
+      const {
+        time_zone,
+        time_formate,
+        date_formate,
+        week_formate,
+        package_id,
+        company_name,
+      } = req.body;
+
+      // Handle file uploads, keeping the existing file if not updated
+      const profileImage = req.files?.profile_image
+        ? req.files.profile_image[0].filename
+        : admin.profile_image;
+
+      const companyLogo = req.files?.company_logo
+        ? req.files.company_logo[0].filename
+        : admin.company_logo;
+
+      // Update the admin details in the database
+      const updatedAdmin = await prisma.admin.update({
+        where: { email },
+        data: {
+          time_zone: time_zone || admin.time_zone,
+          time_formate: time_formate || admin.time_formate,
+          date_formate: date_formate || admin.date_formate,
+          week_formate: week_formate || admin.week_formate,
+          package_id: package_id || admin.package_id,
+          company_name: company_name || admin.company_name,
+          profile_image: profileImage,
+          company_logo: companyLogo,
+        },
+      });
+
+      // Create a new token for the updated admin
+      const token = jwt.sign({ id: updatedAdmin.id }, process.env.JWT_SECRET);
+
+      return res.status(200).json({
+        status: 200,
+        message: "Admin details updated successfully.",
+        updatedAdmin,
+        token: token,
+      });
+    });
+  } catch (error) {
+    console.error("Error in updateAdmin:", error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Failed to update admin details." });
   }
 };
 
@@ -200,14 +255,20 @@ const adminLogin = async (req, res) => {
     }
     const isPasswordMatch = await bcrypt.compare(password, admin.password);
     if (!isPasswordMatch) {
-      return res.status(401).json({ status: 401, message: "Invalid password." });
+      return res
+        .status(401)
+        .json({ status: 401, message: "Invalid password." });
     }
     const token = jwt.sign({ id: admin.id }, process.env.JWT_SECRET);
-    return res.status(200).json({ status: 200, message: "Login successful!", token, });
+    return res
+      .status(200)
+      .json({ status: 200, message: "Login successful!", token: token });
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ status: 500, message: "Internal server error.", });
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal server error." });
   }
 };
 
-module.exports = { adminSignup, verifyOTP, adminLogin };
+module.exports = { adminSignup, verifyOTP, adminLogin, updateAdmin };

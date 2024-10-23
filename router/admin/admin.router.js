@@ -1,10 +1,16 @@
 const express = require("express");
 const adminRouter = express.Router();
 const authenticateUser = require("../../middleware/auth");
-const adminController = require("../../controller/admin/registerLogin.controller");
+const {
+  adminSignup,
+  verifyOTP,
+  adminLogin,
+  updateAdmin,
+} = require("../../controller/admin/admin.controller");
 
-adminRouter.post("/", adminController.adminSignup);
-adminRouter.put("/verify-otp", adminController.verifyOTP);
-adminRouter.post("/login", adminController.adminLogin);
+adminRouter.post("/", adminSignup);
+adminRouter.put("/verify-otp", verifyOTP);
+adminRouter.post("/login", adminLogin);
+adminRouter.put("/update", updateAdmin);
 
 module.exports = adminRouter;

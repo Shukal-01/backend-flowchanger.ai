@@ -11,15 +11,15 @@ datasource db {
 model Admin {
   id            String   @id @default(uuid())
   email         String   @unique
-  first_name    String
-  last_name     String
-  mobile        String
-  time_zone     String
-  time_formate  String
-  date_formate  String
-  week_formate  String
-  package_id    String
-  company_name  String
+  first_name    String?
+  last_name     String?
+  mobile        Int?
+  time_zone     String?
+  time_formate  String?
+  date_formate  String?
+  week_formate  String?
+  package_id    String?
+  company_name  String?
   company_logo  String?
   profile_image String?
   password      String

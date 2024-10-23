@@ -35,7 +35,7 @@ exports.createOrUpdateBankDetails = async (req, res) => {
           ifsc_code,
         },
       });
-      res.status(200).json({
+      res.status(201).json({
         message: "Bank details updated successfully",
         data: responseData,
       });
