@@ -48,8 +48,8 @@ model Staff {
   emergency_contact_relation String?
   emergency_contact_address  String?
 
-  department               Department?                  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  role                     Role?                        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  department               Department?                  @relation(fields: [departmentId], references: [id])
+  role                     Role?                        @relation(fields: [roleId], references: [id])
   verifications            Verification[]
   BankDetails              BankDetails?
   LeavePolicy              LeavePolicy[]
@@ -127,7 +127,7 @@ model StaffBackgroundVerification {
   permanent_address           String?
   address_status              String?  @default("Not Verified")
   address_file                String?
-  staff                       Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff                       Staff?   @relation(fields: [staffId], references: [id])
   staffId                     String?  @unique
   createdAt                   DateTime @default(now())
   updatedAt                   DateTime @updatedAt
@@ -143,7 +143,7 @@ model BankDetails {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
-  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff Staff @relation(fields: [staffId], references: [id])
 }
 
 model LeavePolicy {
@@ -155,7 +155,7 @@ model LeavePolicy {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  staff        Staff          @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff        Staff          @relation(fields: [staffId], references: [id])
   LeaveBalance LeaveBalance[]
   LeaveRequest LeaveRequest[]
 }
@@ -169,8 +169,8 @@ model LeaveBalance {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  staff       Staff       @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+  staff       Staff       @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id])
 }
 
 model LeaveRequest {
@@ -184,8 +184,8 @@ model LeaveRequest {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  staff       Staff       @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id], onDelete: Cascade)
+  staff       Staff       @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id])
 }
 
 model Verification {
@@ -444,18 +444,18 @@ model Deductions {
 }
 
 model Shifts {
-  id             String         @id @default(uuid())
+  id             String        @id @default(uuid())
   shiftName      String
   shiftStartTime String
   shiftEndTime   String
-  // punchInTime    String
-  // punchOutTime   String
-  punchInType    PunchTime      @default(ANYTIME)
-  punchOutType   PunchTime      @default(ANYTIME)
-  fixed          FixedShift?    @relation(fields: [fixedId], references: [id], onDelete: Cascade)
-  fixedId        String?
-  flexible       FlexibleShift? @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
-  flexibleId     String?
+  punchInTime    String
+  punchOutTime   String
+  punchInType    PunchTime     @default(ANYTIME)
+  punchOutType   PunchTime     @default(ANYTIME)
+  fixed          FixedShift    @relation(fields: [fixedId], references: [id], onDelete: Cascade)
+  fixedId        String
+  flexible       FlexibleShift @relation(fields: [flexibleId], references: [id], onDelete: Cascade)
+  flexibleId     String
 }
 
 enum PunchTime {

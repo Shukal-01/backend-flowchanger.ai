@@ -149,6 +149,7 @@ const getAllStaff = async (req, res) => {
         attendanceAutomationRule: true,
         AttendenceMode: true,
         staff_bg_verification: true,
+        UpiDetails: true,
       },
     });
     res.status(200).json(staff);
@@ -166,6 +167,25 @@ const getStaffById = async (req, res) => {
   try {
     const staff = await prisma.staff.findUnique({
       where: { id },
+      include: {
+        department: true,
+        role: true,
+        verifications: true,
+        BankDetails: true,
+        LeavePolicy: true,
+        LeaveBalance: true,
+        FixedShift: true,
+        FlexibleShift: true,
+        panaltyOvertimeDetailId: true,
+        PunchIn: true,
+        PunchOut: true,
+        SalaryDetails: true,
+        PunchRecords: true,
+        attendanceAutomationRule: true,
+        AttendenceMode: true,
+        staff_bg_verification: true,
+        UpiDetails: true,
+      },
     });
     if (staff) {
       res.status(200).json(staff);
