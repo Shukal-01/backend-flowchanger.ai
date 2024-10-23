@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "MarkAttendenceType" AS ENUM ('Office', 'Anywhere');
+
+-- CreateEnum
 CREATE TYPE "VerificationType" AS ENUM ('AADHAAR', 'PAN', 'DRIVING_LICENSE', 'UAN', 'FACE', 'ADDRESS', 'PAST_EMPLOYMENT');
 
 -- CreateEnum
@@ -33,6 +36,7 @@ CREATE TABLE "Admin" (
     "package_id" TEXT NOT NULL,
     "company_name" TEXT NOT NULL,
     "company_logo" TEXT,
+    "profile_image" TEXT,
     "password" TEXT NOT NULL,
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "otp" INTEGER NOT NULL,
@@ -71,6 +75,64 @@ CREATE TABLE "Department" (
     "department_name" TEXT NOT NULL,
 
     CONSTRAINT "Department_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AttendanceAutomationRule" (
+    "id" TEXT NOT NULL,
+    "auto_absent" BOOLEAN NOT NULL DEFAULT false,
+    "present_on_punch" BOOLEAN NOT NULL DEFAULT false,
+    "auto_half_day" TEXT,
+    "manadatory_half_day" TEXT,
+    "manadatory_full_day" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "staffId" TEXT NOT NULL,
+
+    CONSTRAINT "AttendanceAutomationRule_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AttendanceMode" (
+    "id" TEXT NOT NULL,
+    "selfie_attendance" BOOLEAN NOT NULL DEFAULT false,
+    "qr_attendance" BOOLEAN NOT NULL DEFAULT false,
+    "gps_attendance" BOOLEAN NOT NULL DEFAULT false,
+    "mark_attendance" "MarkAttendenceType" NOT NULL DEFAULT 'Office',
+    "allow_punch_in_for_mobile" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "staffId" TEXT NOT NULL,
+
+    CONSTRAINT "AttendanceMode_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StaffBackgroundVerification" (
+    "id" TEXT NOT NULL,
+    "aadhaar_number" TEXT,
+    "aadhaar_verification_status" TEXT DEFAULT 'Not Verified',
+    "aadhaar_file" TEXT,
+    "pan_number" TEXT,
+    "pan_verification_status" TEXT DEFAULT 'Not Verified',
+    "pan_file" TEXT,
+    "uan_number" TEXT,
+    "uan_verification_status" TEXT DEFAULT 'Not Verified',
+    "uan_file" TEXT,
+    "driving_license_number" TEXT,
+    "driving_license_status" TEXT DEFAULT 'Not Verified',
+    "driving_license_file" TEXT,
+    "face_file" TEXT,
+    "face_verification_status" TEXT DEFAULT 'Not Verified',
+    "current_address" TEXT,
+    "permanent_address" TEXT,
+    "address_status" TEXT DEFAULT 'Not Verified',
+    "address_file" TEXT,
+    "staffId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "StaffBackgroundVerification_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -139,6 +201,16 @@ CREATE TABLE "Verification" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Verification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CustomDetails" (
+    "id" TEXT NOT NULL,
+    "staffId" TEXT NOT NULL,
+    "field_name" TEXT NOT NULL,
+    "field_value" TEXT NOT NULL,
+
+    CONSTRAINT "CustomDetails_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -447,17 +519,13 @@ CREATE TABLE "PunchOut" (
 );
 
 -- CreateTable
-CREATE TABLE "TaskType" (
-    "id" TEXT NOT NULL,
-    "taskTypeName" TEXT NOT NULL,
-
-    CONSTRAINT "TaskType_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "TaskStatus" (
     "id" TEXT NOT NULL,
     "taskStatusName" TEXT NOT NULL,
+    "statusColor" TEXT NOT NULL,
+    "statusOrder" INTEGER NOT NULL,
+    "isHiddenId" TEXT NOT NULL,
+    "canBeChangedId" TEXT NOT NULL,
 
     CONSTRAINT "TaskStatus_pkey" PRIMARY KEY ("id")
 );
@@ -490,6 +558,77 @@ CREATE TABLE "TaskDetail" (
 );
 
 -- CreateTable
+CREATE TABLE "ProjectFiles" (
+    "id" TEXT NOT NULL,
+    "file_name" TEXT NOT NULL,
+    "file_type" TEXT NOT NULL,
+    "last_activity" TEXT,
+    "total_comments" TEXT,
+    "visible_to_customer" BOOLEAN NOT NULL DEFAULT false,
+    "uploaded_by" TEXT NOT NULL,
+    "date_uploaded" TIMESTAMP(3) NOT NULL,
+    "projectId" TEXT NOT NULL,
+
+    CONSTRAINT "ProjectFiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Project" (
+    "id" TEXT NOT NULL,
+    "project_name" TEXT NOT NULL,
+    "customer" TEXT NOT NULL,
+    "billing_type" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "total_rate" INTEGER NOT NULL,
+    "estimated_hours" INTEGER NOT NULL,
+    "start_Date" TEXT NOT NULL,
+    "department" TEXT NOT NULL,
+    "deadline" TEXT NOT NULL,
+    "tags" TEXT[],
+    "description" TEXT NOT NULL,
+    "clientId" TEXT NOT NULL,
+
+    CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TicketInformation" (
+    "id" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
+    "contact" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "department" TEXT NOT NULL,
+    "cc" TEXT NOT NULL,
+    "tags" TEXT[],
+    "asign_ticket" TEXT NOT NULL,
+    "priority" TEXT NOT NULL,
+    "service" TEXT NOT NULL,
+    "project" TEXT NOT NULL,
+    "ticket_body" TEXT NOT NULL,
+    "insert_link" TEXT NOT NULL,
+    "personal_notes" TEXT NOT NULL,
+    "insert_files" TEXT NOT NULL,
+    "projectId" TEXT,
+    "staffIdd" TEXT,
+
+    CONSTRAINT "TicketInformation_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Discussion" (
+    "id" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
+    "discription" TEXT NOT NULL,
+    "last_activity" TEXT NOT NULL,
+    "total_comments" TEXT NOT NULL,
+    "visible_to_customer" TEXT NOT NULL,
+    "projectId" TEXT,
+
+    CONSTRAINT "Discussion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Client" (
     "id" TEXT NOT NULL,
     "company" TEXT NOT NULL,
@@ -511,8 +650,28 @@ CREATE TABLE "Client" (
     CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "UpiDetails" (
+    "UpiId" TEXT NOT NULL,
+    "staffId" TEXT NOT NULL,
+
+    CONSTRAINT "UpiDetails_pkey" PRIMARY KEY ("UpiId")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AttendanceAutomationRule_staffId_key" ON "AttendanceAutomationRule"("staffId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AttendanceMode_staffId_key" ON "AttendanceMode"("staffId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StaffBackgroundVerification_staffId_key" ON "StaffBackgroundVerification"("staffId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "BankDetails_staffId_key" ON "BankDetails"("staffId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PanaltyOvertimeDetails_staffId_key" ON "PanaltyOvertimeDetails"("staffId");
@@ -571,11 +730,23 @@ CREATE UNIQUE INDEX "PunchRecords_punchOutId_key" ON "PunchRecords"("punchOutId"
 -- CreateIndex
 CREATE UNIQUE INDEX "Client_vat_number_key" ON "Client"("vat_number");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "UpiDetails_staffId_key" ON "UpiDetails"("staffId");
+
 -- AddForeignKey
 ALTER TABLE "Staff" ADD CONSTRAINT "Staff_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Staff" ADD CONSTRAINT "Staff_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AttendanceAutomationRule" ADD CONSTRAINT "AttendanceAutomationRule_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AttendanceMode" ADD CONSTRAINT "AttendanceMode_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StaffBackgroundVerification" ADD CONSTRAINT "StaffBackgroundVerification_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "BankDetails" ADD CONSTRAINT "BankDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -596,7 +767,10 @@ ALTER TABLE "LeaveRequest" ADD CONSTRAINT "LeaveRequest_staffId_fkey" FOREIGN KE
 ALTER TABLE "LeaveRequest" ADD CONSTRAINT "LeaveRequest_leaveTypeId_fkey" FOREIGN KEY ("leaveTypeId") REFERENCES "LeavePolicy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Verification" ADD CONSTRAINT "Verification_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Verification" ADD CONSTRAINT "Verification_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CustomDetails" ADD CONSTRAINT "CustomDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PanaltyOvertimeDetails" ADD CONSTRAINT "PanaltyOvertimeDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -680,7 +854,22 @@ ALTER TABLE "PunchOut" ADD CONSTRAINT "PunchOut_staffId_fkey" FOREIGN KEY ("staf
 ALTER TABLE "TaskDetail" ADD CONSTRAINT "TaskDetail_taskPriorityId_fkey" FOREIGN KEY ("taskPriorityId") REFERENCES "TaskPriority"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TaskDetail" ADD CONSTRAINT "TaskDetail_taskTypeId_fkey" FOREIGN KEY ("taskTypeId") REFERENCES "TaskType"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "TaskDetail" ADD CONSTRAINT "TaskDetail_taskStatusId_fkey" FOREIGN KEY ("taskStatusId") REFERENCES "TaskStatus"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TaskDetail" ADD CONSTRAINT "TaskDetail_taskStatusId_fkey" FOREIGN KEY ("taskStatusId") REFERENCES "TaskStatus"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ProjectFiles" ADD CONSTRAINT "ProjectFiles_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Project" ADD CONSTRAINT "Project_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TicketInformation" ADD CONSTRAINT "TicketInformation_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "TicketInformation" ADD CONSTRAINT "TicketInformation_staffIdd_fkey" FOREIGN KEY ("staffIdd") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Discussion" ADD CONSTRAINT "Discussion_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UpiDetails" ADD CONSTRAINT "UpiDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

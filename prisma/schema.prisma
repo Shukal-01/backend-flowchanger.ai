@@ -51,7 +51,7 @@ model Staff {
   department               Department?                  @relation(fields: [departmentId], references: [id])
   role                     Role?                        @relation(fields: [roleId], references: [id])
   verifications            Verification[]
-  BankDetails              BankDetails[]
+  BankDetails              BankDetails?
   LeavePolicy              LeavePolicy[]
   LeaveBalance             LeaveBalance[]
   LeaveRequest             LeaveRequest[]
@@ -135,7 +135,7 @@ model StaffBackgroundVerification {
 
 model BankDetails {
   id             String   @id @default(uuid())
-  staffId        String
+  staffId        String   @unique
   bank_name      String?
   account_number String?
   branch_name    String?
