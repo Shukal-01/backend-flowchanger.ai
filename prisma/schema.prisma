@@ -13,7 +13,7 @@ model Admin {
   email         String   @unique
   first_name    String?
   last_name     String?
-  mobile        Int?
+  mobile        String?
   time_zone     String?
   time_formate  String?
   date_formate  String?
@@ -68,6 +68,32 @@ model Staff {
   CustomDetails            CustomDetails[]
   TicketInformation        TicketInformation[]
   UpiDetails               UpiDetails?
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  senderId       String
+  senderType     UserType
+  content        String
+  timestamp      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+}
+
+enum UserType {
+  ADMIN
+  STAFF
+  CLIENT
+}
+
+model Conversation {
+  id           String    @id @default(uuid())
+  participant1 String
+  participant2 String
+  messages     Message[]
+
+  @@unique([participant1, participant2])
 }
 
 model Department {
