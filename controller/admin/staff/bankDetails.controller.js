@@ -1,8 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
-const { bankDetailsSchema, multipleStaffBankDetailSchema } = require("../../../utils/validations");
+const {
+  bankDetailsSchema,
+  multipleStaffBankDetailSchema,
+} = require("../../../utils/validations");
 const prisma = new PrismaClient();
 
-exports.createBankDetails = async (req, res) => {
+exports.createOrUpdateBankDetails = async (req, res) => {
   const validationResult = bankDetailsSchema.safeParse(req.body);
 
   if (!validationResult.success) {
@@ -17,18 +20,43 @@ exports.createBankDetails = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const newBankDetails = await prisma.bankDetails.create({
-      data: {
-        staffId: id,
-        bank_name,
-        account_number,
-        branch_name,
-        ifsc_code,
-      },
+    const existingBankDetails = await prisma.bankDetails.findUnique({
+      where: { staffId: id },
     });
-    res.status(201).json(newBankDetails);
+
+    let responseData;
+    if (existingBankDetails) {
+      responseData = await prisma.bankDetails.update({
+        where: { staffId: id },
+        data: {
+          bank_name,
+          account_number,
+          branch_name,
+          ifsc_code,
+        },
+      });
+      res.status(201).json({
+        message: "Bank details updated successfully",
+        data: responseData,
+      });
+    } else {
+      responseData = await prisma.bankDetails.create({
+        data: {
+          staffId: id,
+          bank_name,
+          account_number,
+          branch_name,
+          ifsc_code,
+        },
+      });
+      res.status(201).json({
+        message: "Bank details created successfully",
+        data: responseData,
+      });
+    }
   } catch (error) {
-    res.status(500).json({ error: "Failed to create bank details" });
+    console.error("Error processing bank details:", error);
+    res.status(500).json({ error: "Failed to process bank details" });
   }
 };
 
@@ -68,7 +96,8 @@ const updateMultipleBankDetailsForStaffs = async (req, res) => {
 
   try {
     // Validate the input using Zod or a similar schema validator
-    const validateMultipleStaffBankDetails = multipleStaffBankDetailSchema.safeParse(req.body);
+    const validateMultipleStaffBankDetails =
+      multipleStaffBankDetailSchema.safeParse(req.body);
     if (!validateMultipleStaffBankDetails.success) {
       return res.status(400).json({
         success: false,
@@ -80,7 +109,15 @@ const updateMultipleBankDetailsForStaffs = async (req, res) => {
 
     // Prepare promises for updating each staff's bank details
     const multipleStaffBankDetailsPromise = multipleStaffBankAccounts.map(
-      async ({ id, staffId, bank_name, account_number, account_holder_name, branch_name, ifsc_code }) => {
+      async ({
+        id,
+        staffId,
+        bank_name,
+        account_number,
+        account_holder_name,
+        branch_name,
+        ifsc_code,
+      }) => {
         return await prisma.bankDetails.upsert({
           where: { id }, // Unique identifier for the automation rule for specific staff member
           update: {
@@ -89,7 +126,7 @@ const updateMultipleBankDetailsForStaffs = async (req, res) => {
             account_number: account_number,
             // account_holder_name: account_holder_name,
             branch_name: branch_name,
-            ifsc_code: ifsc_code
+            ifsc_code: ifsc_code,
           },
           create: {
             staffId: staffId,
@@ -97,14 +134,16 @@ const updateMultipleBankDetailsForStaffs = async (req, res) => {
             account_number: account_number,
             // account_holder_name: account_holder_name,
             branch_name: branch_name,
-            ifsc_code: ifsc_code
-          }
+            ifsc_code: ifsc_code,
+          },
         });
       }
     );
 
     // Wait for all updates to complete
-    const updatedBankDetails = await Promise.all(multipleStaffBankDetailsPromise);
+    const updatedBankDetails = await Promise.all(
+      multipleStaffBankDetailsPromise
+    );
 
     // Send a success response
     res.status(200).json({
@@ -124,11 +163,9 @@ const updateMultipleBankDetailsForStaffs = async (req, res) => {
 exports.updateBankDetails = async (req, res) => {
   const { id } = req.params;
   if (!id) {
-    const data = await updateMultipleBankDetailsForStaffs(req, res)
+    const data = await updateMultipleBankDetailsForStaffs(req, res);
     return data;
-  }
-  else {
-
+  } else {
     const validationResult = bankDetailsSchema.partial().safeParse(req.body);
 
     if (!validationResult.success) {

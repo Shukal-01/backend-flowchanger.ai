@@ -2,7 +2,7 @@ const express = require("express");
 const bankDetailsRouter = express.Router();
 const bankDetailsController = require("../../controller/admin/staff/bankDetails.controller");
 
-bankDetailsRouter.post("/:id", bankDetailsController.createBankDetails);
+bankDetailsRouter.post("/:id", bankDetailsController.createOrUpdateBankDetails);
 
 bankDetailsRouter.get("/", bankDetailsController.getAllBankDetails);
 

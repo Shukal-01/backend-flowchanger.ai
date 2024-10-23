@@ -11,15 +11,15 @@ datasource db {
 model Admin {
   id            String   @id @default(uuid())
   email         String   @unique
-  first_name    String
-  last_name     String
-  mobile        String
-  time_zone     String
-  time_formate  String
-  date_formate  String
-  week_formate  String
-  package_id    String
-  company_name  String
+  first_name    String?
+  last_name     String?
+  mobile        Int?
+  time_zone     String?
+  time_formate  String?
+  date_formate  String?
+  week_formate  String?
+  package_id    String?
+  company_name  String?
   company_logo  String?
   profile_image String?
   password      String
@@ -51,7 +51,7 @@ model Staff {
   department               Department?                  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   role                     Role?                        @relation(fields: [roleId], references: [id], onDelete: Cascade)
   verifications            Verification[]
-  BankDetails              BankDetails[]
+  BankDetails              BankDetails?
   LeavePolicy              LeavePolicy[]
   LeaveBalance             LeaveBalance[]
   LeaveRequest             LeaveRequest[]
@@ -67,6 +67,7 @@ model Staff {
   staff_bg_verification    StaffBackgroundVerification?
   CustomDetails            CustomDetails[]
   TicketInformation        TicketInformation[]
+  UpiDetails               UpiDetails?
 }
 
 model Department {
@@ -134,7 +135,7 @@ model StaffBackgroundVerification {
 
 model BankDetails {
   id             String   @id @default(uuid())
-  staffId        String
+  staffId        String   @unique
   bank_name      String?
   account_number String?
   branch_name    String?
@@ -662,4 +663,10 @@ model Client {
 enum StatusType {
   active
   inactive
+}
+
+model UpiDetails {
+  UpiId   String @id
+  staffId String @unique
+  staff   Staff  @relation(fields: [staffId], references: [id])
 }
