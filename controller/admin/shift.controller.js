@@ -22,14 +22,14 @@ async function getShiftById(req, res) {
 
 async function createShift(req, res) {
     try {
-        const { shiftName, shiftStartTime, shiftEndTime, punchInTime, punchOutTime, punchInType, punchOutType, flexibleId, fixedId } = req.body;
+        const { shiftName, shiftStartTime, shiftEndTime, punchInType, punchOutType, flexibleId, fixedId } = req.body;
 
         const shiftResult = ShiftSchema.safeParse({
             shiftName,
             shiftStartTime,
             shiftEndTime,
-            punchInTime,
-            punchOutTime,
+            // punchInTime,
+            // punchOutTime,
             punchInType,
             punchOutType,
             flexibleId,
@@ -52,7 +52,7 @@ async function createShift(req, res) {
 
 async function updateShift(req, res) {
     const { id } = req.params;
-    const { shiftName, shiftStartTime, shiftEndTime, punchInTime, punchOutTime, punchInType, punchOutType } = req.body;
+    const { shiftName, shiftStartTime, shiftEndTime, punchInType, punchOutType } = req.body;
     try {
         const shift = await prisma.shifts.update({
             where: { id },
@@ -60,8 +60,8 @@ async function updateShift(req, res) {
                 shiftName,
                 shiftStartTime,
                 shiftEndTime,
-                punchInTime,
-                punchOutTime,
+                // punchInTime,
+                // punchOutTime,
                 punchInType,
                 punchOutType,
             },
@@ -96,7 +96,7 @@ async function getFixedShifts(req, res) {
 
 async function createFixedShift(req, res) {
     try {
-        const { day, weekOff, staffId } = req.body;
+        const { weekOff, staffId } = req.body;
         // Check if the staff member exists
         const staffExists = await prisma.staff.findUnique({
             where: { id: staffId },
@@ -105,7 +105,6 @@ async function createFixedShift(req, res) {
             return res.status(404).json({ error: 'Staff not found' });
         }
         const fixedShiftResult = FixedShiftSchema.parse({
-            day,
             weekOff,
             staffId
         })
@@ -138,7 +137,7 @@ async function getFlexibleShifts(req, res) {
 
 async function createFlexibleShift(req, res) {
     try {
-        const { day, weekOff, staffId } = req.body;
+        const { weekOff, staffId } = req.body;
 
         // Check if the staff member exists
         const staffExists = await prisma.staff.findUnique({
@@ -148,8 +147,7 @@ async function createFlexibleShift(req, res) {
         if (!staffExists) {
             return res.status(404).json({ error: 'Staff not found' });
         }
-        const fexibleShiftResult = FlexibleShiftSchema.parse({
-            day,
+        const fexibleShiftResult = FlexibleShiftSchema.safeParse({
             weekOff,
             staffId
         })
@@ -181,8 +179,8 @@ async function updateMultipleShifts(req, res) {
                         shiftName: shift.shiftName,
                         shiftStartTime: shift.shiftStartTime,
                         shiftEndTime: shift.shiftEndTime,
-                        punchInTime: shift.punchInTime,
-                        punchOutTime: shift.punchOutTime,
+                        // punchInTime: shift.punchInTime,
+                        // punchOutTime: shift.punchOutTime,
                         punchInType: shift.punchInType,
                         punchOutType: shift.punchOutType,
                     }
