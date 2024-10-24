@@ -22,7 +22,7 @@ async function getShiftById(req, res) {
 
 async function createShift(req, res) {
     try {
-        const { shiftName, shiftStartTime, shiftEndTime, punchInType, punchOutType, allowPunchInHours, allowPunchInMinutes } = req.body;
+        const { shiftName, shiftStartTime, shiftEndTime, punchInType, punchOutType, allowPunchInHours, allowPunchInMinutes, allowPunchOutHours, allowPunchOutMinutes } = req.body;
 
         const shiftResult = ShiftSchema.safeParse({
             shiftName,
@@ -31,7 +31,9 @@ async function createShift(req, res) {
             punchInType,
             punchOutType,
             allowPunchInHours,
-            allowPunchInMinutes
+            allowPunchInMinutes,
+            allowPunchOutHours,
+            allowPunchOutMinutes
         });
         const newShiftPolicy = await prisma.shifts.create({
             data: shiftResult.data,
@@ -50,7 +52,7 @@ async function createShift(req, res) {
 
 async function updateShift(req, res) {
     const { id } = req.params;
-    const { shiftName, shiftStartTime, shiftEndTime, punchInType, punchOutType, allowPunchInHours, allowPunchInMinutes } = req.body;
+    const { shiftName, shiftStartTime, shiftEndTime, punchInType, punchOutType, allowPunchInHours, allowPunchInMinutes, allowPunchOutHours, allowPunchOutMinutes } = req.body;
     try {
         const shift = await prisma.shifts.update({
             where: { id },
@@ -61,7 +63,9 @@ async function updateShift(req, res) {
                 punchInType,
                 punchOutType,
                 allowPunchInHours,
-                allowPunchInMinutes
+                allowPunchInMinutes,
+                allowPunchOutHours,
+                allowPunchOutMinutes
             },
         });
         res.status(200).json(shift);

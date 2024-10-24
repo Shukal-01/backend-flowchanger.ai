@@ -396,6 +396,8 @@ const ShiftSchema = z.object({
     .optional(),
   allowPunchInHours: z.number().optional(),
   allowPunchInMinutes: z.number().optional(),
+  allowPunchOutHours: z.number().optional(),
+  allowPunchOutMinutes: z.number().optional(),
 });
 
 const PunchInSchema = z.object({
