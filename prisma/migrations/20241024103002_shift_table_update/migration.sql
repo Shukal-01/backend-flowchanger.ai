@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "UserType" AS ENUM ('ADMIN', 'STAFF', 'CLIENT');
+
+-- CreateEnum
 CREATE TYPE "MarkAttendenceType" AS ENUM ('Office', 'Anywhere');
 
 -- CreateEnum
@@ -19,16 +22,13 @@ CREATE TYPE "PunchInMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 -- CreateEnum
 CREATE TYPE "PunchOutMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 
--- CreateEnum
-CREATE TYPE "StatusType" AS ENUM ('active', 'inactive');
-
 -- CreateTable
 CREATE TABLE "Admin" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "first_name" TEXT,
     "last_name" TEXT,
-    "mobile" INTEGER,
+    "mobile" TEXT,
     "time_zone" TEXT,
     "time_formate" TEXT,
     "date_formate" TEXT,
@@ -67,6 +67,27 @@ CREATE TABLE "Staff" (
     "emergency_contact_address" TEXT,
 
     CONSTRAINT "Staff_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Message" (
+    "id" TEXT NOT NULL,
+    "conversationId" TEXT NOT NULL,
+    "senderId" TEXT NOT NULL,
+    "senderType" "UserType" NOT NULL,
+    "content" TEXT NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Conversation" (
+    "id" TEXT NOT NULL,
+    "participant1" TEXT NOT NULL,
+    "participant2" TEXT NOT NULL,
+
+    CONSTRAINT "Conversation_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -214,21 +235,13 @@ CREATE TABLE "CustomDetails" (
 );
 
 -- CreateTable
-CREATE TABLE "PanaltyOvertimeDetails" (
-    "id" TEXT NOT NULL,
-    "staffId" TEXT NOT NULL,
-
-    CONSTRAINT "PanaltyOvertimeDetails_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "EarlyLeavePolicy" (
     "id" TEXT NOT NULL,
     "fineType" "FineType" NOT NULL DEFAULT 'HOURLY',
     "gracePeriodMins" INTEGER NOT NULL,
     "fineAmountMins" INTEGER NOT NULL,
     "waiveOffDays" INTEGER NOT NULL,
-    "panaltyOvertimeDetailId" TEXT,
+    "staffId" TEXT,
 
     CONSTRAINT "EarlyLeavePolicy_pkey" PRIMARY KEY ("id")
 );
@@ -240,7 +253,7 @@ CREATE TABLE "LateComingPolicy" (
     "gracePeriodMins" INTEGER NOT NULL,
     "fineAmountMins" INTEGER NOT NULL,
     "waiveOffDays" INTEGER NOT NULL,
-    "panaltyOvertimeDetailId" TEXT,
+    "staffId" TEXT,
 
     CONSTRAINT "LateComingPolicy_pkey" PRIMARY KEY ("id")
 );
@@ -252,7 +265,7 @@ CREATE TABLE "OvertimePolicy" (
     "extraHoursPay" INTEGER NOT NULL,
     "publicHolidayPay" INTEGER NOT NULL,
     "weekOffPay" INTEGER NOT NULL,
-    "panaltyOvertimeDetailId" TEXT,
+    "staffId" TEXT,
 
     CONSTRAINT "OvertimePolicy_pkey" PRIMARY KEY ("id")
 );
@@ -449,12 +462,12 @@ CREATE TABLE "Shifts" (
     "shiftName" TEXT NOT NULL,
     "shiftStartTime" TEXT NOT NULL,
     "shiftEndTime" TEXT NOT NULL,
-    "punchInTime" TEXT NOT NULL,
-    "punchOutTime" TEXT NOT NULL,
     "punchInType" "PunchTime" NOT NULL DEFAULT 'ANYTIME',
     "punchOutType" "PunchTime" NOT NULL DEFAULT 'ANYTIME',
-    "fixedId" TEXT NOT NULL,
-    "flexibleId" TEXT NOT NULL,
+    "allowPunchInHours" INTEGER,
+    "allowPunchInMinutes" INTEGER,
+    "allowPunchOutMinutes" INTEGER,
+    "allowPunchOutHours" INTEGER,
 
     CONSTRAINT "Shifts_pkey" PRIMARY KEY ("id")
 );
@@ -465,6 +478,8 @@ CREATE TABLE "FixedShift" (
     "day" TEXT NOT NULL,
     "weekOff" BOOLEAN NOT NULL,
     "staffId" TEXT,
+    "shiftId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "FixedShift_pkey" PRIMARY KEY ("id")
 );
@@ -472,9 +487,11 @@ CREATE TABLE "FixedShift" (
 -- CreateTable
 CREATE TABLE "FlexibleShift" (
     "id" TEXT NOT NULL,
-    "day" TEXT NOT NULL,
+    "dateTime" TEXT NOT NULL,
     "weekOff" BOOLEAN NOT NULL,
-    "staffId" TEXT NOT NULL,
+    "staffId" TEXT,
+    "shiftId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "FlexibleShift_pkey" PRIMARY KEY ("id")
 );
@@ -642,7 +659,7 @@ CREATE TABLE "Client" (
     "country" TEXT NOT NULL,
     "state" TEXT NOT NULL,
     "city" TEXT NOT NULL,
-    "status" "StatusType" NOT NULL DEFAULT 'inactive',
+    "status" BOOLEAN NOT NULL DEFAULT false,
     "zip_code" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -662,6 +679,9 @@ CREATE TABLE "UpiDetails" (
 CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Conversation_participant1_participant2_key" ON "Conversation"("participant1", "participant2");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "AttendanceAutomationRule_staffId_key" ON "AttendanceAutomationRule"("staffId");
 
 -- CreateIndex
@@ -672,18 +692,6 @@ CREATE UNIQUE INDEX "StaffBackgroundVerification_staffId_key" ON "StaffBackgroun
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BankDetails_staffId_key" ON "BankDetails"("staffId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "PanaltyOvertimeDetails_staffId_key" ON "PanaltyOvertimeDetails"("staffId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "EarlyLeavePolicy_panaltyOvertimeDetailId_key" ON "EarlyLeavePolicy"("panaltyOvertimeDetailId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "LateComingPolicy_panaltyOvertimeDetailId_key" ON "LateComingPolicy"("panaltyOvertimeDetailId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "OvertimePolicy_panaltyOvertimeDetailId_key" ON "OvertimePolicy"("panaltyOvertimeDetailId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Role_role_name_key" ON "Role"("role_name");
@@ -740,6 +748,9 @@ ALTER TABLE "Staff" ADD CONSTRAINT "Staff_departmentId_fkey" FOREIGN KEY ("depar
 ALTER TABLE "Staff" ADD CONSTRAINT "Staff_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_conversationId_fkey" FOREIGN KEY ("conversationId") REFERENCES "Conversation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "AttendanceAutomationRule" ADD CONSTRAINT "AttendanceAutomationRule_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -773,16 +784,13 @@ ALTER TABLE "Verification" ADD CONSTRAINT "Verification_staffId_fkey" FOREIGN KE
 ALTER TABLE "CustomDetails" ADD CONSTRAINT "CustomDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PanaltyOvertimeDetails" ADD CONSTRAINT "PanaltyOvertimeDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EarlyLeavePolicy" ADD CONSTRAINT "EarlyLeavePolicy_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "EarlyLeavePolicy" ADD CONSTRAINT "EarlyLeavePolicy_panaltyOvertimeDetailId_fkey" FOREIGN KEY ("panaltyOvertimeDetailId") REFERENCES "PanaltyOvertimeDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "LateComingPolicy" ADD CONSTRAINT "LateComingPolicy_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LateComingPolicy" ADD CONSTRAINT "LateComingPolicy_panaltyOvertimeDetailId_fkey" FOREIGN KEY ("panaltyOvertimeDetailId") REFERENCES "PanaltyOvertimeDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "OvertimePolicy" ADD CONSTRAINT "OvertimePolicy_panaltyOvertimeDetailId_fkey" FOREIGN KEY ("panaltyOvertimeDetailId") REFERENCES "PanaltyOvertimeDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "OvertimePolicy" ADD CONSTRAINT "OvertimePolicy_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClientsPermissions" ADD CONSTRAINT "ClientsPermissions_permissionsId_fkey" FOREIGN KEY ("permissionsId") REFERENCES "Permissions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -824,16 +832,16 @@ ALTER TABLE "SalaryDetails" ADD CONSTRAINT "SalaryDetails_staffId_fkey" FOREIGN 
 ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_salaryId_fkey" FOREIGN KEY ("salaryId") REFERENCES "SalaryDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Shifts" ADD CONSTRAINT "Shifts_fixedId_fkey" FOREIGN KEY ("fixedId") REFERENCES "FixedShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Shifts" ADD CONSTRAINT "Shifts_flexibleId_fkey" FOREIGN KEY ("flexibleId") REFERENCES "FlexibleShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "FixedShift" ADD CONSTRAINT "FixedShift_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "FixedShift" ADD CONSTRAINT "FixedShift_shiftId_fkey" FOREIGN KEY ("shiftId") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "FlexibleShift" ADD CONSTRAINT "FlexibleShift_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FlexibleShift" ADD CONSTRAINT "FlexibleShift_shiftId_fkey" FOREIGN KEY ("shiftId") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_punchInId_fkey" FOREIGN KEY ("punchInId") REFERENCES "PunchIn"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -65,7 +65,11 @@ async function createTaskStatus(req, res) {
 
 async function getAllTaskStatus(req, res) {
     try {
-        const taskStatus = await prisma.taskStatus.findMany();
+        const taskStatus = await prisma.taskStatus.findMany({
+            include: {
+                TaskDetail: true
+            }
+        });
         res.status(200).json(taskStatus);
     } catch (error) {
         console.log(error);
@@ -100,7 +104,11 @@ async function createTaskPriority(req, res) {
 
 async function getAllTaskPriority(req, res) {
     try {
-        const taskPriority = await prisma.taskPriority.findMany();
+        const taskPriority = await prisma.taskPriority.findMany({
+            include: {
+                TaskDetail: true
+            }
+        });
         res.status(200).json(taskPriority);
     } catch (error) {
         console.log(error);

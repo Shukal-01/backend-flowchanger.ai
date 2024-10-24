@@ -473,16 +473,18 @@ model Deductions {
 }
 
 model Shifts {
-  id                  String          @id @default(uuid())
-  shiftName           String
-  shiftStartTime      String
-  shiftEndTime        String
-  punchInType         PunchTime       @default(ANYTIME)
-  punchOutType        PunchTime       @default(ANYTIME)
-  allowPunchInHours   Int?
-  allowPunchInMinutes Int?
-  FixedShift          FixedShift[]
-  FlexibleShift       FlexibleShift[]
+  id                   String          @id @default(uuid())
+  shiftName            String
+  shiftStartTime       String
+  shiftEndTime         String
+  punchInType          PunchTime       @default(ANYTIME)
+  punchOutType         PunchTime       @default(ANYTIME)
+  allowPunchInHours    Int?
+  allowPunchInMinutes  Int?
+  allowPunchOutMinutes Int?
+  allowPunchOutHours   Int?
+  FixedShift           FixedShift[]
+  FlexibleShift        FlexibleShift[]
 }
 
 enum PunchTime {

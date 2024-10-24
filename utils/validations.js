@@ -201,7 +201,7 @@ const clientSchema = z.object({
   country: z.string().min(2, "Country name is required"),
   state: z.string().min(2, "State name is required"),
   city: z.string().min(1, "City name is required"),
-  status: z.enum(["active", "inactive"]).default("inactive"),
+  status: z.boolean().default(false),
   zip_code: z.string().regex(/^\d{4,10}$/, "ZIP code must be 4 to 10 digits"),
 });
 
@@ -273,9 +273,9 @@ const leaveBalanceSchema = z.object({
 const leaveRequestSchema = z.object({
   staffId: z.string().uuid(),
   leaveTypeId: z.string().uuid(),
-  request_date: z.date().optional().default(new Date()),
-  start_date: z.date(),
-  end_date: z.date(),
+  request_date: z.coerce.date().optional().default(new Date()),
+  start_date: z.coerce.date(),
+  end_date: z.coerce.date(),
   status: z.string().min(1, "Status is required"),
 });
 
@@ -396,6 +396,8 @@ const ShiftSchema = z.object({
     .optional(),
   allowPunchInHours: z.number().optional(),
   allowPunchInMinutes: z.number().optional(),
+  allowPunchOutHours: z.number().optional(),
+  allowPunchOutMinutes: z.number().optional(),
 });
 
 const PunchInSchema = z.object({
