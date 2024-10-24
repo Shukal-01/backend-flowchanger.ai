@@ -3,6 +3,7 @@ const {
   createLeaveRequestSchema,
   updateLeaveRequestSchema,
 } = require("../../../utils/validations");
+const { z } = require("zod");
 const prisma = new PrismaClient();
 
 const getAllLeaveRequests = async (req, res) => {
