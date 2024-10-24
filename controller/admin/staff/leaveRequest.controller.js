@@ -17,18 +17,17 @@ const getAllLeaveRequests = async (req, res) => {
   }
 };
 
-const getLeaveRequestById = async (req, res) => {
+const getLeaveRequestsByStaffId = async (req, res) => {
   const { id } = req.params;
   try {
-    const leaveRequest = await prisma.leaveRequest.findUnique({
-      where: { id },
+    const leaveRequests = await prisma.leaveRequest.findMany({
+      where: { staffId: id },
       include: { staff: true, leavePolicy: true },
     });
-    if (!leaveRequest)
-      return res.status(404).json({ error: "Leave request not found" });
-    res.json(leaveRequest);
+
+    res.json(leaveRequests);
   } catch (error) {
-    res.status(500).json({ error: "Unable to retrieve leave request" });
+    res.status(500).json({ error: "Unable to retrieve leave requests" });
   }
 };
 
@@ -93,7 +92,7 @@ const deleteLeaveRequest = async (req, res) => {
 
 module.exports = {
   getAllLeaveRequests,
-  getLeaveRequestById,
+  getLeaveRequestsByStaffId,
   createLeaveRequest,
   updateLeaveRequest,
   deleteLeaveRequest,
