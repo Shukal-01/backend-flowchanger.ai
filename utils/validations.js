@@ -311,7 +311,7 @@ const EarlyLeavePolicySchema = z.object({
     .number()
     .int({ message: "Waive Off Days must be an integer." })
     .optional(),
-  panaltyOvertimeDetailId: z
+  staffId: z
     .string()
     .min(1, { message: "Staff ID is required." }),
 });
@@ -335,7 +335,7 @@ const LateComingPolicySchema = z.object({
     .number()
     .int({ message: "Waive Off Days must be an integer." })
     .optional(),
-  panaltyOvertimeDetailId: z
+  staffId: z
     .string()
     .min(1, { message: "Staff ID is required." }),
 });
@@ -357,26 +357,23 @@ const OvertimePolicySchema = z.object({
     .number()
     .int({ message: "Week Off Pay must be an integer." })
     .optional(),
-  panaltyOvertimeDetailId: z
+  staffId: z
     .string()
     .min(1, { message: "Staff ID is required." }),
 });
 
 const FlexibleShiftSchema = z.object({
-  // day: z.string().min(1, { message: "Day is required." }),
-  // date: z.string().optional(),
-  weekOff: z.boolean().refine((val) => typeof val === "boolean", {
-    message: "Week Off must be a boolean.",
-  }),
+  dateTime: z.string().min(1, { message: "Day is required." }),
+  weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().optional(),
+  shiftId: z.string().optional(),
 });
 
 const FixedShiftSchema = z.object({
-  // day: z.string().min(1, { message: "Day is required." }),
-  weekOff: z.boolean().refine((val) => typeof val === "boolean", {
-    message: "Week Off must be a boolean.",
-  }),
+  day: z.string().min(1, { message: "Day is required." }),
+  weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().optional(),
+  shiftId: z.string().optional(),
 });
 
 const ShiftSchema = z.object({
@@ -385,22 +382,6 @@ const ShiftSchema = z.object({
     .string(),
   shiftEndTime: z
     .string(),
-  // .regex(
-  //   /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-  //   "Invalid shift end time format (HH:mm)"
-  // ),
-  // punchInTime: z
-  //   .string()
-  //   .regex(
-  //     /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-  //     "Invalid punch in time format (HH:mm)"
-  //   ),
-  // punchOutTime: z
-  //   .string(),
-  // .regex(
-  //   /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-  //   "Invalid punch out time format (HH:mm)"
-  // ),
   punchInType: z
     .string()
     .refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
@@ -413,8 +394,8 @@ const ShiftSchema = z.object({
       message: "PunchOut Type must be either 'ANYTIME' or 'ADDLIMIT'.",
     })
     .optional(),
-  flexibleId: z.string().optional(),
-  fixedId: z.string().optional(),
+  allowPunchInHours: z.number().optional(),
+  allowPunchInMinutes: z.number().optional(),
 });
 
 const PunchInSchema = z.object({
