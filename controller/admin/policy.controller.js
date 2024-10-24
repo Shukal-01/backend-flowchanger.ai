@@ -17,15 +17,15 @@ async function getAllEarlyLeavePolicy(req, res) {
 
 async function createEarlyLeavePolicy(req, res) {
     try {
-        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays, panaltyOvertimeDetailId } = req.body;
+        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays, staffId } = req.body;
 
-        
+
         const earlyLeavePolicyResult = EarlyLeavePolicySchema.safeParse({
             fineType,
             gracePeriodMins,
             fineAmountMins,
             waiveOffDays,
-            panaltyOvertimeDetailId
+            staffId
         });
 
         if (!earlyLeavePolicyResult.success) {
@@ -61,7 +61,7 @@ async function getAllLateComingPolicy(req, res) {
 
 async function createLateComingPolicy(req, res) {
     try {
-        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays, panaltyOvertimeDetailId } = req.body;
+        const { fineType, gracePeriodMins, fineAmountMins, waiveOffDays, staffId } = req.body;
 
 
         const lateComingPolicyResult = LateComingPolicySchema.safeParse({
@@ -69,15 +69,15 @@ async function createLateComingPolicy(req, res) {
             gracePeriodMins,
             fineAmountMins,
             waiveOffDays,
-            panaltyOvertimeDetailId
-        });        
-        
-        
+            staffId
+        });
+
+
         if (!lateComingPolicyResult.success) {
             return res.status(400).json({ error: lateComingPolicyResult.error.format() });
         }
 
-        
+
         const newLateComingPolicy = await prisma.lateComingPolicy.create({
             data: lateComingPolicyResult.data,
         });
@@ -106,18 +106,18 @@ async function getAllOvertimePolicy(req, res) {
 
 async function createOvertimePolicy(req, res) {
     try {
-        const { gracePeriodMins, extraHoursPay, publicHolidayPay, weekOffPay, panaltyOvertimeDetailId } = req.body;
+        const { gracePeriodMins, extraHoursPay, publicHolidayPay, weekOffPay, staffId } = req.body;
 
-        
+
         const overtimePolicyResult = OvertimePolicySchema.safeParse({
             gracePeriodMins,
             extraHoursPay,
             publicHolidayPay,
             weekOffPay,
-            panaltyOvertimeDetailId
-        });        
-        
-        
+            staffId
+        });
+
+
         if (!overtimePolicyResult.success) {
             return res.status(400).json({ error: overtimePolicyResult.error.format() });
         }
