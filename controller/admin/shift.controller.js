@@ -73,7 +73,12 @@ async function updateShift(req, res) {
 
 async function getAllShift(req, res) {
     try {
-        const shifts = await prisma.shifts.findMany();
+        const shifts = await prisma.shifts.findMany({
+            include: {
+                FixedShift: true,
+                FlexibleShift: true
+            }
+        });
         res.status(200).json(shifts);
     } catch (error) {
         console.log(error);

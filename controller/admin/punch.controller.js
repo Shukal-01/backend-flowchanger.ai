@@ -95,7 +95,11 @@ async function getPunchIn(req, res) {
     }
 
     // Fetch the punch-in records from the database
-    const records = await prisma.punchIn.findMany(queryOptions);
+    const records = await prisma.punchIn.findMany(queryOptions, {
+      include: {
+        PunchRecords: true
+      }
+    });
 
     // Convert date strings back to JavaScript Date objects if needed
     const formattedRecords = records.map((record) => ({
@@ -201,7 +205,11 @@ async function getPunchOut(req, res) {
     }
 
     // Fetch the punch-in records from the database
-    const records = await prisma.punchOut.findMany(queryOptions);
+    const records = await prisma.punchOut.findMany(queryOptions, {
+      include: {
+        PunchRecords: true
+      }
+    });
 
     // Convert date strings back to JavaScript Date objects if needed
     const formattedRecords = records.map((record) => ({
