@@ -127,9 +127,9 @@ const updateSpecificClient = async (req, res) => {
         vat_number: vat_number,
         phone: phone,
         website: website,
-        groups: [...findClient.groups, ...groups],
-        currency: [...findClient.currency, ...currency],
-        default_language: [...findClient.default_language, ...default_language],
+        groups: groups,
+        currency: currency,
+        default_language: default_language,
         address: address,
         country: country,
         state: state,
@@ -137,7 +137,7 @@ const updateSpecificClient = async (req, res) => {
         zip_code: zip_code,
       },
     });
-    return res.json({
+    return res.status(200).json({
       status: true,
       data: updatedClient,
       message: "client updated successfully!",
