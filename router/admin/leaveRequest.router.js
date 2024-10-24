@@ -2,14 +2,14 @@ const express = require("express");
 const leaveRequestRouter = express.Router();
 const {
   getAllLeaveRequests,
-  getLeaveRequestById,
+  getLeaveRequestsByStaffId,
   createLeaveRequest,
   updateLeaveRequest,
   deleteLeaveRequest,
 } = require("../../controller/admin/staff/leaveRequest.controller");
 
 leaveRequestRouter.get("/", getAllLeaveRequests);
-leaveRequestRouter.get("/:id", getLeaveRequestById);
+leaveRequestRouter.get("/:id", getLeaveRequestsByStaffId);
 leaveRequestRouter.post("/:id", createLeaveRequest);
 leaveRequestRouter.put("/:id", updateLeaveRequest);
 leaveRequestRouter.delete("/:id", deleteLeaveRequest);

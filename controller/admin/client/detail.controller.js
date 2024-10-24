@@ -163,7 +163,7 @@ const changeStatus = async (req, res) => {
         status: status,
       },
     });
-    return res.json({
+    return res.status(200).json({
       status: true,
       message: "client status updated successfully!",
     });
