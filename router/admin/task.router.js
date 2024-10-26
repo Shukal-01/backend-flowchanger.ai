@@ -6,16 +6,16 @@ const { createTaskStatus, getAllTaskStatus, createTaskPriority, getAllTaskPriori
 // taskRouter.post("/createTaskType", createTaskType);
 // taskRouter.get("/getAllTaskType", getAllTaskType);
 
-taskRouter.post("/createTaskStatus", createTaskStatus);
-taskRouter.get("/getAllTaskStatus", getAllTaskStatus);
+taskRouter.post("/status", createTaskStatus);
+taskRouter.get("/status", getAllTaskStatus);
 
-taskRouter.post("/createTaskPriority", createTaskPriority);
-taskRouter.get("/getAllTaskPriority", getAllTaskPriority);
+taskRouter.post("/priority", createTaskPriority);
+taskRouter.get("/priority", getAllTaskPriority);
 
-taskRouter.post("/createTaskDetail", uploadFile.single('attachFile'), createTaskDetail);
-taskRouter.get("/getAllTaskDetail", getAllTaskDetail);
-taskRouter.delete("/deleteTaskDetail/:id", deleteTaskDetail);
-taskRouter.put("/updateTaskDetail/:id", uploadFile.single('attachFile'), updateTaskDetail);
-taskRouter.get("/getTaskDetailById/:id", getTaskDetailById);
+taskRouter.post("/detail", uploadFile.single('attachFile'), createTaskDetail);
+taskRouter.get("/detail", getAllTaskDetail);
+taskRouter.delete("/detail/:id", deleteTaskDetail);
+taskRouter.put("/detail/:id", uploadFile.single('attachFile'), updateTaskDetail);
+taskRouter.get("/detailById/:id", getTaskDetailById);
 
 module.exports = taskRouter

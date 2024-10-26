@@ -74,8 +74,8 @@ model StaffDetails {
   LeaveRequest             LeaveRequest[]
   FixedShift               FixedShift[]
   FlexibleShift            FlexibleShift[]
-  PunchIn                  PunchIn[]
-  PunchOut                 PunchOut[]
+  // PunchIn                  PunchIn[]
+  // PunchOut                 PunchOut[]
   OverLeavePolicy          OvertimePolicy[]
   EarlyLeavePolicy         EarlyLeavePolicy[]
   LateComingPolicy         LateComingPolicy[]
@@ -520,9 +520,10 @@ model PunchIn {
   biometricData String?
   qrCodeValue   String?
   photoUrl      String?
+  location      String
   PunchRecords  PunchRecords?
-  staffId       String
-  staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  // staffId       String
+  // staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchOutMethod {
@@ -539,9 +540,10 @@ model PunchOut {
   biometricData  String?
   qrCodeValue    String?
   photoUrl       String?
+  location       String
   PunchRecords   PunchRecords?
-  staffId        String
-  staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  // staffId        String
+  // staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 // model TaskType {
@@ -570,7 +572,7 @@ model TaskDetail {
   id               String       @id @default(dbgenerated("gen_random_uuid()"))
   taskName         String
   taskStatusId     String
-  taskTypeId       String
+  // taskTypeId       String
   taskPriorityId   String
   taskPriority     TaskPriority @relation(fields: [taskPriorityId], references: [id], onDelete: Cascade)
   // taskType         TaskType     @relation(fields: [taskTypeId], references: [id], onDelete: Cascade)
