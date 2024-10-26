@@ -6,12 +6,13 @@ const {
   fetchClientInfoSpecificID,
   deleteSpecificClient,
   changeStatus,
+  createClient,
 } = require("../../controller/admin/client/detail.controller");
 
 const clientRouter = Router();
 
 // create a new client
-clientRouter.post("/", addNewClient);
+clientRouter.post("/", createClient);
 
 // Get all Roles
 clientRouter.get("/", fetchAllClients);

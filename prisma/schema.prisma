@@ -8,34 +8,51 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Admin {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  first_name    String?
-  last_name     String?
-  mobile        String?
-  time_zone     String?
-  time_formate  String?
-  date_formate  String?
-  week_formate  String?
+model User {
+  id           String    @id @default(dbgenerated("gen_random_uuid()"))
+  email        String    @unique
+  password     String?
+  name         String?
+  mobile       String?
+  role         UserRole  @default(STAFF)
+  is_verified  Boolean   @default(false)
+  otp          Int?
+  otpExpiresAt DateTime?
+
+  // Relations
+  clientDetails ClientDetails? @relation
+  adminDetails  AdminDetails?  @relation
+  staffDetails  StaffDetails?  @relation
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  CLIENT
+}
+
+model AdminDetails {
+  id            String  @id @default(dbgenerated("gen_random_uuid()"))
+  userId        String  @unique
   package_id    String?
   company_name  String?
   company_logo  String?
   profile_image String?
-  password      String
-  is_verified   Boolean  @default(false)
-  otp           Int
-  otpExpiresAt  DateTime
+  time_format   String?
+  time_zone     String?
+  date_format   String?
+  week_format   String?
+
+  User User @relation(fields: [userId], references: [id])
 }
 
-model Staff {
-  id                         String    @id @default(uuid())
-  name                       String
+model StaffDetails {
+  id                         String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId                     String    @unique
   job_title                  String?
   branch                     String?
   departmentId               String?
   roleId                     String?
-  mobile                     String?
   login_otp                  String?
   gender                     String?
   official_email             String?
@@ -50,7 +67,7 @@ model Staff {
 
   department               Department?                  @relation(fields: [departmentId], references: [id])
   role                     Role?                        @relation(fields: [roleId], references: [id])
-  verifications            Verification[]
+  User                     User                         @relation(fields: [userId], references: [id])
   BankDetails              BankDetails?
   LeavePolicy              LeavePolicy[]
   LeaveBalance             LeaveBalance[]
@@ -73,62 +90,42 @@ model Staff {
   UpiDetails               UpiDetails?
 }
 
-model Message {
-  id             String   @id @default(uuid())
-  conversationId String
-  senderId       String
-  senderType     UserType
-  content        String
-  timestamp      DateTime @default(now())
-
-  conversation Conversation @relation(fields: [conversationId], references: [id])
-}
-
 enum UserType {
   ADMIN
   STAFF
   CLIENT
 }
 
-model Conversation {
-  id           String    @id @default(uuid())
-  participant1 String
-  participant2 String
-  messages     Message[]
-
-  @@unique([participant1, participant2])
-}
-
 model Department {
-  id              String  @id @default(uuid())
+  id              String         @id @default(dbgenerated("gen_random_uuid()"))
   department_name String
-  staffs          Staff[]
+  staffs          StaffDetails[]
 }
 
 model AttendanceAutomationRule {
-  id                  String   @id @default(uuid())
-  auto_absent         Boolean  @default(false)
-  present_on_punch    Boolean  @default(false)
+  id                  String       @id @default(dbgenerated("gen_random_uuid()"))
+  auto_absent         Boolean      @default(false)
+  present_on_punch    Boolean      @default(false)
   auto_half_day       String?
   manadatory_half_day String?
   manadatory_full_day String?
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-  staffId             String   @unique
-  staff               Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  created_at          DateTime     @default(now())
+  updated_at          DateTime     @updatedAt
+  staffId             String       @unique
+  staff               StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model AttendanceMode {
-  id                        String             @id @default(uuid())
+  id                        String             @id @default(dbgenerated("gen_random_uuid()"))
   selfie_attendance         Boolean            @default(false)
   qr_attendance             Boolean            @default(false)
   gps_attendance            Boolean            @default(false)
   mark_attendance           MarkAttendenceType @default(Office)
-  allow_punch_in_for_mobile Boolean            @default(false) // Allows punch-in from mobile devices
+  allow_punch_in_for_mobile Boolean            @default(false)
   created_at                DateTime           @default(now())
   updated_at                DateTime           @updatedAt
   staffId                   String             @unique
-  staff                     Staff              @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff                     StaffDetails       @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum MarkAttendenceType {
@@ -136,34 +133,40 @@ enum MarkAttendenceType {
   Anywhere
 }
 
+enum VerificationStatus {
+  VERIFIED
+  PENDING
+  REJECTED
+}
+
 model StaffBackgroundVerification {
-  id                          String   @id @default(uuid())
+  id                          String             @id @default(dbgenerated("gen_random_uuid()"))
   aadhaar_number              String?
-  aadhaar_verification_status String?  @default("Not Verified")
+  aadhaar_verification_status VerificationStatus @default(PENDING)
   aadhaar_file                String?
   pan_number                  String?
-  pan_verification_status     String?  @default("Not Verified")
+  pan_verification_status     VerificationStatus @default(PENDING)
   pan_file                    String?
   uan_number                  String?
-  uan_verification_status     String?  @default("Not Verified")
+  uan_verification_status     VerificationStatus @default(PENDING)
   uan_file                    String?
   driving_license_number      String?
-  driving_license_status      String?  @default("Not Verified")
+  driving_license_status      VerificationStatus @default(PENDING)
   driving_license_file        String?
   face_file                   String?
-  face_verification_status    String?  @default("Not Verified")
+  face_verification_status    VerificationStatus @default(PENDING)
   current_address             String?
   permanent_address           String?
-  address_status              String?  @default("Not Verified")
+  address_status              VerificationStatus @default(PENDING)
   address_file                String?
-  staff                       Staff?   @relation(fields: [staffId], references: [id])
-  staffId                     String?  @unique
-  createdAt                   DateTime @default(now())
-  updatedAt                   DateTime @updatedAt
+  staff                       StaffDetails?      @relation(fields: [staffId], references: [id])
+  staffId                     String?            @unique
+  createdAt                   DateTime           @default(now())
+  updatedAt                   DateTime           @updatedAt
 }
 
 model BankDetails {
-  id             String   @id @default(uuid())
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
   staffId        String   @unique
   bank_name      String?
   account_number String?
@@ -172,11 +175,11 @@ model BankDetails {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
-  staff Staff @relation(fields: [staffId], references: [id])
+  staff StaffDetails @relation(fields: [staffId], references: [id])
 }
 
 model LeavePolicy {
-  id                   String   @id @default(uuid())
+  id                   String   @id @default(dbgenerated("gen_random_uuid()"))
   staffId              String
   name                 String
   allowed_leaves       Int      @default(0)
@@ -184,13 +187,13 @@ model LeavePolicy {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  staff        Staff          @relation(fields: [staffId], references: [id])
+  staff        StaffDetails   @relation(fields: [staffId], references: [id])
   LeaveBalance LeaveBalance[]
   LeaveRequest LeaveRequest[]
 }
 
 model LeaveBalance {
-  id          String   @id @default(uuid())
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
   staffId     String
   leaveTypeId String
   balance     Int      @default(0)
@@ -198,63 +201,41 @@ model LeaveBalance {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  staff       Staff       @relation(fields: [staffId], references: [id])
-  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id])
+  staff       StaffDetails @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy  @relation(fields: [leaveTypeId], references: [id])
 }
 
 model LeaveRequest {
-  id           String   @id @default(uuid())
+  id           String             @id @default(dbgenerated("gen_random_uuid()"))
   staffId      String
   leaveTypeId  String
-  request_date DateTime @default(now())
+  request_date DateTime           @default(now())
   start_date   DateTime
   end_date     DateTime
-  status       String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  status       LeaveRequestStatus @default(PENDING)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
 
-  staff       Staff       @relation(fields: [staffId], references: [id])
-  leavePolicy LeavePolicy @relation(fields: [leaveTypeId], references: [id])
+  staff       StaffDetails @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy  @relation(fields: [leaveTypeId], references: [id])
 }
 
-model Verification {
-  id          String             @id @default(uuid())
-  staffId     String
-  type        VerificationType
-  status      VerificationStatus
-  documentUrl String?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-
-  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
-}
-
-model CustomDetails {
-  id          String @id @default(uuid())
-  staffId     String
-  field_name  String
-  field_value String
-  staff       Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
-}
-
-enum VerificationType {
-  AADHAAR
-  PAN
-  DRIVING_LICENSE
-  UAN
-  FACE
-  ADDRESS
-  PAST_EMPLOYMENT
-}
-
-enum VerificationStatus {
+enum LeaveRequestStatus {
   PENDING
   APPROVED
   REJECTED
 }
 
+model CustomDetails {
+  id          String       @id @default(dbgenerated("gen_random_uuid()"))
+  staffId     String
+  field_name  String
+  field_value String
+  staff       StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
 // model PanaltyOvertimeDetails {
-//   id      String @id @default(uuid())
+//   id      String @id @default(dbgenerated("gen_random_uuid()"))
 //   staffId String @unique
 
 //   earlyLeavePolicy EarlyLeavePolicy?
@@ -270,49 +251,49 @@ enum FineType {
 }
 
 model EarlyLeavePolicy {
-  id              String   @id @default(uuid())
+  id              String   @id @default(dbgenerated("gen_random_uuid()"))
   fineType        FineType @default(HOURLY)
-  gracePeriodMins Int
-  fineAmountMins  Int
-  waiveOffDays    Int
+  gracePeriodMins Int      @default(0)
+  fineAmountMins  Int      @default(0)
+  waiveOffDays    Int      @default(0)
 
-  staff   Staff?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff   StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId String?
 }
 
 model LateComingPolicy {
-  id              String   @id @default(uuid())
+  id              String   @id @default(dbgenerated("gen_random_uuid()"))
   fineType        FineType @default(HOURLY)
-  gracePeriodMins Int
-  fineAmountMins  Int
-  waiveOffDays    Int
+  gracePeriodMins Int      @default(0)
+  fineAmountMins  Int      @default(0)
+  waiveOffDays    Int      @default(0)
 
-  staff   Staff?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff   StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId String?
 }
 
 model OvertimePolicy {
-  id               String @id @default(uuid())
-  gracePeriodMins  Int
-  extraHoursPay    Int
-  publicHolidayPay Int
-  weekOffPay       Int
+  id               String @id @default(dbgenerated("gen_random_uuid()"))
+  gracePeriodMins  Int    @default(0)
+  extraHoursPay    Int    @default(0)
+  publicHolidayPay Int    @default(0)
+  weekOffPay       Int    @default(0)
 
-  staff   Staff?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff   StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId String?
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  role_name   String       @unique
+  id          String         @id @default(dbgenerated("gen_random_uuid()"))
+  role_name   String         @unique
   permissions Permissions?
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
-  staffs      Staff[]
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  staffs      StaffDetails[]
 }
 
 model ClientsPermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global   Boolean      @default(false)
   create        Boolean      @default(false)
   edit          Boolean      @default(false)
@@ -324,7 +305,7 @@ model ClientsPermissions {
 }
 
 model ProjectsPermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global   Boolean      @default(false)
   create        Boolean      @default(false)
   edit          Boolean      @default(false)
@@ -336,7 +317,7 @@ model ProjectsPermissions {
 }
 
 model ReportPermissions {
-  id               String       @id @default(uuid())
+  id               String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global      Boolean      @default(false)
   view_time_sheets Boolean      @default(false)
   Permissions      Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
@@ -346,7 +327,7 @@ model ReportPermissions {
 }
 
 model StaffRolePermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global   Boolean      @default(false)
   create        Boolean      @default(false)
   edit          Boolean      @default(false)
@@ -358,7 +339,7 @@ model StaffRolePermissions {
 }
 
 model SettingsPermissions {
-  id               String       @id @default(uuid())
+  id               String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global      Boolean      @default(false)
   view_time_sheets Boolean      @default(false)
   Permissions      Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
@@ -368,7 +349,7 @@ model SettingsPermissions {
 }
 
 model StaffPermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global   Boolean      @default(false)
   create        Boolean      @default(false)
   edit          Boolean      @default(false)
@@ -380,7 +361,7 @@ model StaffPermissions {
 }
 
 model TaskPermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global   Boolean      @default(false)
   create        Boolean      @default(false)
   edit          Boolean      @default(false)
@@ -392,7 +373,7 @@ model TaskPermissions {
 }
 
 model SubTaskPermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   view_global   Boolean      @default(false)
   create        Boolean      @default(false)
   edit          Boolean      @default(false)
@@ -404,7 +385,7 @@ model SubTaskPermissions {
 }
 
 model ChatModulePermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   grant_access  Boolean      @default(false)
   Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
   permissionsId String?      @unique
@@ -413,7 +394,7 @@ model ChatModulePermissions {
 }
 
 model AIPermissions {
-  id            String       @id @default(uuid())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
   grant_access  Boolean      @default(false)
   Permissions   Permissions? @relation(fields: [permissionsId], references: [id], onDelete: Cascade)
   permissionsId String?      @unique
@@ -422,7 +403,7 @@ model AIPermissions {
 }
 
 model Permissions {
-  id                      String                 @id @default(uuid())
+  id                      String                 @id @default(dbgenerated("gen_random_uuid()"))
   clients_permissions     ClientsPermissions?
   projects_permissions    ProjectsPermissions?
   report_permissions      ReportPermissions?
@@ -440,7 +421,7 @@ model Permissions {
 }
 
 model SalaryDetails {
-  id                 String       @id @default(uuid())
+  id                 String       @id @default(dbgenerated("gen_random_uuid()"))
   effective_date     DateTime?
   salary_type        String?
   ctc_amount         Float?
@@ -459,11 +440,11 @@ model SalaryDetails {
   updated_at         DateTime?    @updatedAt
   staffId            String
   Deductions         Deductions[]
-  Staff              Staff        @relation(fields: [staffId], references: [id])
+  Staff              StaffDetails @relation(fields: [staffId], references: [id])
 }
 
 model Deductions {
-  id            String         @id @default(uuid())
+  id            String         @id @default(dbgenerated("gen_random_uuid()"))
   salaryId      String?
   heads         String[]
   calculation   String[]
@@ -473,7 +454,7 @@ model Deductions {
 }
 
 model Shifts {
-  id                   String          @id @default(uuid())
+  id                   String          @id @default(dbgenerated("gen_random_uuid()"))
   shiftName            String
   shiftStartTime       String
   shiftEndTime         String
@@ -493,36 +474,36 @@ enum PunchTime {
 }
 
 model FixedShift {
-  id        String   @id @default(uuid())
+  id        String        @id @default(dbgenerated("gen_random_uuid()"))
   day       String
-  weekOff   Boolean
-  staff     Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  weekOff   Boolean       @default(false)
+  staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
   shiftId   String?
-  shift     Shifts?  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  shift     Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
 }
 
 model FlexibleShift {
-  id        String   @id @default(uuid())
+  id        String        @id @default(dbgenerated("gen_random_uuid()"))
   dateTime  String
-  weekOff   Boolean
-  staff     Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  weekOff   Boolean       @default(false)
+  staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
   shiftId   String?
-  shift     Shifts?  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  shift     Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
 }
 
 model PunchRecords {
-  id         String   @id @default(uuid())
-  punchDate  DateTime @default(now())
-  punchInId  String   @unique
-  punchIn    PunchIn  @relation(fields: [punchInId], references: [id], onDelete: Cascade)
-  punchOutId String   @unique
-  punchOut   PunchOut @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  id         String        @id @default(dbgenerated("gen_random_uuid()"))
+  punchDate  DateTime      @default(now())
+  punchInId  String        @unique
+  punchIn    PunchIn       @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId String        @unique
+  punchOut   PunchOut      @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
   staffId    String?
-  staff      Staff?   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff      StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchInMethod {
@@ -532,16 +513,16 @@ enum PunchInMethod {
 }
 
 model PunchIn {
-  id            String        @id @default(uuid())
+  id            String        @id @default(dbgenerated("gen_random_uuid()"))
   punchInMethod PunchInMethod @default(PHOTOCLICK)
   punchInTime   DateTime      @default(now())
   punchInDate   DateTime      @default(now())
-  biometricData String? // Store biometric signature, nullable
-  qrCodeValue   String? // Store QR scan result, nullable
-  photoUrl      String? // Store the URL of the photo taken, nullable
+  biometricData String?
+  qrCodeValue   String?
+  photoUrl      String?
   PunchRecords  PunchRecords?
-  staffId       String // Foreign key to User table
-  staff         Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId       String
+  staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchOutMethod {
@@ -551,42 +532,42 @@ enum PunchOutMethod {
 }
 
 model PunchOut {
-  id             String         @id @default(uuid())
+  id             String         @id @default(dbgenerated("gen_random_uuid()"))
   punchOutMethod PunchOutMethod @default(PHOTOCLICK)
   punchOutTime   DateTime       @default(now())
   punchOutDate   DateTime       @default(now())
-  biometricData  String? // Store biometric signature, nullable
-  qrCodeValue    String? // Store QR scan result, nullable
-  photoUrl       String? // Store the URL of the photo taken, nullable
+  biometricData  String?
+  qrCodeValue    String?
+  photoUrl       String?
   PunchRecords   PunchRecords?
-  staffId        String // Foreign key to User table
-  staff          Staff          @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId        String
+  staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 // model TaskType {
-//   id           String       @id @default(uuid())
+//   id           String       @id @default(dbgenerated("gen_random_uuid()"))
 //   taskTypeName String
 //   TaskDetail   TaskDetail[]
 // }
 
 model TaskStatus {
-  id             String       @id @default(uuid())
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
   taskStatusName String
   TaskDetail     TaskDetail[]
   statusColor    String
-  statusOrder    Int
+  statusOrder    Int          @default(0)
   isHiddenId     String
   canBeChangedId String
 }
 
 model TaskPriority {
-  id               String       @id @default(uuid())
+  id               String       @id @default(dbgenerated("gen_random_uuid()"))
   taskPriorityName String
   TaskDetail       TaskDetail[]
 }
 
 model TaskDetail {
-  id               String       @id @default(uuid())
+  id               String       @id @default(dbgenerated("gen_random_uuid()"))
   taskName         String
   taskStatusId     String
   taskTypeId       String
@@ -605,7 +586,7 @@ model TaskDetail {
 }
 
 model ProjectFiles {
-  id                  String   @id @default(uuid())
+  id                  String   @id @default(dbgenerated("gen_random_uuid()"))
   file_name           String
   file_type           String
   last_activity       String?
@@ -618,27 +599,27 @@ model ProjectFiles {
 }
 
 model Project {
-  id                String              @id @default(uuid())
+  id                String              @id @default(dbgenerated("gen_random_uuid()"))
   project_name      String
   customer          String
   billing_type      String
   status            String
-  total_rate        Int
-  estimated_hours   Int
+  total_rate        Int                 @default(0)
+  estimated_hours   Int                 @default(0)
   start_Date        String
   department        String
   deadline          String
   tags              String[]
   description       String
   clientId          String
-  client            Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client            ClientDetails       @relation(fields: [clientId], references: [id], onDelete: Cascade)
   projectFiles      ProjectFiles[]
   discussion        Discussion[]
   ticketInformation TicketInformation[]
 }
 
 model TicketInformation {
-  id                String   @id @default(uuid())
+  id                String        @id @default(dbgenerated("gen_random_uuid()"))
   subject           String
   contact           String
   name              String
@@ -654,14 +635,14 @@ model TicketInformation {
   insert_link       String
   personal_notes    String
   insert_files      String
-  ticketInformation Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ticketInformation Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId         String?
   staffIdd          String?
-  staff             Staff?   @relation(fields: [staffIdd], references: [id], onDelete: Cascade)
+  staff             StaffDetails? @relation(fields: [staffIdd], references: [id], onDelete: Cascade)
 }
 
 model Discussion {
-  id                  String   @id @default(uuid())
+  id                  String   @id @default(dbgenerated("gen_random_uuid()"))
   subject             String
   discription         String
   last_activity       String
@@ -671,11 +652,11 @@ model Discussion {
   projectId           String?
 }
 
-model Client {
-  id               String    @id @default(uuid())
+model ClientDetails {
+  id               String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId           String    @unique
   company          String
   vat_number       String    @unique
-  phone            String
   website          String?
   groups           String[]
   currency         String[]
@@ -689,10 +670,11 @@ model Client {
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
   Project          Project[]
+  User             User      @relation(fields: [userId], references: [id])
 }
 
 model UpiDetails {
-  UpiId   String @id
-  staffId String @unique
-  staff   Staff  @relation(fields: [staffId], references: [id])
+  UpiId   String       @id
+  staffId String       @unique
+  staff   StaffDetails @relation(fields: [staffId], references: [id])
 }

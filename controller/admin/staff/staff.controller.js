@@ -1,6 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
 const { staffSchema } = require("../../../utils/validations");
-const { ZodError } = require("zod");
 const prisma = new PrismaClient();
 
 const createStaff = async (req, res) => {
@@ -14,7 +13,6 @@ const createStaff = async (req, res) => {
   }
 
   const {
-    name,
     job_title,
     branch,
     departmentId,
@@ -31,31 +29,40 @@ const createStaff = async (req, res) => {
     emergency_contact_mobile,
     emergency_contact_relation,
     emergency_contact_address,
+    name,
   } = validation.data;
-  // console.log(validation)
+
   try {
-    const staff = await prisma.staff.create({
+    const user = await prisma.user.create({
       data: {
         name,
-        job_title,
-        branch,
-        departmentId,
-        roleId,
         mobile,
-        login_otp,
-        gender,
-        official_email,
-        date_of_joining: date_of_joining ? new Date(date_of_joining) : null,
-        date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
-        current_address,
-        permanent_address,
-        emergency_contact_name,
-        emergency_contact_mobile,
-        emergency_contact_relation,
-        emergency_contact_address,
+        role: "STAFF",
+        email: official_email,
+        otp: parseInt(login_otp),
+        staffDetails: {
+          create: {
+            job_title,
+            branch,
+            departmentId,
+            roleId,
+            login_otp,
+            gender,
+            official_email,
+            date_of_joining: date_of_joining ? new Date(date_of_joining) : null,
+            date_of_birth: date_of_birth ? new Date(date_of_birth) : null,
+            current_address,
+            permanent_address,
+            emergency_contact_name,
+            emergency_contact_mobile,
+            emergency_contact_relation,
+            emergency_contact_address,
+          },
+        },
       },
     });
-    res.status(201).json(staff);
+
+    res.status(201).json(user);
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -78,7 +85,6 @@ const updateStaff = async (req, res) => {
   }
 
   const {
-    name,
     job_title,
     branch,
     departmentId,
@@ -95,18 +101,26 @@ const updateStaff = async (req, res) => {
     emergency_contact_mobile,
     emergency_contact_relation,
     emergency_contact_address,
+    name, // Updated field from User model
   } = validation.data;
 
   try {
-    const updatedStaff = await prisma.staff.update({
-      where: { id },
+    // Update user details if necessary
+    await prisma.user.update({
+      where: { id: id }, // Assuming the `id` corresponds to the User model
       data: {
         name,
+        mobile,
+      },
+    });
+
+    const updatedStaff = await prisma.staffDetails.update({
+      where: { userId: id }, // Assuming userId is used to fetch staff
+      data: {
         job_title,
         branch,
         departmentId,
         roleId,
-        mobile,
         login_otp,
         gender,
         official_email,
@@ -131,7 +145,7 @@ const updateStaff = async (req, res) => {
 
 const getAllStaff = async (req, res) => {
   try {
-    const staff = await prisma.staff.findMany({
+    const staff = await prisma.staffDetails.findMany({
       include: {
         department: true,
         role: true,
@@ -141,7 +155,6 @@ const getAllStaff = async (req, res) => {
         LeaveBalance: true,
         FixedShift: true,
         FlexibleShift: true,
-        // panaltyOvertimeDetailId: true,
         LateComingPolicy: true,
         EarlyLeavePolicy: true,
         OverLeavePolicy: true,
@@ -168,8 +181,8 @@ const getStaffById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const staff = await prisma.staff.findUnique({
-      where: { id },
+    const staff = await prisma.staffDetails.findUnique({
+      where: { userId: id }, // Adjusted to use userId
       include: {
         department: true,
         role: true,
@@ -179,7 +192,6 @@ const getStaffById = async (req, res) => {
         LeaveBalance: true,
         FixedShift: true,
         FlexibleShift: true,
-        // panaltyOvertimeDetailId: true,
         LateComingPolicy: true,
         EarlyLeavePolicy: true,
         OverLeavePolicy: true,
@@ -199,7 +211,6 @@ const getStaffById = async (req, res) => {
       res.status(404).json({ error: "Staff member not found" });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       error: "Failed to fetch staff member",
       details: error.message,
@@ -209,9 +220,10 @@ const getStaffById = async (req, res) => {
 
 const deleteStaff = async (req, res) => {
   const { id } = req.params;
+
   try {
-    await prisma.staff.delete({
-      where: { id },
+    await prisma.staffDetails.delete({
+      where: { userId: id }, // Adjusted to use userId
     });
     res.status(204).json({ message: "Staff member disabled" });
   } catch (error) {
