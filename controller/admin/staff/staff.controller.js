@@ -149,7 +149,6 @@ const getAllStaff = async (req, res) => {
       include: {
         department: true,
         role: true,
-        verifications: true,
         BankDetails: true,
         LeavePolicy: true,
         LeaveBalance: true,
