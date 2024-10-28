@@ -157,8 +157,7 @@ const getAllStaff = async (req, res) => {
         LateComingPolicy: true,
         EarlyLeavePolicy: true,
         OverLeavePolicy: true,
-        PunchIn: true,
-        PunchOut: true,
+
         SalaryDetails: true,
         PunchRecords: true,
         attendanceAutomationRule: true,
