@@ -1,6 +1,6 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
-// const { param } = require('../../router/routes');
+const { param } = require("../../router/routes");
 
 const app = express();
 const prisma = new PrismaClient();
@@ -12,9 +12,9 @@ const addOrUpdateSalaryDetails = async (req, res) => {
       effective_date,
       salary_type,
       ctc_amount,
-      basic,
-      hra,
-      dearness_allowance,
+      earnings_heads = [],
+      earnings_calculation = [],
+      earnings_amount = [],
       employer_pf,
       employer_esi,
       employer_lwf,
@@ -43,11 +43,12 @@ const addOrUpdateSalaryDetails = async (req, res) => {
           salary_type: salary_type || existingSalaryDetails.salary_type,
           ctc_amount:
             parseFloat(ctc_amount) || existingSalaryDetails.ctc_amount,
-          basic: parseFloat(basic) || existingSalaryDetails.basic,
-          hra: parseFloat(hra) || existingSalaryDetails.hra,
-          dearness_allowance:
-            parseFloat(dearness_allowance) ||
-            existingSalaryDetails.dearness_allowance,
+          earnings_heads:
+            earnings_heads || existingSalaryDetails.earnings_heads,
+          earnings_calculation:
+            earnings_calculation || existingSalaryDetails.earnings_calculation,
+          earnings_amount:
+            earnings_amount || existingSalaryDetails.earnings_amount,
           employer_pf:
             parseFloat(employer_pf) || existingSalaryDetails.employer_pf,
           employer_esi:
@@ -80,9 +81,9 @@ const addOrUpdateSalaryDetails = async (req, res) => {
           effective_date: formattedEffectiveDate,
           salary_type: salary_type || null,
           ctc_amount: parseFloat(ctc_amount) || null,
-          basic: parseFloat(basic) || null,
-          hra: parseFloat(hra) || null,
-          dearness_allowance: parseFloat(dearness_allowance) || null,
+          earnings_heads: earnings_heads || null,
+          earnings_calculation: earnings_calculation || null,
+          earnings_amount: earnings_amount || null,
           employer_pf: parseFloat(employer_pf) || null,
           employer_esi: parseFloat(employer_esi) || null,
           employer_lwf: parseFloat(employer_lwf) || null,
@@ -124,7 +125,7 @@ const getSalaryDetailsById = async (req, res) => {
     });
     return res
       .status(200)
-      .json({ status: 200, message: "Get Salary Data By ID!", data: getById });
+      .json({ status: 200, message: "Get Salaary Data By ID!", data: getById });
   } catch (error) {
     console.log(error);
     return res
@@ -162,15 +163,17 @@ const getAllSalaryData = async (req, res) => {
   }
 };
 
+// Update Salary Data
+
 const updateSalaryData = async (req, res) => {
   const { id } = req.params;
   const {
     effective_date,
     salary_type,
     ctc_amount,
-    basic,
-    hra,
-    dearness_allowance,
+    earnings_heads = [],
+    earnings_calculation = [],
+    earnings_amount = [],
     employer_pf,
     employer_esi,
     employer_lwf,
@@ -186,18 +189,20 @@ const updateSalaryData = async (req, res) => {
       data: {
         effective_date: new Date(effective_date),
         salary_type,
-        ctc_amount,
-        basic,
-        hra,
-        dearness_allowance,
-        employer_pf,
-        employer_esi,
-        employer_lwf,
-        employee_pf,
-        employee_esi,
-        professional_tax,
-        employee_lwf,
-        tds,
+        ctc_amount: ctc_amount ? parseFloat(ctc_amount) : undefined,
+        earnings_heads,
+        earnings_calculation,
+        earnings_amount,
+        employer_pf: employer_pf ? parseFloat(employer_pf) : undefined,
+        employer_esi: employer_esi ? parseFloat(employer_esi) : undefined,
+        employer_lwf: employer_lwf ? parseFloat(employer_lwf) : undefined,
+        employee_pf: employee_pf ? parseFloat(employee_pf) : undefined,
+        employee_esi: employee_esi ? parseFloat(employee_esi) : undefined,
+        professional_tax: professional_tax
+          ? parseFloat(professional_tax)
+          : undefined,
+        employee_lwf: employee_lwf ? parseFloat(employee_lwf) : undefined,
+        tds: tds ? parseFloat(tds) : undefined,
       },
     });
     return res
