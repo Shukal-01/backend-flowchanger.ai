@@ -88,6 +88,8 @@ model StaffDetails {
   CustomDetails            CustomDetails[]
   TicketInformation        TicketInformation[]
   UpiDetails               UpiDetails?
+  StartBreak               StartBreak[]
+  EndBreak                 EndBreak[]
 }
 
 enum UserType {
@@ -551,6 +553,38 @@ model PunchOut {
 //   taskTypeName String
 //   TaskDetail   TaskDetail[]
 // }
+
+enum BreakMethod {
+  BIOMETRIC
+  QRSCAN
+  PHOTOCLICK
+}
+
+model StartBreak {
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  breakMethod    BreakMethod  @default(PHOTOCLICK)
+  startBreakTime DateTime     @default(now())
+  // startBreakDate DateTime     @default(now())
+  biometricData  String?
+  qrCodeValue    String?
+  photoUrl       String?
+  location       String
+  staffId        String
+  staff          StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model EndBreak {
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  breakMethod   BreakMethod  @default(PHOTOCLICK)
+  endBreakTime  DateTime     @default(now())
+  // endBreakDate  DateTime     @default(now())
+  biometricData String?
+  qrCodeValue   String?
+  photoUrl      String?
+  location      String
+  staffId       String
+  staff         StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
 
 model TaskStatus {
   id             String       @id @default(dbgenerated("gen_random_uuid()"))

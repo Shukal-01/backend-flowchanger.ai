@@ -25,6 +25,7 @@ const taskRouter = require("./admin/task.router");
 const discussionRouter = require("./admin/discussions.router");
 const ticketRouter = require("./admin/ticketInformation.router");
 const upiRouter = require("./admin/upi.router.js");
+const breakRouter = require("./admin/break.router.js");
 
 rootRouter.use("/role", roleRouter);
 rootRouter.use("/attendance", attendanceRouter);
@@ -50,5 +51,6 @@ rootRouter.use("/task", taskRouter);
 rootRouter.use("/discussions", discussionRouter);
 rootRouter.use("/ticket", ticketRouter);
 rootRouter.use("/upi-details", upiRouter);
+rootRouter.use("/break", breakRouter);
 
 module.exports = rootRouter;

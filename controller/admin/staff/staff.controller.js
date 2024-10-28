@@ -165,6 +165,8 @@ const getAllStaff = async (req, res) => {
         AttendenceMode: true,
         staff_bg_verification: true,
         UpiDetails: true,
+        StartBreak: true,
+        EndBreak: true,
       },
     });
     res.status(200).json(staff);
@@ -202,6 +204,8 @@ const getStaffById = async (req, res) => {
         AttendenceMode: true,
         staff_bg_verification: true,
         UpiDetails: true,
+        StartBreak: true,
+        EndBreak: true,
       },
     });
     if (staff) {
