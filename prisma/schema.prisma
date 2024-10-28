@@ -609,8 +609,8 @@ model TaskStatus {
   TaskDetail     TaskDetail[]
   statusColor    String
   statusOrder    Int          @default(0)
-  isHiddenId     String
-  canBeChangedId String
+  isHiddenId     String[]
+  canBeChangedId String[]
 }
 
 model TaskPriority {

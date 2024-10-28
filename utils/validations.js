@@ -474,8 +474,8 @@ const TaskStatusSchema = z.object({
   taskStatusName: z.string().min(1, "Task Status name is required"),
   statusColor: z.string().optional(),
   statusOrder: z.number().min(1, "Status Order is required"),
-  isHiddenId: z.string().min(1, "Is Hidden Id is required"),
-  canBeChangedId: z.string().min(1, "Can Be Changed Id is required"),
+  isHiddenId: z.array(z.string()),  // Define as an array of numbers
+  canBeChangedId: z.array(z.string())
 });
 
 const TaskPrioritySchema = z.object({
