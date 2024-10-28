@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
+const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,8 @@ const matchStaffLoginOTP = async (req, res) => {
     if (!staff) {
       return res.status(404).json({ message: "Staff member not found" });
     }
+    console.log("staff mobile", staff.mobile);
+    console.log("login otp", staff.otp, login_otp);
 
     if (staff.otp === login_otp) {
       const token = jwt.sign({ userId: staff.id }, process.env.JWT_SECRET);
