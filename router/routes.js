@@ -53,6 +53,6 @@ rootRouter.use("/discussions", discussionRouter);
 rootRouter.use("/ticket", ticketRouter);
 rootRouter.use("/upi-details", upiRouter);
 rootRouter.use("/staff-login", loginRouter);
-rootRouter.use("work-entry", workRouter);
+rootRouter.use("/work-entry", workRouter);
 
 module.exports = rootRouter;

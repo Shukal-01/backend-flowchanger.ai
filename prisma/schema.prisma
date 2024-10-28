@@ -30,8 +30,8 @@ model WorkEntry {
   work_name      String
   units          String
   description    String
-  attachments    String
-  location       String
+  attachments    String?
+  location       String?
   staffDetailsId String?
   createdAt      DateTime      @default(now())
   staff          StaffDetails? @relation(fields: [staffDetailsId], references: [id], onDelete: Cascade)
@@ -86,8 +86,6 @@ model StaffDetails {
   LeaveRequest             LeaveRequest[]
   FixedShift               FixedShift[]
   FlexibleShift            FlexibleShift[]
-  // PunchIn                  PunchIn[]
-  // PunchOut                 PunchOut[]
   OverLeavePolicy          OvertimePolicy[]
   EarlyLeavePolicy         EarlyLeavePolicy[]
   LateComingPolicy         LateComingPolicy[]

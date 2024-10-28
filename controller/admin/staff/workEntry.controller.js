@@ -1,7 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const nodemailer = require("nodemailer");
-const upload = require("../../../middleware/upload");
 const prisma = new PrismaClient();
+
+// Add Work Entry Query
 const addWorkEntry = async (req, res) => {
   try {
     const {
@@ -14,17 +15,15 @@ const addWorkEntry = async (req, res) => {
     } = req.body;
     const file_name = req.file ? req.file.originalname : null;
 
-    // Get today's date (set time to midnight)
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set time to 00:00:00
+    today.setHours(0, 0, 0, 0);
 
-    // Check if a work entry already exists for today
     const existingEntry = await prisma.workEntry.findFirst({
       where: {
-        staffLoginId: staffLoginId,
+        staffDetailsId: staffLoginId,
         createdAt: {
-          gte: today, // Greater than or equal to today's date
-          lt: new Date(today.getTime() + 86400000), // Less than tomorrow's date
+          gte: today,
+          lt: new Date(today.getTime() + 86400000),
         },
       },
     });
@@ -36,7 +35,6 @@ const addWorkEntry = async (req, res) => {
       });
     }
 
-    // Create new work entry if no existing entry found for today
     const newWorkEntry = await prisma.workEntry.create({
       data: {
         work_name: work_name,
@@ -44,7 +42,7 @@ const addWorkEntry = async (req, res) => {
         description: description,
         attachments: file_name,
         location: location,
-        staffLoginId: staffLoginId,
+        staffDetailsId: staffLoginId,
       },
     });
 
@@ -67,7 +65,7 @@ const getAllWorkEntry = async (req, res) => {
   try {
     const getAllWorkEntry = await prisma.workEntry.findMany({
       where: {
-        staffLoginId: req.params.id,
+        staffDetailsId: req.params.id,
       },
     });
     return res.status(200).json({
@@ -87,14 +85,14 @@ const getAllWorkEntry = async (req, res) => {
 // update work entry
 const updateWorkEntry = async (req, res) => {
   const { id } = req.params;
-  const { work_name, units, discription, location } = req.body;
+  const { work_name, units, description, location } = req.body;
   try {
     const updateWorkEntry = await prisma.workEntry.update({
       where: { id: id },
       data: {
         work_name: work_name,
         units: units,
-        discription: discription,
+        description: description,
         location: location,
       },
     });
