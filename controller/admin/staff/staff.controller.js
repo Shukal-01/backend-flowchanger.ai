@@ -143,39 +143,52 @@ const updateStaff = async (req, res) => {
   }
 };
 
-const getAllStaff = async (req, res) => {
+async function getAllStaff(req, res) {
   try {
-    const staff = await prisma.staffDetails.findMany({
+    const staffs = await prisma.user.findMany({
+      where: {
+        role: "STAFF",
+      },
       include: {
-        department: true,
-        role: true,
-        BankDetails: true,
-        LeavePolicy: true,
-        LeaveBalance: true,
-        FixedShift: true,
-        FlexibleShift: true,
-        LateComingPolicy: true,
-        EarlyLeavePolicy: true,
-        OverLeavePolicy: true,
-
-        SalaryDetails: true,
-        PunchRecords: true,
-        attendanceAutomationRule: true,
-        AttendenceMode: true,
-        staff_bg_verification: true,
-        UpiDetails: true,
-        StartBreak: true,
-        EndBreak: true,
+        staffDetails: {
+          include: {
+            department: true,
+            role: true,
+            BankDetails: true,
+            LeavePolicy: true,
+            LeaveBalance: true,
+            LeaveRequest: true,
+            FixedShift: true,
+            FlexibleShift: true,
+            OverLeavePolicy: true,
+            EarlyLeavePolicy: true,
+            LateComingPolicy: true,
+            SalaryDetails: true,
+            PunchRecords: true,
+            attendanceAutomationRule: true,
+            AttendenceMode: true,
+            staff_bg_verification: true,
+            CustomDetails: true,
+            TicketInformation: true,
+            UpiDetails: true,
+            WorkEntry: true,
+          },
+        },
       },
     });
-    res.status(200).json(staff);
+
+    if (staffs) {
+      res.status(200).json(staffs);
+    } else {
+      res.status(404).json({ error: "Staff member not found" });
+    }
   } catch (error) {
     res.status(500).json({
       error: "Failed to fetch staff members",
       details: error.message,
     });
   }
-};
+}
 
 const getStaffById = async (req, res) => {
   const { id } = req.params;
