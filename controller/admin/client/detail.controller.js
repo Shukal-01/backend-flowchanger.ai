@@ -68,23 +68,14 @@ const createClient = async (req, res) => {
 
 const fetchAllClients = async (req, res) => {
   try {
-    const clients = await prisma.clientDetails.findMany({
+    const clients = await prisma.user.findMany({
+      where: {
+        role: "CLIENT",
+      },
       include: {
-        user: {
-          select: {
-            email: true,
-            is_verified: true,
-          },
-        },
+        clientDetails: true,
       },
     });
-
-    if (!clients || clients.length === 0) {
-      return res.status(404).json({
-        status: false,
-        message: "No clients found",
-      });
-    }
 
     return res.status(200).json({
       status: true,
