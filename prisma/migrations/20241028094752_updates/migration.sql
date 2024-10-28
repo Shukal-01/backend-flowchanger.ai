@@ -25,6 +25,9 @@ CREATE TYPE "PunchInMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 -- CreateEnum
 CREATE TYPE "PunchOutMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 
+-- CreateEnum
+CREATE TYPE "BreakMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
@@ -38,6 +41,20 @@ CREATE TABLE "User" (
     "otpExpiresAt" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WorkEntry" (
+    "id" TEXT NOT NULL,
+    "work_name" TEXT NOT NULL,
+    "units" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "attachments" TEXT,
+    "location" TEXT,
+    "staffDetailsId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "WorkEntry_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -398,13 +415,13 @@ CREATE TABLE "Permissions" (
 
 -- CreateTable
 CREATE TABLE "SalaryDetails" (
-    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "id" TEXT NOT NULL,
     "effective_date" TIMESTAMP(3),
     "salary_type" TEXT,
     "ctc_amount" DOUBLE PRECISION,
-    "basic" DOUBLE PRECISION,
-    "hra" DOUBLE PRECISION,
-    "dearness_allowance" DOUBLE PRECISION,
+    "earnings_heads" TEXT[],
+    "earnings_calculation" TEXT[],
+    "earnings_amount" TEXT[],
     "employer_pf" DOUBLE PRECISION,
     "employer_esi" DOUBLE PRECISION,
     "employer_lwf" DOUBLE PRECISION,
@@ -492,7 +509,7 @@ CREATE TABLE "PunchIn" (
     "biometricData" TEXT,
     "qrCodeValue" TEXT,
     "photoUrl" TEXT,
-    "staffId" TEXT NOT NULL,
+    "location" TEXT NOT NULL,
 
     CONSTRAINT "PunchIn_pkey" PRIMARY KEY ("id")
 );
@@ -506,9 +523,37 @@ CREATE TABLE "PunchOut" (
     "biometricData" TEXT,
     "qrCodeValue" TEXT,
     "photoUrl" TEXT,
-    "staffId" TEXT NOT NULL,
+    "location" TEXT NOT NULL,
 
     CONSTRAINT "PunchOut_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StartBreak" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "breakMethod" "BreakMethod" NOT NULL DEFAULT 'PHOTOCLICK',
+    "startBreakTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "biometricData" TEXT,
+    "qrCodeValue" TEXT,
+    "photoUrl" TEXT,
+    "location" TEXT NOT NULL,
+    "staffId" TEXT NOT NULL,
+
+    CONSTRAINT "StartBreak_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "EndBreak" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "breakMethod" "BreakMethod" NOT NULL DEFAULT 'PHOTOCLICK',
+    "endBreakTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "biometricData" TEXT,
+    "qrCodeValue" TEXT,
+    "photoUrl" TEXT,
+    "location" TEXT NOT NULL,
+    "staffId" TEXT NOT NULL,
+
+    CONSTRAINT "EndBreak_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -536,7 +581,6 @@ CREATE TABLE "TaskDetail" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "taskName" TEXT NOT NULL,
     "taskStatusId" TEXT NOT NULL,
-    "taskTypeId" TEXT NOT NULL,
     "taskPriorityId" TEXT NOT NULL,
     "startDate" TEXT NOT NULL,
     "endDate" TEXT NOT NULL,
@@ -724,6 +768,9 @@ CREATE UNIQUE INDEX "ClientDetails_vat_number_key" ON "ClientDetails"("vat_numbe
 CREATE UNIQUE INDEX "UpiDetails_staffId_key" ON "UpiDetails"("staffId");
 
 -- AddForeignKey
+ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffDetailsId_fkey" FOREIGN KEY ("staffDetailsId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "AdminDetails" ADD CONSTRAINT "AdminDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -835,10 +882,10 @@ ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_punchOutId_fkey" FOREIGN
 ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PunchIn" ADD CONSTRAINT "PunchIn_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StartBreak" ADD CONSTRAINT "StartBreak_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PunchOut" ADD CONSTRAINT "PunchOut_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "EndBreak" ADD CONSTRAINT "EndBreak_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TaskDetail" ADD CONSTRAINT "TaskDetail_taskPriorityId_fkey" FOREIGN KEY ("taskPriorityId") REFERENCES "TaskPriority"("id") ON DELETE CASCADE ON UPDATE CASCADE;

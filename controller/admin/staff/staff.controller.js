@@ -216,6 +216,8 @@ const getStaffById = async (req, res) => {
         AttendenceMode: true,
         staff_bg_verification: true,
         UpiDetails: true,
+        StartBreak: true,
+        EndBreak: true,
       },
     });
     if (staff) {

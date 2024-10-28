@@ -440,6 +440,35 @@ const PunchRecordsSchema = z.object({
 //   taskTypeName: z.string().min(1, "Task Type name is required"),
 // });
 
+const StartBreakSchema = z.object({
+  breakMethod: z
+    .string()
+    .refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
+      message:
+        "Break Method Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
+    })
+    .optional(),
+  biometricData: z.string().optional(), // Only required for biometric
+  qrCodeValue: z.string().optional(), // Only required for QR scan
+  photoUrl: z.string().optional(), // Required for photo click
+  location: z.string().min(1, { message: "Location is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
+});
+
+const EndBreakSchema = z.object({
+  breakMethod: z
+    .string()
+    .refine((value) => ["BIOMETRIC", "QRSCAN", "PHOTOCLICK"].includes(value), {
+      message:
+        "Break Method Type must be either 'BIOMETRIC', 'QRSCAN' Or 'PHOTOCLICK'.",
+    })
+    .optional(),
+  biometricData: z.string().optional(), // Only required for biometric
+  qrCodeValue: z.string().optional(), // Only required for QR scan
+  photoUrl: z.string().optional(), // Required for photo click
+  location: z.string().min(1, { message: "Location is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
+});
 
 const TaskStatusSchema = z.object({
   taskStatusName: z.string().min(1, "Task Status name is required"),
@@ -538,6 +567,8 @@ module.exports = {
   TaskDetailSchema,
   ticketInformationSchema,
   adminSchema,
+  EndBreakSchema,
+  StartBreakSchema
 };
 
 
