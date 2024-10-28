@@ -93,6 +93,35 @@ const adminSignup = async (req, res) => {
   }
 };
 
+const googleSignup = async (req, res) => {
+  try {
+    const { email, name, mobile } = req.body;
+    if (!email)
+      return res.status(400).json({ message: "Email and password required." });
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser)
+      return res.status(400).json({ message: "Email already exists." });
+
+    const newUser = await prisma.user.create({
+      data: {
+        email,
+        name,
+        mobile,
+        role: "ADMIN",
+        is_verified: true,
+      },
+    });
+
+    res
+      .status(201)
+      .json({ message: "OTP sent to your email for verification." });
+  } catch (error) {
+    console.error("Error in adminSignup:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 const verifyOTP = async (req, res) => {
   try {
     const { otp, email } = req.body;
