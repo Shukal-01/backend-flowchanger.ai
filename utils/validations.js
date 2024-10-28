@@ -411,7 +411,8 @@ const PunchInSchema = z.object({
   biometricData: z.string().optional(), // Only required for biometric
   qrCodeValue: z.string().optional(), // Only required for QR scan
   photoUrl: z.string().optional(), // Required for photo click
-  staffId: z.string().min(1, { message: "Staff ID is required." }),
+  location: z.string().min(1, { message: "Location is required." }),
+  // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const PunchOutSchema = z.object({
@@ -425,7 +426,8 @@ const PunchOutSchema = z.object({
   biometricData: z.string().optional(), // Only required for biometric
   qrCodeValue: z.string().optional(), // Only required for QR scan
   photoUrl: z.string().optional(), // Required for photo click
-  staffId: z.string().min(1, { message: "Staff ID is required." }),
+  location: z.string().min(1, { message: "Location is required." }),
+  // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const PunchRecordsSchema = z.object({
@@ -437,6 +439,7 @@ const PunchRecordsSchema = z.object({
 // const TaskTypeSchema = z.object({
 //   taskTypeName: z.string().min(1, "Task Type name is required"),
 // });
+
 
 const TaskStatusSchema = z.object({
   taskStatusName: z.string().min(1, "Task Status name is required"),
