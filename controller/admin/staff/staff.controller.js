@@ -191,37 +191,40 @@ async function getAllStaff(req, res) {
 }
 
 const getStaffById = async (req, res) => {
-  const { id } = req.params;
-
   try {
-    const staff = await prisma.staffDetails.findUnique({
-      where: { userId: id }, // Adjusted to use userId
+    const staffs = await prisma.user.findMany({
+      where: {
+        id: req.userId,
+      },
       include: {
-        department: true,
-        role: true,
-        verifications: true,
-        BankDetails: true,
-        LeavePolicy: true,
-        LeaveBalance: true,
-        FixedShift: true,
-        FlexibleShift: true,
-        LateComingPolicy: true,
-        EarlyLeavePolicy: true,
-        OverLeavePolicy: true,
-        PunchIn: true,
-        PunchOut: true,
-        SalaryDetails: true,
-        PunchRecords: true,
-        attendanceAutomationRule: true,
-        AttendenceMode: true,
-        staff_bg_verification: true,
-        UpiDetails: true,
-        StartBreak: true,
-        EndBreak: true,
+        staffDetails: {
+          include: {
+            department: true,
+            role: true,
+            BankDetails: true,
+            LeavePolicy: true,
+            LeaveBalance: true,
+            LeaveRequest: true,
+            FixedShift: true,
+            FlexibleShift: true,
+            OverLeavePolicy: true,
+            EarlyLeavePolicy: true,
+            LateComingPolicy: true,
+            SalaryDetails: true,
+            PunchRecords: true,
+            attendanceAutomationRule: true,
+            AttendenceMode: true,
+            staff_bg_verification: true,
+            CustomDetails: true,
+            TicketInformation: true,
+            UpiDetails: true,
+            WorkEntry: true,
+          },
+        },
       },
     });
-    if (staff) {
-      res.status(200).json(staff);
+    if (staffs) {
+      res.status(200).json(staffs);
     } else {
       res.status(404).json({ error: "Staff member not found" });
     }

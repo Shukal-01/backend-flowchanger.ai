@@ -3,14 +3,22 @@ const jwt = require("jsonwebtoken");
 
 const authorizationMiddleware = (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res
+        .status(401)
+        .json({ error: "No token provided or invalid format" });
+    }
+
+    const token = authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : authHeader;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decodedToken.userId;
-    req.userId = userId;
+    req.userId = decodedToken.userId; // Assuming `userId` is in the token payload
     next();
-  } catch {
+  } catch (error) {
     res.status(401).json({
-      error: new Error("Invalid Request!"),
+      error: "Invalid token or authorization failed",
     });
   }
 };

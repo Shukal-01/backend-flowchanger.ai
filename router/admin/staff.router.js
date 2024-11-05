@@ -6,6 +6,7 @@ const {
   updateStaff,
   deleteStaff,
 } = require("../../controller/admin/staff/staff.controller");
+const authorizationMiddleware = require("../../middleware/auth");
 
 const staffRouter = express.Router();
 
@@ -13,7 +14,7 @@ staffRouter.post("/", createStaff);
 
 staffRouter.get("/", getAllStaff);
 
-staffRouter.get("/:id", getStaffById);
+staffRouter.get("/one", authorizationMiddleware, getStaffById);
 
 staffRouter.put("/:id", updateStaff);
 
