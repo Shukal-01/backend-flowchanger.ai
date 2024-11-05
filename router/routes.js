@@ -29,7 +29,7 @@ const breakRouter = require("./admin/break.router.js");
 const projectStatus = require("./admin/projectStatus.router");
 const earningsData = require("./admin/earnings.router");
 const projectPriority = require("./admin/projectPriority.router");
-const deductionsRouter = require("./admin/deductions.router");
+// const deductionsRouter = require("./admin/deductions.router");
 const loginRouter = require("./admin/staffLogin.router.js");
 const workRouter = require("./admin/workEntry.router.js");
 

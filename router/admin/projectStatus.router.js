@@ -4,8 +4,8 @@ const prisma = new PrismaClient();
 const projectStatusRouter = express.Router();
 const projectStatusController = require("../../controller/admin/project/projectStatus.controller.js");
 
-projectStatusRouter.post('/project-status', projectStatusController.projectStatus);
-projectStatusRouter.get('/project-status/:id?', projectStatusController.getProjectStatus);
-projectStatusRouter.put('/project-status/:id', projectStatusController.updateProjectStatus);
+projectStatusRouter.post('/', projectStatusController.projectStatus);
+projectStatusRouter.get('/:id?', projectStatusController.getProjectStatus);
+projectStatusRouter.put('/:id', projectStatusController.updateProjectStatus);
 
 module.exports = projectStatusRouter;
