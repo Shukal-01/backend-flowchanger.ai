@@ -194,7 +194,7 @@ async function getAllStaff(req, res) {
 
 const getStaffById = async (req, res) => {
   try {
-    const staffs = await prisma.user.findMany({
+    const staffs = await prisma.user.findFirst({
       where: {
         id: req.userId,
       },
