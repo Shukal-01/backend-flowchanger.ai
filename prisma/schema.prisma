@@ -101,6 +101,8 @@ model StaffDetails {
   StartBreak               StartBreak[]
   EndBreak                 EndBreak[]
   WorkEntry                WorkEntry[]
+  Deduction                Deductions[]
+  Earning                  Earnings[]
 }
 
 enum UserType {
@@ -452,7 +454,6 @@ model SalaryDetails {
   created_at           DateTime?    @default(now())
   updated_at           DateTime?    @updatedAt
   staffId              String
-  Deductions           Deductions[]
   Staff                StaffDetails @relation(fields: [staffId], references: [id])
 }
 
@@ -461,16 +462,6 @@ model SalaryDetails {
 //  calucation:"lkdjjafljd"
 //  amount:500
 //}
-
-model Deductions {
-  id            String         @id @default(dbgenerated("gen_random_uuid()"))
-  salaryId      String?
-  heads         String[]
-  calculation   String[]
-  amount        Float[]
-  SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
-  updated_at    DateTime       @updatedAt
-}
 
 model Shifts {
   id                   String          @id @default(dbgenerated("gen_random_uuid()"))
@@ -730,4 +721,47 @@ model UpiDetails {
   UpiId   String       @id
   staffId String       @unique
   staff   StaffDetails @relation(fields: [staffId], references: [id])
+}
+
+model ProjectStatus {
+  id             String   @id @default(uuid())
+  project_name   String
+  project_color  String
+  project_order  String
+  default_filter Boolean  @default(false)
+  can_changed    String[]
+}
+
+model ProjectPriority {
+  id             String   @id @default(uuid())
+  Priority_name  String
+  Priority_color String
+  Priority_order String
+  default_filter Boolean  @default(false)
+  is_hidden      String[]
+  can_changed    String[]
+}
+
+model Deductions {
+  id              String        @id @default(dbgenerated("gen_random_uuid()"))
+  heads           String?
+  calculation     String?
+  amount          Float?
+  deduction_month String?
+  staffId         String?
+  staff           StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  // SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
+  salaryDetailsId String?
+}
+
+model Earnings {
+  id           String        @id @default(dbgenerated("gen_random_uuid()"))
+  heads        String?
+  calculation  String?
+  amount       Float?
+  salaryId     String?
+  staffId      String?
+  salary_month String?
+  staff        StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  // SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
 }

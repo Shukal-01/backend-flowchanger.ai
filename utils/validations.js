@@ -475,7 +475,7 @@ const TaskStatusSchema = z.object({
   statusColor: z.string().optional(),
   statusOrder: z.number().min(1, "Status Order is required"),
   isHiddenId: z.array(z.string()),  // Define as an array of numbers
-  canBeChangedId: z.array(z.string())
+  canBeChangedId: z.array(z.string()).optional()
 });
 
 const TaskPrioritySchema = z.object({
@@ -570,9 +570,4 @@ module.exports = {
   EndBreakSchema,
   StartBreakSchema
 };
-
-
-
-
-
 

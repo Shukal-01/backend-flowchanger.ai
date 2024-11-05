@@ -172,6 +172,8 @@ async function getAllStaff(req, res) {
             TicketInformation: true,
             UpiDetails: true,
             WorkEntry: true,
+            Earning: true,
+            Deduction: true,
           },
         },
       },
@@ -218,6 +220,8 @@ const getStaffById = async (req, res) => {
         UpiDetails: true,
         StartBreak: true,
         EndBreak: true,
+        Earning: true,
+        Deduction: true,
       },
     });
     if (staff) {
