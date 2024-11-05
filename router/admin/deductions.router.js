@@ -5,11 +5,8 @@ const deductionsController = require("../../controller/admin/salaryDetails.contr
 
 
 // deduction
-deductionsRouter.post('/', deductionsController.deductions)
-deductionsRouter.get('/', deductionsController.getAllDeductions)
-deductionsRouter.get('/:id', deductionsController.getDeductionsById)
-deductionsRouter.put('/:id', deductionsController.updateDeductions)
-deductionsRouter.delete('/:id', deductionsController.deleteDeductions)
+deductionsRouter.post('/create', deductionsController.deductions)
+deductionsRouter.put('/update', deductionsController.updateDeductions)
 
 
 module.exports = deductionsRouter;

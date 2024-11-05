@@ -35,6 +35,7 @@ const createClient = async (req, res) => {
         role: "CLIENT",
         is_verified: false,
         mobile: phone,
+        name: req.body.name,
 
         clientDetails: {
           create: {

@@ -534,6 +534,53 @@ const adminSchema = z.object({
     .optional(),
 });
 
+const projectStatusSchema = z.object({
+  project_name: z.string().min(1, "Project Name is required"),
+  project_color: z.string().min(1, "Project Color is required"),
+  project_order: z.string().min(1, "Project Order is required"),
+  default_filter: z.boolean().optional(), // Optional field
+  can_changed: z.array(z.string()).min(1, "Select at least one option for Can Changed"),
+});
+
+// project Priority Schema
+const projectPrioritySchema = z.object({
+  priority_name: z.string().min(1, "Priority Name is required"),
+  priority_color: z.string().min(1, "Priority Color is required"),
+  priority_order: z.string().min(1, "Priority Order is required"),
+  default_filter: z.boolean().optional(),
+  is_hidden: z.array(z.string()).min(1, "Select at least one option for Is Hidden"),
+  can_changed: z.array(z.string()).min(1, "Select at least one option for Can Changed"),
+})
+
+const salaryDetailsSchema = z.object({
+  effective_date: z.coerce.date().refine((date) => !isNaN(date.getTime()), {
+    message: "Effective date is required",
+  }),
+  salary_type: z
+    .string()
+    .optional()
+    .refine((type) => type === null || type.trim() !== "", {
+      message: "Salary type is a required field",
+    }),
+  ctc_amount: z.number().optional(),
+  employer_pf: z.number().optional(),
+  employer_esi: z.number().optional(),
+  employer_lwf: z.number().optional(),
+  employee_pf: z.number().optional(),
+  employee_esi: z.number().optional(),
+  professional_tax: z.number().optional(),
+  employee_lwf: z.number().optional(),
+  tds: z.number().optional(),
+  staffId: z.string().uuid(),
+});
+
+// Deductions Schema
+const deductionsEarningsSchema = z.object({
+  staffId: z.string().uuid("Invalid Staff ID format").optional(),
+  heads: z.string().min(1, "Head Name is required").optional(),
+  amount: z.number().optional(),
+  calculation: z.string().min(1, "Calculation is required").optional(),
+});
 
 
 module.exports = {
@@ -568,6 +615,10 @@ module.exports = {
   ticketInformationSchema,
   adminSchema,
   EndBreakSchema,
-  StartBreakSchema
+  StartBreakSchema,
+  projectStatusSchema,
+  projectPrioritySchema,
+  salaryDetailsSchema,
+  deductionsEarningsSchema
 };
 

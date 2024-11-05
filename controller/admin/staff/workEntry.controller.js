@@ -6,13 +6,17 @@ const prisma = new PrismaClient();
 const addWorkEntry = async (req, res) => {
   try {
     const {
-      staffLoginId,
       work_name,
       units,
       attachments,
       description,
       location,
     } = req.body;
+    const userId = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    })
     const file_name = req.file ? req.file.originalname : null;
 
     const today = new Date();
@@ -20,7 +24,7 @@ const addWorkEntry = async (req, res) => {
 
     const existingEntry = await prisma.workEntry.findFirst({
       where: {
-        staffDetailsId: staffLoginId,
+        staffDetailsId: userId.staffDetails.id,
         createdAt: {
           gte: today,
           lt: new Date(today.getTime() + 86400000),

@@ -95,6 +95,49 @@ async function getAllTaskStatus(req, res) {
   }
 }
 
+async function updateTaskStatus(req, res) {
+  try {
+    const { id } = req.params; // Assuming the ID of the task status is passed in the URL
+    const {
+      taskStatusName,
+      statusColor,
+      statusOrder,
+      isHiddenId,
+      canBeChangedId,
+    } = req.body;
+
+    // Validate the incoming data using TaskStatusSchema
+    const TaskStatusResult = TaskStatusSchema.safeParse({
+      taskStatusName,
+      statusColor,
+      statusOrder,
+      isHiddenId,
+      canBeChangedId,
+    });
+
+    if (!TaskStatusResult.success) {
+      return res
+        .status(400)
+        .json({ message: TaskStatusResult.error.issues[0].message });
+    }
+
+    // Update the task status in the database
+    const updatedTaskStatus = await prisma.taskStatus.update({
+      where: { id: Number(id) }, // Convert ID to a number if necessary
+      data: TaskStatusResult.data,
+    });
+
+    res.status(200).json(updatedTaskStatus);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(400).json({ error: "Invalid request data" });
+    } else {
+      console.log(error);
+      res.status(500).json({ error: "Failed to update task status" });
+    }
+  }
+}
+
 async function createTaskPriority(req, res) {
   try {
     const { taskPriorityName } = req.body;
@@ -135,6 +178,39 @@ async function getAllTaskPriority(req, res) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to fetch task priority" });
+  }
+}
+
+async function updateTaskPriority(req, res) {
+  try {
+    const { id } = req.params; // Assuming the ID of the task priority is passed in the URL
+    const { taskPriorityName } = req.body;  // Assuming the name of the task priority is passed in the request body
+
+    // Validate the incoming data using TaskPrioritySchema
+    const taskPriorityResult = TaskPrioritySchema.safeParse({
+      taskPriorityName,
+    });
+
+    if (!taskPriorityResult.success) {
+      return res
+        .status(400)
+        .json({ message: taskPriorityResult.error.issues[0].message });
+    }
+
+    // Update the task priority in the database
+    const updatedTaskPriority = await prisma.taskPriority.update({
+      where: { id: Number(id) }, // Convert ID to a number if necessary
+      data: taskPriorityResult.data,
+    });
+
+    res.status(200).json(updatedTaskPriority);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(400).json({ error: "Invalid request data" });
+    } else {
+      console.log(error);
+      res.status(500).json({ error: "Failed to update task priority" });
+    }
   }
 }
 
@@ -328,4 +404,6 @@ module.exports = {
   deleteTaskDetail,
   updateTaskDetail,
   getTaskDetailById,
+  updateTaskStatus,
+  updateTaskPriority,
 };

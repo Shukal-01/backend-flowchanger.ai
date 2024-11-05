@@ -1,20 +1,30 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { param } = require("../../router/routes");
-
+const { ZodError } = require("zod");
+const { salaryDetailsSchema, deductionsEarningsSchema } = require("../../utils/validations.js");
 const app = express();
 const prisma = new PrismaClient();
 
 app.use(express.json());
+
+
 const addOrUpdateSalaryDetails = async (req, res) => {
   try {
+    // Validate request data
+    const validation = salaryDetailsSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation error",
+        errors: validation.error.errors,
+      });
+    }
+
     const {
       effective_date,
       salary_type,
       ctc_amount,
-      earnings_heads = [],
-      earnings_calculation = [],
-      earnings_amount = [],
       employer_pf,
       employer_esi,
       employer_lwf,
@@ -24,7 +34,7 @@ const addOrUpdateSalaryDetails = async (req, res) => {
       tds,
       employee_lwf,
       staffId,
-    } = req.body;
+    } = validation.data;
 
     const formattedEffectiveDate = new Date(effective_date);
 
@@ -35,55 +45,62 @@ const addOrUpdateSalaryDetails = async (req, res) => {
         effective_date: formattedEffectiveDate,
       },
     });
+
+    const staffEarningsData = await prisma.staff.findMany({
+      where: { id: staffId },
+      include: { Earnings: true, deductions: true },
+    });
+
+    let deductionsDetails = [];
+    let earningsDetails = [];
+
+    if (staffEarningsData?.Earnings?.length > 0 || staffEarningsData?.deductions?.length > 0) {
+      earningsDetails = staffEarningsData.Earnings.map((earning) => ({
+        id: earning.id,
+        heads: earning.heads,
+        calculation: earning.calculation,
+        amount: earning.amount,
+      }));
+
+      deductionsDetails = staffEarningsData.deductions.map((deduction) => ({
+        id: deduction.id,
+        heads: deduction.heads,
+        calculation: deduction.calculation,
+        amount: deduction.amount,
+      }));
+    }
+
     if (existingSalaryDetails) {
       // Update the existing record for the same effective date
       const updatedSalaryDetails = await prisma.salaryDetails.update({
         where: { id: existingSalaryDetails.id },
         data: {
           salary_type: salary_type || existingSalaryDetails.salary_type,
-          ctc_amount:
-            parseFloat(ctc_amount) || existingSalaryDetails.ctc_amount,
-          earnings_heads:
-            earnings_heads || existingSalaryDetails.earnings_heads,
-          earnings_calculation:
-            earnings_calculation || existingSalaryDetails.earnings_calculation,
-          earnings_amount:
-            earnings_amount || existingSalaryDetails.earnings_amount,
-          employer_pf:
-            parseFloat(employer_pf) || existingSalaryDetails.employer_pf,
-          employer_esi:
-            parseFloat(employer_esi) || existingSalaryDetails.employer_esi,
-          employer_lwf:
-            parseFloat(employer_lwf) || existingSalaryDetails.employer_lwf,
-          employee_pf:
-            parseFloat(employee_pf) || existingSalaryDetails.employee_pf,
-          employee_esi:
-            parseFloat(employee_esi) || existingSalaryDetails.employee_esi,
-          professional_tax:
-            parseFloat(professional_tax) ||
-            existingSalaryDetails.professional_tax,
-          employee_lwf:
-            parseFloat(employee_lwf) || existingSalaryDetails.employee_lwf,
+          ctc_amount: parseFloat(ctc_amount) || existingSalaryDetails.ctc_amount,
+          employer_pf: parseFloat(employer_pf) || existingSalaryDetails.employer_pf,
+          employer_esi: parseFloat(employer_esi) || existingSalaryDetails.employer_esi,
+          employer_lwf: parseFloat(employer_lwf) || existingSalaryDetails.employer_lwf,
+          employee_pf: parseFloat(employee_pf) || existingSalaryDetails.employee_pf,
+          employee_esi: parseFloat(employee_esi) || existingSalaryDetails.employee_esi,
+          professional_tax: parseFloat(professional_tax) || existingSalaryDetails.professional_tax,
+          employee_lwf: parseFloat(employee_lwf) || existingSalaryDetails.employee_lwf,
           tds: parseFloat(tds) || existingSalaryDetails.tds,
+          earnings: { create: earningsDetails },
+          deductions: { create: deductionsDetails },
         },
       });
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "Salary details updated successfully",
-          data: updatedSalaryDetails,
-        });
+      res.status(200).json({
+        success: true,
+        message: "Salary details updated successfully",
+        data: updatedSalaryDetails,
+      });
     } else {
       // Create a new record if the effective date has changed
       const newSalaryDetails = await prisma.salaryDetails.create({
         data: {
-          effective_date: formattedEffectiveDate,
-          salary_type: salary_type || null,
-          ctc_amount: parseFloat(ctc_amount) || null,
-          earnings_heads: earnings_heads || null,
-          earnings_calculation: earnings_calculation || null,
-          earnings_amount: earnings_amount || null,
+          effective_date: validation.data.effective_date,
+          salary_type: validation.data.salary_type || null,
+          ctc_amount: parseFloat(validation.data.ctc_amount) || null,
           employer_pf: parseFloat(employer_pf) || null,
           employer_esi: parseFloat(employer_esi) || null,
           employer_lwf: parseFloat(employer_lwf) || null,
@@ -93,27 +110,26 @@ const addOrUpdateSalaryDetails = async (req, res) => {
           employee_lwf: parseFloat(employee_lwf) || null,
           tds: parseFloat(tds) || null,
           staffId: staffId,
+          earnings: { create: earningsDetails },
+          deductions: { create: deductionsDetails },
         },
       });
-      res
-        .status(201)
-        .json({
-          success: true,
-          message: "Salary details added successfully",
-          data: newSalaryDetails,
-        });
+      res.status(201).json({
+        success: true,
+        message: "Salary details added successfully",
+        data: newSalaryDetails,
+      });
     }
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error adding or updating salary details",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error adding or updating salary details",
+      error: error.message,
+    });
   }
 };
+
 
 // Salary Data Fetch By Id:
 
@@ -122,6 +138,10 @@ const getSalaryDetailsById = async (req, res) => {
   try {
     const getById = await prisma.salaryDetails.findUnique({
       where: { id },
+      include: {
+        earnings: true,
+        deductions: true,
+      },
     });
     return res
       .status(200)
@@ -138,42 +158,61 @@ const getSalaryDetailsById = async (req, res) => {
 
 const getAllSalaryData = async (req, res) => {
   try {
-    const salaryData = await prisma.salaryDetails.findMany({});
+    const earningData = await prisma.earnings.findMany();
+    const deductionData = await prisma.deductions.findMany();
+    const salaryData = await prisma.salaryDetails.findMany();
+
+    // Check if there is any salary data
     if (salaryData.length === 0) {
-      return res
-        .status(404)
-        .json({ status: 404, message: "No salary data found.", data: [] });
+      return res.status(404).json({
+        status: 404,
+        message: "No salary data found.",
+        data: [],
+      });
     }
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: "Successfully retrieved all salary data.",
-        data: salaryData,
-      });
+
+    // Merging salary data with related earnings and deductions based on staffId
+    const mergedData = salaryData.map((salary) => {
+      const earnings = earningData.filter(
+        (earning) => earning.staffId === salary.staffId
+      );
+      const deductions = deductionData.filter(
+        (deduction) => deduction.staffId === salary.staffId
+      );
+      return {
+        ...salary,
+        earnings: earnings.length > 0 ? earnings : null,
+        deductions: deductions.length > 0 ? deductions : null,
+      };
+    });
+
+    // Send the merged data as the response
+    return res.status(200).json({
+      status: 200,
+      message: "Successfully retrieved all salary data with related earnings and deductions.",
+      data: mergedData,
+    });
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({
-        status: 500,
-        message: "An error occurred while fetching salary data.",
-        error: error.message,
-      });
+    console.log("Error:", error);
+    return res.status(500).json({
+      status: 500,
+      message: "An error occurred while fetching salary data.",
+      error: error.message,
+    });
   }
 };
+
+
 
 // Update Salary Data
 
 const updateSalaryData = async (req, res) => {
   const { id } = req.params;
+
   const {
     effective_date,
     salary_type,
     ctc_amount,
-    earnings_heads = [],
-    earnings_calculation = [],
-    earnings_amount = [],
     employer_pf,
     employer_esi,
     employer_lwf,
@@ -182,66 +221,144 @@ const updateSalaryData = async (req, res) => {
     professional_tax,
     employee_lwf,
     tds,
+    earnings // Array of earnings objects
   } = req.body;
+
   try {
-    const update = await prisma.salaryDetails.update({
+    // Update the salary details
+    const updatedSalaryDetails = await prisma.salaryDetails.update({
       where: { id },
       data: {
         effective_date: new Date(effective_date),
         salary_type,
         ctc_amount: ctc_amount ? parseFloat(ctc_amount) : undefined,
-        earnings_heads,
-        earnings_calculation,
-        earnings_amount,
         employer_pf: employer_pf ? parseFloat(employer_pf) : undefined,
         employer_esi: employer_esi ? parseFloat(employer_esi) : undefined,
         employer_lwf: employer_lwf ? parseFloat(employer_lwf) : undefined,
         employee_pf: employee_pf ? parseFloat(employee_pf) : undefined,
         employee_esi: employee_esi ? parseFloat(employee_esi) : undefined,
-        professional_tax: professional_tax
-          ? parseFloat(professional_tax)
-          : undefined,
+        professional_tax: professional_tax ? parseFloat(professional_tax) : undefined,
         employee_lwf: employee_lwf ? parseFloat(employee_lwf) : undefined,
         tds: tds ? parseFloat(tds) : undefined,
       },
     });
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: "Salary Data Succesfully Updated!",
-        data: update,
-      });
+    const staffId = updatedSalaryDetails.staffId;
+    // console.log(staffId);
+    // Update or create earnings details
+    await Promise.all(
+      deductions.map(async (deduction) => {
+        if (deduction.id) {
+          await prisma.deductions.update({
+            where: { id: deduction.id }, // Update by deduction ID
+            data: {
+              heads: deduction.heads,
+              calculation: deduction.calculation,
+              amount: deduction.amount !== null ? parseFloat(deduction.amount) : null,
+            },
+          });
+        } else {
+          // If there is no ID, create a new deductions entry
+          await prisma.deductions.create({
+            data: {
+              heads: deduction.heads,
+              calculation: deduction.calculation,
+              amount: deduction.amount !== null ? parseFloat(deduction.amount) : null,
+              salaryId: id,
+              staffId: staffId,
+            },
+          });
+        }
+      })
+    )
+    await Promise.all(
+      earnings.map(async (earning) => {
+        if (earning.id) {
+          await prisma.earnings.update({
+            where: { id: earning.id }, // Update by earning ID
+            data: {
+              heads: earning.heads,
+              calculation: earning.calculation,
+              amount: earning.amount !== null ? parseFloat(earning.amount) : null,
+            },
+          });
+        } else {
+          // If there is no ID, create a new earnings entry
+          await prisma.earnings.create({
+            data: {
+              heads: earning.heads,
+              calculation: earning.calculation,
+              amount: earning.amount !== null ? parseFloat(earning.amount) : null,
+              salaryId: id,
+              staffId: staffId
+            },
+          });
+        }
+      })
+    );
+
+    return res.json({
+      status: 200,
+      message: "Salary Data Successfully Updated!",
+      data: { updatedSalaryDetails },
+    });
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "This Data (" + id + ") ID Not Found!" });
+    console.error("Error updating salary data:", error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error updating salary data",
+      error: error.message,
+    });
   }
 };
+
+
 
 // Delete Salary Data Record By ID
 
 const deleteSalaryRecord = async (req, res) => {
   const { id } = req.params;
+
   try {
+    // First, retrieve the salary record to get the associated staffId
+    const salaryRecord = await prisma.salaryDetails.findUnique({
+      where: { id },
+      select: { staffId: true }
+    });
+    if (!salaryRecord) {
+      return res.status(404).json({
+        status: 404,
+        message: "Salary Record Not Found!",
+      });
+    }
+
+    // Delete related earnings based on staffId
+    await prisma.earnings.deleteMany({
+      where: { staffId: salaryRecord.staffId },
+    });
+
+    // Delete related deductions based on staffId
+    await prisma.deductions.deleteMany({
+      where: { staffId: salaryRecord.staffId },
+    });
+    // Now delete the salary record
     const deleteRecord = await prisma.salaryDetails.delete({
       where: { id },
     });
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: "Salary Record Deleted Successfully!",
-        data: deleteRecord,
-      });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Salary Record Deleted Successfully!",
+      data: deleteRecord,
+    });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "This Data (" + id + ") ID Not Found!" });
+      .json({ status: 500, message: "Error deleting record: " + error.message });
   }
 };
+
+
 
 // ------------------------------
 // Deductions API
@@ -249,126 +366,170 @@ const deleteSalaryRecord = async (req, res) => {
 
 const deductions = async (req, res) => {
   try {
-    // Destructure headers, calculation, and amount from req.body
-    const { heads, calculation, amount } = req.body;
-    const addDeductions = await prisma.deductions.create({
-      data: {
-        heads,
-        calculation,
-        amount,
-      },
-    });
-
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Deductions added successfully",
-        data: addDeductions,
-      });
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({
+    const validation = deductionsEarningsSchema.safeParse(req.body);
+    if (validation.error) {
+      return res.status(400).json({
         success: false,
-        message: "Error adding deductions",
-        error: error.message,
-      });
-  }
-};
-
-// Get All Deductions Data
-
-const getAllDeductions = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const getDeductions = await prisma.deductions.findMany({});
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: "Get All Deductions!",
-        data: getDeductions,
-      });
+        message: validation.error.details[0].message
+      })
+    }
+    const { staffId, heads } = validation.data;
+    if (!staffId || !heads) {
+      return res.status(400).json({ success: false, message: "Staff ID and heads are required." });
+    }
+    const deductionData = await prisma.deductions.create({
+      data: {
+        staffId: validation.data.staffId,
+        heads: validation.data.heads
+      }
+    })
+    return res.status(201).json({
+      status: 201,
+      message: "Deduction created successfully.",
+      data: deductionData,
+    })
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "Deduction Not Found This Id (" + id });
-  }
-};
-
-// Get Deductions By Id
-
-const getDeductionsById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const getDeductionsById = await prisma.deductions.findUnique({
-      where: { id },
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error creating deductions.",
+      error: error.message,
     });
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: "Get Deductions By ID",
-        data: getDeductionsById,
-      });
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "Deductions Not Found" });
   }
-};
-
-// Update Deductions By ID
+}
 
 const updateDeductions = async (req, res) => {
-  const { heads, calculation, amount } = req.body;
-  const { id } = req.params;
   try {
-    const update = await prisma.deductions.update({
-      where: { id },
+    const validation = deductionsEarningsSchema.safeParse(req.body);
+    if (validation.error) {
+      return res.status(400).json({
+        success: false,
+        message: validation.error.details[0].message
+      })
+    }
+    const { headId, calculation, amount } = req.body;
+    // Validate input
+    if (!headId || !calculation || amount === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Head ID, calculation, and amount are required.",
+      });
+    }
+
+    // Update the existing head entry with new calculation and amount
+    const updatedHead = await prisma.deductions.update({
+      where: { id: headId }, // Find by headId
       data: {
-        heads,
-        calculation,
-        amount,
+        calculation: validation.data.calculation,
+        amount: parseFloat(validation.data.amount),
+        deduction_month: String(new Date()),
       },
     });
-    return res
-      .status(200)
-      .json({ status: 200, message: "Deductions Successfully Updated!" });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Head updated successfully.",
+      data: updatedHead,
+    });
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "Deductions Not Found (" + id });
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error updating head.",
+      error: error.message,
+    });
   }
 };
 
-const deleteDeductions = async (req, res) => {
-  const { id } = req.params;
+// Earnings Head Create API
+
+const createEarningHead = async (req, res) => {
   try {
-    const deletedData = await prisma.deductions.delete({
-      where: { id },
+    const validation = deductionsEarningsSchema.safeParse(req.body);
+    if (validation.error) {
+      return res.status(400).json({
+        success: false,
+        message: validation.error.details[0].message
+      })
+    }
+    // const { salaryId, heads } = req.body;
+    const { staffId, heads } = req.body;
+
+    // Validate input
+    if (!staffId || !heads) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Salary ID and heads are required." });
+    }
+
+    // Create a new heads entry
+    const headData = await prisma.earnings.create({
+      data: {
+        staffId: validation.data.staffId,
+        heads: validation.data.heas,
+      },
     });
-    return res
-      .status(200)
-      .json({
-        status: 200,
-        message: "Deduction Deleted From This ID (" + id + ")",
-      });
+
+    return res.status(201).json({
+      status: 201,
+      message: "Head created successfully.",
+      data: headData,
+    });
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({
-        status: 500,
-        message: "Deduction Not Found From This Id (" + id + ")",
-      });
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error creating head.",
+      error: error.message,
+    });
   }
 };
+
+// Update Earning Head API
+
+const updateEarningHead = async (req, res) => {
+  try {
+    const validation = deductionsEarningsSchema.safeParse(req.body);
+    if (validation.error) {
+      return res.status(400).json({
+        success: false,
+        message: validation.error.details[0].message
+      })
+    }
+    const { headId, calculation, amount } = req.body;
+
+    // Validate input
+    if (!headId || !calculation || amount === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Head ID, calculation, and amount are required.",
+      });
+    }
+
+    // Update the existing head entry with new calculation and amount
+    const updatedHead = await prisma.earnings.update({
+      where: { id: headId }, // Find by headId
+      data: {
+        calculation: validation.data.calculation,
+        amount: parseFloat(validation.data.amount),
+      },
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: "Head updated successfully.",
+      data: updatedHead,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Error updating head.",
+      error: error.message,
+    });
+  }
+};
+
 
 module.exports = {
   addOrUpdateSalaryDetails,
@@ -377,8 +538,7 @@ module.exports = {
   updateSalaryData,
   getSalaryDetailsById,
   deleteSalaryRecord,
-  getAllDeductions,
   updateDeductions,
-  getDeductionsById,
-  deleteDeductions,
+  createEarningHead,
+  updateEarningHead,
 };
