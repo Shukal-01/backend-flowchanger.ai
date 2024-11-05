@@ -25,16 +25,27 @@ model User {
   staffDetails  StaffDetails?  @relation
 }
 
+model StaffLogin {
+  id           String      @id @default(uuid())
+  mobile       String      @unique
+  otp          String?
+  is_verified  Boolean     @default(false)
+  otpExpiresAt DateTime?
+  WorkEntry    WorkEntry[]
+}
+
 model WorkEntry {
   id             String        @id @default(uuid())
-  work_name      String
-  units          String
-  description    String
+  work_name      String?
+  units          String?
+  discription    String?
   attachments    String?
   location       String?
-  staffDetailsId String?
+  staffLoginId   String?
   createdAt      DateTime      @default(now())
-  staff          StaffDetails? @relation(fields: [staffDetailsId], references: [id], onDelete: Cascade)
+  staffLogin     StaffLogin?   @relation(fields: [staffLoginId], references: [id], onDelete: Cascade)
+  StaffDetails   StaffDetails? @relation(fields: [staffDetailsId], references: [id])
+  staffDetailsId String?
 }
 
 enum UserRole {
@@ -601,7 +612,7 @@ model TaskStatus {
   statusColor    String
   statusOrder    Int          @default(0)
   isHiddenId     String[]
-  canBeChangedId String[]     @default([])
+  canBeChangedId String[]
 }
 
 model TaskPriority {
@@ -729,7 +740,7 @@ model ProjectStatus {
   project_color  String
   project_order  String
   default_filter Boolean  @default(false)
-  can_changed    String[] @default([])
+  can_changed    String[]
 }
 
 model ProjectPriority {
@@ -738,8 +749,8 @@ model ProjectPriority {
   Priority_color String
   Priority_order String
   default_filter Boolean  @default(false)
-  is_hidden      String[] @default([])
-  can_changed    String[] @default([])
+  is_hidden      String[]
+  can_changed    String[]
 }
 
 model Deductions {

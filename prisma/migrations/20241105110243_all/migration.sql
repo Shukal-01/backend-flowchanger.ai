@@ -44,15 +44,27 @@ CREATE TABLE "User" (
 );
 
 -- CreateTable
+CREATE TABLE "StaffLogin" (
+    "id" TEXT NOT NULL,
+    "mobile" TEXT NOT NULL,
+    "otp" TEXT,
+    "is_verified" BOOLEAN NOT NULL DEFAULT false,
+    "otpExpiresAt" TIMESTAMP(3),
+
+    CONSTRAINT "StaffLogin_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "WorkEntry" (
     "id" TEXT NOT NULL,
-    "work_name" TEXT NOT NULL,
-    "units" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "work_name" TEXT,
+    "units" TEXT,
+    "discription" TEXT,
     "attachments" TEXT,
     "location" TEXT,
-    "staffDetailsId" TEXT,
+    "staffLoginId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "staffDetailsId" TEXT,
 
     CONSTRAINT "WorkEntry_pkey" PRIMARY KEY ("id")
 );
@@ -438,18 +450,6 @@ CREATE TABLE "SalaryDetails" (
 );
 
 -- CreateTable
-CREATE TABLE "Deductions" (
-    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "salaryId" TEXT,
-    "heads" TEXT[],
-    "calculation" TEXT[],
-    "amount" DOUBLE PRECISION[],
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Deductions_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Shifts" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "shiftName" TEXT NOT NULL,
@@ -562,8 +562,8 @@ CREATE TABLE "TaskStatus" (
     "taskStatusName" TEXT NOT NULL,
     "statusColor" TEXT NOT NULL,
     "statusOrder" INTEGER NOT NULL DEFAULT 0,
-    "isHiddenId" TEXT NOT NULL,
-    "canBeChangedId" TEXT NOT NULL,
+    "isHiddenId" TEXT[],
+    "canBeChangedId" TEXT[],
 
     CONSTRAINT "TaskStatus_pkey" PRIMARY KEY ("id")
 );
@@ -695,8 +695,62 @@ CREATE TABLE "UpiDetails" (
     CONSTRAINT "UpiDetails_pkey" PRIMARY KEY ("UpiId")
 );
 
+-- CreateTable
+CREATE TABLE "ProjectStatus" (
+    "id" TEXT NOT NULL,
+    "project_name" TEXT NOT NULL,
+    "project_color" TEXT NOT NULL,
+    "project_order" TEXT NOT NULL,
+    "default_filter" BOOLEAN NOT NULL DEFAULT false,
+    "can_changed" TEXT[],
+
+    CONSTRAINT "ProjectStatus_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ProjectPriority" (
+    "id" TEXT NOT NULL,
+    "Priority_name" TEXT NOT NULL,
+    "Priority_color" TEXT NOT NULL,
+    "Priority_order" TEXT NOT NULL,
+    "default_filter" BOOLEAN NOT NULL DEFAULT false,
+    "is_hidden" TEXT[],
+    "can_changed" TEXT[],
+
+    CONSTRAINT "ProjectPriority_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Deductions" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "heads" TEXT,
+    "calculation" TEXT,
+    "amount" DOUBLE PRECISION,
+    "deduction_month" TEXT,
+    "staffId" TEXT,
+    "salaryDetailsId" TEXT,
+
+    CONSTRAINT "Deductions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Earnings" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "heads" TEXT,
+    "calculation" TEXT,
+    "amount" DOUBLE PRECISION,
+    "salaryId" TEXT,
+    "staffId" TEXT,
+    "salary_month" TEXT,
+
+    CONSTRAINT "Earnings_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StaffLogin_mobile_key" ON "StaffLogin"("mobile");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AdminDetails_userId_key" ON "AdminDetails"("userId");
@@ -768,7 +822,10 @@ CREATE UNIQUE INDEX "ClientDetails_vat_number_key" ON "ClientDetails"("vat_numbe
 CREATE UNIQUE INDEX "UpiDetails_staffId_key" ON "UpiDetails"("staffId");
 
 -- AddForeignKey
-ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffDetailsId_fkey" FOREIGN KEY ("staffDetailsId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffLoginId_fkey" FOREIGN KEY ("staffLoginId") REFERENCES "StaffLogin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffDetailsId_fkey" FOREIGN KEY ("staffDetailsId") REFERENCES "StaffDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AdminDetails" ADD CONSTRAINT "AdminDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -858,9 +915,6 @@ ALTER TABLE "Permissions" ADD CONSTRAINT "Permissions_roleId_fkey" FOREIGN KEY (
 ALTER TABLE "SalaryDetails" ADD CONSTRAINT "SalaryDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_salaryId_fkey" FOREIGN KEY ("salaryId") REFERENCES "SalaryDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "FixedShift" ADD CONSTRAINT "FixedShift_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -913,3 +967,9 @@ ALTER TABLE "ClientDetails" ADD CONSTRAINT "ClientDetails_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "UpiDetails" ADD CONSTRAINT "UpiDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Earnings" ADD CONSTRAINT "Earnings_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
