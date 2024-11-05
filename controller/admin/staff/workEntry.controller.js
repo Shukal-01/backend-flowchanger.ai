@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const nodemailer = require("nodemailer");
-const upload = require('../../middleware/upload.js');
+const upload = require('../../../middleware/upload.js');
 const prisma = new PrismaClient();
 
 // Add Work Entry Query
