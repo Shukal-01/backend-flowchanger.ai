@@ -724,12 +724,12 @@ model UpiDetails {
 }
 
 model ProjectStatus {
-  id             String   @id @default(uuid())
+  id             String  @id @default(uuid())
   project_name   String
   project_color  String
   project_order  String
-  default_filter Boolean  @default(false)
-  can_changed    String[]
+  default_filter Boolean @default(false)
+  can_changed    String?
 }
 
 model ProjectPriority {
@@ -739,7 +739,7 @@ model ProjectPriority {
   Priority_order String
   default_filter Boolean  @default(false)
   is_hidden      String[]
-  can_changed    String[]
+  can_changed    String?
 }
 
 model Deductions {
