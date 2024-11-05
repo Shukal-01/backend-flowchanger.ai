@@ -539,7 +539,7 @@ const projectStatusSchema = z.object({
   project_color: z.string().min(1, "Project Color is required"),
   project_order: z.string().min(1, "Project Order is required"),
   default_filter: z.boolean().optional(), // Optional field
-  can_changed: z.array(z.string()).min(1, "Select at least one option for Can Changed"),
+  can_changed: z.array(z.string()).min(1, "Select at least one option for Can Changed").optional(),
 });
 
 // project Priority Schema
@@ -549,7 +549,7 @@ const projectPrioritySchema = z.object({
   priority_order: z.string().min(1, "Priority Order is required"),
   default_filter: z.boolean().optional(),
   is_hidden: z.array(z.string()).min(1, "Select at least one option for Is Hidden"),
-  can_changed: z.array(z.string()).min(1, "Select at least one option for Can Changed"),
+  can_changed: z.array(z.string()).min(1, "Select at least one option for Can Changed").optional(),
 })
 
 const salaryDetailsSchema = z.object({
