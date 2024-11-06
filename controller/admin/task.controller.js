@@ -280,6 +280,7 @@ async function getAllTaskDetail(req, res) {
     res.status(500).json({ error: "Failed to fetch task detail" });
   }
 }
+//added
 
 async function deleteTaskDetail(req, res) {
   const { id } = req.params;
