@@ -542,6 +542,22 @@ const projectStatusSchema = z.object({
   can_changed: z.array(z.string()).default([]).optional(),
 });
 
+const projectSchema = z.object({
+  id: z.string().uuid().optional(),
+  project_name: z.string().min(1, "required"),
+  customer: z.string().min(1, "required"),
+  billing_type: z.string().min(1, "required"),
+  status: z.string().min(1, "required"),
+  total_rate: z.number().positive("Total rate must be a positive number").min(1, "required"),
+  estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "required"),
+  department: z.array(z.string().min(1, "required")),
+  start_date: z.string().min(1, "required"),
+  deadline: z.string().min(1, "required"),
+  tags: z.array(z.string().min(1, "required")),
+  description: z.string().min(1, "required"),
+  send_mail: z.boolean().default(false)
+});
+
 // project Priority Schema
 const projectPrioritySchema = z.object({
   priority_name: z.string().min(1, "Priority Name is required"),
@@ -619,6 +635,7 @@ module.exports = {
   projectStatusSchema,
   projectPrioritySchema,
   salaryDetailsSchema,
-  deductionsEarningsSchema
+  deductionsEarningsSchema,
+  projectSchema
 };
 

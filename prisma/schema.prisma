@@ -649,69 +649,59 @@ model ProjectFiles {
   visible_to_customer Boolean  @default(false)
   uploaded_by         String
   date_uploaded       DateTime
-  projectId           String
-  project_files       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model Project {
-  id                String              @id @default(dbgenerated("gen_random_uuid()"))
-  project_name      String
-  customer          String
-  billing_type      String
-  status            String
-  total_rate        Int                 @default(0)
-  estimated_hours   Int                 @default(0)
-  start_Date        String
-  department        String
-  deadline          String
-  tags              String[]
-  description       String
-  clientId          String
-  client            ClientDetails       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  projectFiles      ProjectFiles[]
-  discussion        Discussion[]
-  ticketInformation TicketInformation[]
+  id              String   @id @default(uuid())
+  project_name    String
+  customer        String
+  billing_type    String
+  status          String
+  total_rate      Int
+  estimated_hours Int
+  department      String[]
+  start_date      String
+  deadline        String
+  tags            String[]
+  description     String
+  send_mail       Boolean  @default(false)
 }
 
 model TicketInformation {
-  id                String        @id @default(dbgenerated("gen_random_uuid()"))
-  subject           String
-  contact           String
-  name              String
-  email             String
-  department        String
-  cc                String
-  tags              String[]
-  asign_ticket      String
-  priority          String
-  service           String
-  project           String
-  ticket_body       String
-  insert_link       String
-  personal_notes    String
-  insert_files      String
-  ticketInformation Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId         String?
-  staffIdd          String?
-  staff             StaffDetails? @relation(fields: [staffIdd], references: [id], onDelete: Cascade)
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  subject        String
+  contact        String
+  name           String
+  email          String
+  department     String
+  cc             String
+  tags           String[]
+  asign_ticket   String
+  priority       String
+  service        String
+  project        String
+  ticket_body    String
+  insert_link    String
+  personal_notes String
+  insert_files   String
+  staffIdd       String?
+  staff          StaffDetails? @relation(fields: [staffIdd], references: [id], onDelete: Cascade)
 }
 
 model Discussion {
-  id                  String   @id @default(dbgenerated("gen_random_uuid()"))
+  id                  String @id @default(dbgenerated("gen_random_uuid()"))
   subject             String
   discription         String
   last_activity       String
   total_comments      String
   visible_to_customer String
-  discussion          Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId           String?
 }
 
 model ClientDetails {
-  id               String    @id @default(dbgenerated("gen_random_uuid()"))
-  userId           String    @unique
+  id               String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId           String   @unique
   company          String
-  vat_number       String    @unique
+  vat_number       String   @unique
   website          String?
   groups           String[]
   currency         String[]
@@ -720,12 +710,11 @@ model ClientDetails {
   country          String
   state            String
   city             String
-  status           Boolean   @default(false)
+  status           Boolean  @default(false)
   zip_code         String
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
-  Project          Project[]
-  User             User      @relation(fields: [userId], references: [id])
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  User             User     @relation(fields: [userId], references: [id])
 }
 
 model UpiDetails {
