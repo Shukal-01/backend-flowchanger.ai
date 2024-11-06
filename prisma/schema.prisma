@@ -606,38 +606,35 @@ model EndBreak {
 }
 
 model TaskStatus {
-  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  id             String   @id @default(dbgenerated("gen_random_uuid()"))
   taskStatusName String
-  TaskDetail     TaskDetail[]
+  // TaskDetail     TaskDetail[]
   statusColor    String
-  statusOrder    Int          @default(0)
+  statusOrder    Int      @default(0)
   isHiddenId     String[]
   canBeChangedId String[]
 }
 
 model TaskPriority {
-  id               String       @id @default(dbgenerated("gen_random_uuid()"))
+  id               String @id @default(dbgenerated("gen_random_uuid()"))
   taskPriorityName String
-  TaskDetail       TaskDetail[]
+  // TaskDetail       TaskDetail[]
 }
 
 model TaskDetail {
-  id               String       @id @default(dbgenerated("gen_random_uuid()"))
-  taskName         String
-  taskStatusId     String
-  // taskTypeId       String
-  taskPriorityId   String
-  taskPriority     TaskPriority @relation(fields: [taskPriorityId], references: [id], onDelete: Cascade)
-  // taskType         TaskType     @relation(fields: [taskTypeId], references: [id], onDelete: Cascade)
-  taskStatus       TaskStatus   @relation(fields: [taskStatusId], references: [id], onDelete: Cascade)
-  startDate        String
-  endDate          String
-  dueDate          String
-  selectProject    String
-  selectDepartment String
-  taskAssign       String
-  taskDescription  String
-  attachFile       String
+  id                 String   @id @default(dbgenerated("gen_random_uuid()"))
+  taskName           String
+  taskStatusId       String
+  taskPriorityId     String
+  startDate          String
+  endDate            String?
+  dueDate            String?
+  selectProjectId    String
+  selectDepartmentId String
+  taskAssign         String[]
+  taskDescription    String
+  taskTag            String?
+  attachFile         String?
 }
 
 model ProjectFiles {

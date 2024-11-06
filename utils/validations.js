@@ -485,15 +485,16 @@ const TaskPrioritySchema = z.object({
 const TaskDetailSchema = z.object({
   taskName: z.string().min(1, { message: "Task name is required" }),
   taskStatusId: z.string().uuid({ message: "Invalid task status ID" }),
-  taskTypeId: z.string().uuid({ message: "Invalid task type ID" }),
+  // taskTypeId: z.string().uuid({ message: "Invalid task type ID" }),
   taskPriorityId: z.string().uuid({ message: "Invalid task priority ID" }),
   startDate: z.string(),
-  endDate: z.string(),
+  endDate: z.string().optional(),
   dueDate: z.string().optional(),
-  selectProject: z.string().min(1, { message: "Project selection is required" }),
-  selectDepartment: z.string().min(1, { message: "Department selection is required" }),
-  taskAssign: z.string().min(1, { message: "Task assignee is required" }),
+  selectProjectId: z.string().uuid(1, { message: "Project selection is required" }),
+  selectDepartmentId: z.string().uuid(1, { message: "Department selection is required" }),
+  taskAssign: z.array(z.string()).min(1, { message: "Task assignee is required" }),
   taskDescription: z.string().optional(),
+  taskTag: z.string().optional(),
   attachFile: z.string().optional(),
 });
 

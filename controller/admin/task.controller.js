@@ -83,11 +83,7 @@ async function createTaskStatus(req, res) {
 
 async function getAllTaskStatus(req, res) {
   try {
-    const taskStatus = await prisma.taskStatus.findMany({
-      include: {
-        TaskDetail: true,
-      },
-    });
+    const taskStatus = await prisma.taskStatus.findMany();
     res.status(200).json(taskStatus);
   } catch (error) {
     console.log(error);
@@ -223,10 +219,11 @@ async function createTaskDetail(req, res) {
       startDate,
       endDate,
       dueDate,
-      selectProject,
-      selectDepartment,
+      selectProjectId,
+      selectDepartmentId,
       taskAssign,
       taskDescription,
+      taskTag,
     } = req.body;
     // const attachFile = JSON.stringify(req.file);
     // if (!req.file) {
@@ -240,12 +237,15 @@ async function createTaskDetail(req, res) {
       startDate,
       endDate,
       dueDate,
-      selectProject,
-      selectDepartment,
+      selectProjectId,
+      selectDepartmentId,
       taskAssign,
       taskDescription,
+      taskTag,
       attachFile: req.savedFilename,
     });
+
+    console.log(taskDetailResult);
 
     if (!taskDetailResult.success) {
       return res
@@ -315,10 +315,11 @@ async function updateTaskDetail(req, res) {
       startDate,
       endDate,
       dueDate,
-      selectProject,
-      selectDepartment,
+      selectProjectId,
+      selectDepartmentId,
       taskAssign,
       taskDescription,
+      taskTag,
     } = req.body;
     const attachFile = req.file ? req.savedFilename : null; // Check if a new file is uploaded
 
@@ -330,10 +331,11 @@ async function updateTaskDetail(req, res) {
       startDate,
       endDate,
       dueDate,
-      selectProject,
-      selectDepartment,
+      selectProjectId,
+      selectDepartmentId,
       taskAssign,
       taskDescription,
+      taskTag,
       attachFile,
     });
 
