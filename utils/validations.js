@@ -412,6 +412,7 @@ const PunchInSchema = z.object({
   qrCodeValue: z.string().optional(), // Only required for QR scan
   photoUrl: z.string().optional(), // Required for photo click
   location: z.string().min(1, { message: "Location is required." }),
+  fine: z.string().optional(),
   // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
@@ -427,6 +428,7 @@ const PunchOutSchema = z.object({
   qrCodeValue: z.string().optional(), // Only required for QR scan
   photoUrl: z.string().optional(), // Required for photo click
   location: z.string().min(1, { message: "Location is required." }),
+  overtime: z.string().optional(),
   // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 

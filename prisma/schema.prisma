@@ -542,6 +542,7 @@ model PunchIn {
   qrCodeValue   String?
   photoUrl      String?
   location      String
+  fine          String?
   PunchRecords  PunchRecords?
   // staffId       String
   // staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
@@ -562,6 +563,7 @@ model PunchOut {
   qrCodeValue    String?
   photoUrl       String?
   location       String
+  overtime       String?
   PunchRecords   PunchRecords?
   // staffId        String
   // staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)

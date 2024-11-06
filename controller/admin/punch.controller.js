@@ -11,7 +11,6 @@ const {
 async function createPunchIn(req, res) {
   try {
     const { punchInMethod, biometricData, qrCodeValue, location } = req.body;
-    // const photoUrl = JSON.stringify(req.file);
     const photoUrl = String(req.file);
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
@@ -19,7 +18,6 @@ async function createPunchIn(req, res) {
 
     // Validate input using zod schema
     PunchInSchema.parse({
-      // staffId,
       punchInMethod,
       biometricData,
       qrCodeValue,
@@ -29,10 +27,7 @@ async function createPunchIn(req, res) {
 
     let punchInData = { punchInMethod, location };
 
-    console.log(location);
-    // Determine the method of punch-in and set the appropriate data
     if (punchInMethod === "PHOTOCLICK") {
-      // punchInData = { ...punchInData, photoUrl: req.file.originalname };
       punchInData = { ...punchInData, photoUrl: req.savedFilename };
     } else if (punchInMethod === "QRSCAN") {
       punchInData = { ...punchInData, qrCodeValue };
@@ -40,49 +35,70 @@ async function createPunchIn(req, res) {
       punchInData = { ...punchInData, biometricData };
     }
 
-    // Get today's date (only the date part) to avoid multiple punch-ins on the same day
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for accurate date comparison
+    today.setHours(0, 0, 0, 0);
 
-    // Check if a punch-in already exists for the same staff and date
     const existingPunchIn = await prisma.punchIn.findFirst({
       where: {
         punchInDate: {
-          // Check the punchInDate field
-          gte: today, // Greater than or equal to today
-          lt: new Date(today.getTime() + 86400000), // Less than tomorrow
+          gte: today,
+          lt: new Date(today.getTime() + 86400000),
         },
       },
     });
 
-    // If a punch-out already exists for today, return an error
     if (existingPunchIn) {
-      return res
-        .status(400)
-        .json({ error: "Punch-out record already exists for today." });
+      return res.status(400).json({ error: "Punch-in record already exists for today." });
     }
+
+    // Define the standard punch-in time
+    const standardStartTime = new Date();
+    standardStartTime.setHours(10, 0, 0, 0);
+
+    const currentPunchInTime = new Date();
+
+    // Calculate lateness in minutes
+    const latenessMinutes = Math.max(
+      0,
+      Math.floor((currentPunchInTime - standardStartTime) / (1000 * 60))
+    );
+
+    const hoursLate = Math.floor(latenessMinutes / 60);
+    const minutesLate = latenessMinutes % 60;
+
+    // Set fine as a string based on lateness
+    let fine;
+    if (latenessMinutes > 0) {
+      fine = `${hoursLate > 0 ? hoursLate : ""} : ${minutesLate} `;
+    } else {
+      fine = "On time";
+    }
+
+    // Add lateness information to punchInData
+    punchInData = { ...punchInData, punchInTime: currentPunchInTime };
 
     // Create the punch-in record in the database
     const punchIn = await prisma.punchIn.create({
       data: {
-        punchInMethod: punchInMethod || "PHOTOCLICK", // default to PHOTOCLICK if not provided
+        punchInMethod: punchInMethod || "PHOTOCLICK",
         ...punchInData,
         location,
+        fine: fine
       },
     });
 
     return res.status(201).json(punchIn);
   } catch (error) {
     console.log(error);
-    // Check if the error is from Zod validation and handle accordingly
     if (error instanceof ZodError) {
-      return res.status(400).json({ errors: error.errors }); // Return detailed validation errors
+      return res.status(400).json({ errors: error.errors });
     }
 
-    // For any other errors, return a general error message
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
+
 
 
 async function getAllPunchIn(req, res) {
@@ -100,7 +116,6 @@ async function getAllPunchIn(req, res) {
 async function createPunchOut(req, res) {
   try {
     const { punchOutMethod, biometricData, qrCodeValue, location } = req.body;
-    // const photoUrl = JSON.stringify(req.file);
     const photoUrl = String(req.file);
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
@@ -115,11 +130,9 @@ async function createPunchOut(req, res) {
       location
     });
 
-    let punchOutData = { punchOutMethod };
+    let punchOutData = { punchOutMethod, location };
 
-    // Determine the method of punch-in and set the appropriate data
     if (punchOutMethod === "PHOTOCLICK") {
-      // punchInData = { ...punchInData, photoUrl: req.file.originalname };
       punchOutData = { ...punchOutData, photoUrl: req.savedFilename };
     } else if (punchOutMethod === "QRSCAN") {
       punchOutData = { ...punchOutData, qrCodeValue };
@@ -127,11 +140,9 @@ async function createPunchOut(req, res) {
       punchOutData = { ...punchOutData, biometricData };
     }
 
-    // Get today's date (only the date part) to avoid multiple punch-ins on the same day
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set the time to 00:00:00 for accurate date comparison
+    today.setHours(0, 0, 0, 0);
 
-    // Check if a punch-in record exists for today
     const existingPunchIn = await prisma.punchIn.findFirst({
       where: {
         punchInDate: {
@@ -145,45 +156,74 @@ async function createPunchOut(req, res) {
       return res.status(400).json({ error: "No punch-in record found for today." });
     }
 
-    // Check if a punch-in already exists for the same staff and date
     const existingPunchOut = await prisma.punchOut.findFirst({
       where: {
         punchOutDate: {
-          // Check the punchInDate field
-          gte: today, // Greater than or equal to today
-          lt: new Date(today.getTime() + 86400000), // Less than tomorrow
+          gte: today,
+          lt: new Date(today.getTime() + 86400000),
         },
       },
     });
 
-    // If a punch-out already exists for today, return an error
     if (existingPunchOut) {
-      return res
-        .status(400)
-        .json({ error: "Punch-out record already exists for today." });
+      return res.status(400).json({ error: "Punch-out record already exists for today." });
     }
 
-    // Create the punch-in record in the database
+    // Define standard start and end times (10:00 am to 6:30 pm on the current date)
+    const standardStartTime = new Date();
+    standardStartTime.setHours(10, 0, 0, 0);
+
+    // Standard end time (6:30 pm on the current date)
+    const standardEndTime = new Date();
+    standardEndTime.setHours(18, 30, 0, 0);
+
+    const currentPunchOutTime = new Date();
+    const punchInTime = new Date(existingPunchIn.punchInTime);  // Assume this field holds punch-in time
+
+    // Calculate overtime before the standard start time
+    let overtimeBefore = 0;
+    if (punchInTime < standardStartTime) {
+      overtimeBefore = Math.floor((standardStartTime - punchInTime) / (1000 * 60));
+    }
+
+    // Calculate overtime after the standard end time
+    let overtimeAfter = 0;
+    if (currentPunchOutTime > standardEndTime) {
+      overtimeAfter = Math.floor((currentPunchOutTime - standardEndTime) / (1000 * 60));
+    }
+
+    // Total overtime in minutes
+    const totalOvertimeMinutes = overtimeBefore + overtimeAfter;
+
+    // Format total overtime in hours and minutes
+    const hoursOvertime = Math.floor(totalOvertimeMinutes / 60);
+    const minutesOvertime = totalOvertimeMinutes % 60;
+    const overtime = totalOvertimeMinutes > 0 ? `${hoursOvertime} : ${minutesOvertime}` : "No overtime";
+
+    // Add punch-out time and overtime information to punchOutData
+    punchOutData = { ...punchOutData, punchOutTime: currentPunchOutTime };
+
+    // Create the punch-out record in the database
     const punchOut = await prisma.punchOut.create({
       data: {
-        punchOutMethod: punchOutMethod || 'PHOTOCLICK', // default to PHOTOCLICK if not provided
+        punchOutMethod: punchOutMethod || 'PHOTOCLICK',
         ...punchOutData,
-        location
+        location,
+        overtime: overtime
       },
     });
 
     return res.status(201).json(punchOut);
   } catch (error) {
     console.log(error);
-    // Check if the error is from Zod validation and handle accordingly
     if (error instanceof ZodError) {
-      return res.status(400).json({ errors: error.errors }); // Return detailed validation errors
+      return res.status(400).json({ errors: error.errors });
     }
 
-    // For any other errors, return a general error message
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
 
 async function getAllPunchOut(req, res) {
   try {
