@@ -6,7 +6,7 @@ const workRouter = express.Router();
 
 // Route to send OTP to mobile number
 workRouter.post("/", upload.single("attachments"), authorizationMiddleware, workController.addWorkEntry);
-workRouter.get("/:id", workController.getAllWorkEntry);
+workRouter.get("/", workController.getAllWorkEntry);
 workRouter.put(
   "/:id",
   upload.single("attachments"),
