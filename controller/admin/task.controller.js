@@ -166,9 +166,9 @@ async function createTaskPriority(req, res) {
 async function getAllTaskPriority(req, res) {
   try {
     const taskPriority = await prisma.taskPriority.findMany({
-      include: {
-        TaskDetail: true,
-      },
+      // include: {
+      //    TaskDetail: true,
+      // },
     });
     res.status(200).json(taskPriority);
   } catch (error) {
