@@ -7,41 +7,6 @@ const {
   TaskDetailSchema,
 } = require("../../utils/validations");
 
-// async function createTaskType(req, res) {
-//     try {
-//         const { taskTypeName } = req.body;
-
-//         // Validate the taskTypeName using TaskTypeSchema
-//         const taskTypeResult = TaskTypeSchema.safeParse({ taskTypeName });
-
-//         if (!taskTypeResult.success) {
-//             return res.status(400).json({ message: taskTypeResult.error.issues[0].message });
-//         }
-
-//         const taskType = await prisma.taskType.create({
-//             data: taskTypeResult.data
-//         });
-//         res.status(201).json(taskType);
-//     } catch (error) {
-//         if (error instanceof ZodError) {
-//             res.status(400).json({ error: 'Invalid request data' });
-//         } else {
-//             console.log(error);
-//             res.status(500).json({ error: 'Failed to create new task type' });
-//         }
-//     }
-// }
-
-// async function getAllTaskType(req, res) {
-//     try {
-//         const taskTypes = await prisma.taskType.findMany();
-//         res.status(200).json(taskTypes);
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ error: 'Failed to fetch task types' });
-//     }
-// }
-
 async function createTaskStatus(req, res) {
   try {
     const {
@@ -68,8 +33,14 @@ async function createTaskStatus(req, res) {
     }
 
     const taskStatus = await prisma.taskStatus.create({
-      data: TaskStatusResult.data,
+      data: {
+        ...TaskStatusResult.data,
+        isHiddenId: {
+          connect: isHiddenId.map((id) => ({ id })), // Connect existing StaffDetails by id
+        },
+      }
     });
+
     res.status(201).json(taskStatus);
   } catch (error) {
     if (error instanceof ZodError) {
@@ -225,11 +196,8 @@ async function createTaskDetail(req, res) {
       taskDescription,
       taskTag,
     } = req.body;
-    // const attachFile = JSON.stringify(req.file);
-    // if (!req.file) {
-    //     return res.status(400).json({ message: 'File upload is required.' });
-    // }
-    // Validate the taskTypeName using TaskTypeSchema
+
+    // Validate the task details using TaskDetailSchema
     const taskDetailResult = TaskDetailSchema.safeParse({
       taskStatusId,
       taskPriorityId,
@@ -242,10 +210,8 @@ async function createTaskDetail(req, res) {
       taskAssign,
       taskDescription,
       taskTag,
-      attachFile: req.file.cloudinaryUrl,
+      attachFile: req.file.cloudinaryUrl, // Set attachFile if available
     });
-
-    console.log(taskDetailResult);
 
     if (!taskDetailResult.success) {
       return res
@@ -253,13 +219,16 @@ async function createTaskDetail(req, res) {
         .json({ message: taskDetailResult.error.issues[0].message });
     }
 
+    // Create taskDetail and associate taskAssign users
     const taskDetail = await prisma.taskDetail.create({
       data: {
         ...taskDetailResult.data,
-        // attachFile: req.savedFileName
+        taskAssign: {
+          connect: taskAssign.map((id) => ({ id })), // Connect assigned users by IDs
+        },
       },
     });
-    console.log(taskDetail);
+
     res.status(201).json(taskDetail);
   } catch (error) {
     if (error instanceof ZodError) {
@@ -270,6 +239,7 @@ async function createTaskDetail(req, res) {
     }
   }
 }
+
 
 async function getAllTaskDetail(req, res) {
   try {
@@ -360,7 +330,9 @@ async function updateTaskDetail(req, res) {
       where: { id },
       data: {
         ...taskDetailResult.data,
-        attachFile: attachFile || existingTaskDetail.attachFile, // Preserve the existing file if no new file is uploaded
+        taskAssign: {
+          connect: taskAssign.map((id) => ({ id })), // Connect assigned users by IDs
+        },
       },
     });
 

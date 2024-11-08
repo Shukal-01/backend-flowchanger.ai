@@ -36,25 +36,24 @@ const createClient = async (req, res) => {
         is_verified: false,
         mobile: phone,
         name: req.body.name,
-
-        clientDetails: {
-          create: {
-            company,
-            vat_number,
-            website,
-            groups,
-            currency,
-            default_language,
-            address,
-            country,
-            state,
-            city,
-            zip_code,
-            status,
-          },
-        },
       },
-      include: { clientDetails: true },
+    });
+    const clientDetails = await prisma.clientDetails.create({
+      data: {
+        company,
+        vat_number,
+        website,
+        groups,
+        currency,
+        default_language,
+        address,
+        country,
+        state,
+        city,
+        zip_code,
+        status,
+        userId: newClient.id,
+      },
     });
 
     res.status(201).json(newClient);
