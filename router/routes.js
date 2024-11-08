@@ -33,6 +33,8 @@ const projectPriority = require("./admin/projectPriority.router");
 // const deductionsRouter = require("./admin/deductions.router");
 const loginRouter = require("./admin/staffLogin.router.js");
 const workRouter = require("./admin/workEntry.router.js");
+const ChatRouter = require("./chat.router.js");
+const MessageRouter = require("./message.router.js");
 
 rootRouter.use("/role", roleRouter);
 rootRouter.use("/attendance", attendanceRouter);
@@ -66,5 +68,9 @@ rootRouter.use("/break", breakRouter);
 rootRouter.use("/staff-login", loginRouter);
 rootRouter.use("/work-entry", workRouter);
 rootRouter.use("/past-employment", pastEmploymentRouter);
+
+rootRouter.use("/chat", ChatRouter);
+
+rootRouter.use("/message", MessageRouter);
 
 module.exports = rootRouter;

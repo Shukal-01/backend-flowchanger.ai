@@ -75,7 +75,7 @@ const adminSignup = async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        name: first_name + last_name,
+        name: first_name + " " + last_name,
         mobile,
         role: "ADMIN",
         otp: parseInt(otp),
@@ -159,14 +159,11 @@ const updateAdmin = async (req, res) => {
         week_format, // Added new fields
       } = req.body;
 
-      // Step 1: Find the user by email
       const user = await prisma.user.findUnique({
         where: { email },
-        include: { adminDetails: true },
       });
       if (!user) return res.status(404).json({ message: "Admin not found." });
 
-      // Step 2: Handle file uploads (profile_image and company_logo)
       const profileImage = req.files?.profile_image
         ? req.files.profile_image[0].filename
         : null;
@@ -174,7 +171,6 @@ const updateAdmin = async (req, res) => {
         ? req.files.company_logo[0].filename
         : null;
 
-      // Step 3: Update the User and AdminDetails
       const updatedUser = await prisma.user.update({
         where: { email },
         data: {
@@ -190,6 +186,7 @@ const updateAdmin = async (req, res) => {
                 time_zone: time_zone,
                 date_format: date_format,
                 week_format: week_format,
+                userId: user.id,
               },
               update: {
                 company_name: company_name,
@@ -206,15 +203,26 @@ const updateAdmin = async (req, res) => {
         },
       });
 
-      // Step 4: Generate a new JWT token
-      const token = jwt.sign({ id: updatedUser.id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
 
-      // Step 5: Send the response with success message and token
       res.status(200).json({ message: "Admin updated successfully.", token });
     });
   } catch (error) {
     console.error("Error in updateAdmin:", error);
     res.status(500).json({ message: "Failed to update admin details." });
+  }
+};
+
+const getAllAdmins = async (req, res) => {
+  try {
+    const admins = await prisma.user.findMany({
+      where: { role: "ADMIN" },
+      include: { adminDetails: true },
+    });
+    res.status(200).json(admins);
+  } catch (error) {
+    console.error("Error in getAllAdmins:", error);
+    res.status(500).json({ message: "Failed to get admins." });
   }
 };
 
@@ -228,7 +236,7 @@ const adminLogin = async (req, res) => {
     if (!isPasswordMatch)
       return res.status(401).json({ message: "Invalid password." });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
     res.status(200).json({ message: "Login successful!", token });
   } catch (error) {
     console.error("Login error:", error);
@@ -236,4 +244,10 @@ const adminLogin = async (req, res) => {
   }
 };
 
-module.exports = { adminSignup, verifyOTP, adminLogin, updateAdmin };
+module.exports = {
+  adminSignup,
+  verifyOTP,
+  adminLogin,
+  updateAdmin,
+  getAllAdmins,
+};

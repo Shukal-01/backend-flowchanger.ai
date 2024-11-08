@@ -197,7 +197,7 @@ async function getAllStaff(req, res) {
 
 const getStaffById = async (req, res) => {
   try {
-    const staffs = await prisma.user.findUnique({
+    const staff = await prisma.user.findFirst({
       where: {
         id: req.userId,
       },
@@ -233,8 +233,8 @@ const getStaffById = async (req, res) => {
         },
       },
     });
-    if (staffs) {
-      res.status(200).json(staffs);
+    if (staff) {
+      res.status(200).json(staff);
     } else {
       res.status(404).json({ error: "Staff member not found" });
     }

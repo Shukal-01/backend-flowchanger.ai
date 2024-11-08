@@ -14,7 +14,13 @@ const authorizationMiddleware = (req, res, next) => {
       ? authHeader.split(" ")[1]
       : authHeader;
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decodedToken.userId; // Assuming `userId` is in the token payload
+    if (!decodedToken) {
+      return res
+        .status(401)
+        .json({ error: "Invalid token or authorization failed" });
+    }
+    req.userId = decodedToken.userId;
+    console.log(decodedToken);
     next();
   } catch (error) {
     res.status(401).json({
