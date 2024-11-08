@@ -12,6 +12,7 @@ const salaryDetailsRouter = require("./admin/salaryDetails.router");
 const deductionsRouter = require("./admin/deductions.router");
 const customDetailsRouter = require("./admin/customDetails.router");
 const policyRouter = require("./admin/policy.router");
+const pastEmploymentRouter = require("./admin/pastEmployment.router");
 // const penaltyOvertimeDetailRouter = require("./admin/penaltyOvertimeDetail.router");
 const shiftRouter = require("./admin/shift.router");
 const punchRouter = require("./admin/punch.router");
@@ -64,5 +65,6 @@ rootRouter.use("/upi-details", upiRouter);
 rootRouter.use("/break", breakRouter);
 rootRouter.use("/staff-login", loginRouter);
 rootRouter.use("/work-entry", workRouter);
+rootRouter.use("/past-employment", pastEmploymentRouter);
 
 module.exports = rootRouter;
