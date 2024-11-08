@@ -19,10 +19,40 @@ model User {
   otp          Int?
   otpExpiresAt DateTime?
 
-  // Relations
-  clientDetails ClientDetails? @relation
-  adminDetails  AdminDetails?  @relation
-  staffDetails  StaffDetails?  @relation
+  messages        Message[]      @relation("UserMessages")
+  rooms           ChatRoom[]     @relation("UserRooms")
+  clientDetails   ClientDetails? @relation(fields: [clientDetailsId], references: [id])
+  adminDetails    AdminDetails?  @relation(fields: [adminDetailsId], references: [id])
+  staffDetails    StaffDetails?  @relation
+  clientDetailsId String?
+  adminDetailsId  String?
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  CLIENT
+}
+
+model ChatRoom {
+  id      String  @id @default(dbgenerated("gen_random_uuid()"))
+  name    String?
+  isGroup Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  messages  Message[] @relation("RoomMessages")
+  users     User[]    @relation("UserRooms")
+}
+
+model Message {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  content   String
+  timestamp DateTime @default(now())
+
+  sender   User     @relation("UserMessages", fields: [senderId], references: [id])
+  senderId String
+  room     ChatRoom @relation("RoomMessages", fields: [roomId], references: [id])
+  roomId   String
 }
 
 model WorkEntry {
@@ -37,12 +67,6 @@ model WorkEntry {
   staff          StaffDetails? @relation(fields: [staffDetailsId], references: [id], onDelete: Cascade)
 }
 
-enum UserRole {
-  ADMIN
-  STAFF
-  CLIENT
-}
-
 model AdminDetails {
   id            String  @id @default(dbgenerated("gen_random_uuid()"))
   userId        String  @unique
@@ -55,7 +79,7 @@ model AdminDetails {
   date_format   String?
   week_format   String?
 
-  User User @relation(fields: [userId], references: [id])
+  User User[]
 }
 
 model StaffDetails {
@@ -77,6 +101,7 @@ model StaffDetails {
   emergency_contact_relation String?
   emergency_contact_address  String?
 
+  // relations
   department               Department?                  @relation(fields: [departmentId], references: [id])
   role                     Role?                        @relation(fields: [roleId], references: [id])
   User                     User                         @relation(fields: [userId], references: [id])
@@ -205,19 +230,6 @@ model LeavePolicy {
   LeaveRequest LeaveRequest[]
 }
 
-model LeaveBalance {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  staffId     String
-  leaveTypeId String
-  balance     Int      @default(0)
-  used        Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  staff       StaffDetails @relation(fields: [staffId], references: [id])
-  leavePolicy LeavePolicy  @relation(fields: [leaveTypeId], references: [id])
-}
-
 model LeaveRequest {
   id           String             @id @default(dbgenerated("gen_random_uuid()"))
   staffId      String
@@ -228,6 +240,19 @@ model LeaveRequest {
   status       LeaveRequestStatus @default(PENDING)
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
+
+  staff       StaffDetails @relation(fields: [staffId], references: [id])
+  leavePolicy LeavePolicy  @relation(fields: [leaveTypeId], references: [id])
+}
+
+model LeaveBalance {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  staffId     String
+  leaveTypeId String
+  balance     Int      @default(0)
+  used        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   staff       StaffDetails @relation(fields: [staffId], references: [id])
   leavePolicy LeavePolicy  @relation(fields: [leaveTypeId], references: [id])
@@ -723,7 +748,8 @@ model ClientDetails {
   created_at       DateTime  @default(now())
   updated_at       DateTime  @updatedAt
   Project          Project[]
-  User             User      @relation(fields: [userId], references: [id])
+
+  User User[]
 }
 
 model UpiDetails {
