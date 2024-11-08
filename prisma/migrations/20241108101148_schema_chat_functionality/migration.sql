@@ -39,34 +39,45 @@ CREATE TABLE "User" (
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "otp" INTEGER,
     "otpExpiresAt" TIMESTAMP(3),
+    "clientDetailsId" TEXT,
+    "adminDetailsId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "StaffLogin" (
+CREATE TABLE "WorkEntry" (
     "id" TEXT NOT NULL,
-    "mobile" TEXT NOT NULL,
-    "otp" TEXT,
-    "is_verified" BOOLEAN NOT NULL DEFAULT false,
-    "otpExpiresAt" TIMESTAMP(3),
+    "work_name" TEXT NOT NULL,
+    "units" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "attachments" TEXT,
+    "location" TEXT,
+    "staffDetailsId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "StaffLogin_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "WorkEntry_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "WorkEntry" (
-    "id" TEXT NOT NULL,
-    "work_name" TEXT,
-    "units" TEXT,
-    "discription" TEXT,
-    "attachments" TEXT,
-    "location" TEXT,
-    "staffLoginId" TEXT,
+CREATE TABLE "ChatRoom" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "name" TEXT,
+    "isGroup" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "staffDetailsId" TEXT,
 
-    CONSTRAINT "WorkEntry_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ChatRoom_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Message" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "content" TEXT NOT NULL,
+    "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "senderId" TEXT NOT NULL,
+    "roomId" TEXT NOT NULL,
+
+    CONSTRAINT "Message_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -175,6 +186,23 @@ CREATE TABLE "StaffBackgroundVerification" (
 );
 
 -- CreateTable
+CREATE TABLE "PastEmployment" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "company_name" TEXT NOT NULL,
+    "designation" TEXT,
+    "joining_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "leaving_date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "currency" TEXT,
+    "salary" DOUBLE PRECISION,
+    "company_gst" TEXT,
+    "staffId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PastEmployment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "BankDetails" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "staffId" TEXT NOT NULL,
@@ -202,19 +230,6 @@ CREATE TABLE "LeavePolicy" (
 );
 
 -- CreateTable
-CREATE TABLE "LeaveBalance" (
-    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "staffId" TEXT NOT NULL,
-    "leaveTypeId" TEXT NOT NULL,
-    "balance" INTEGER NOT NULL DEFAULT 0,
-    "used" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "LeaveBalance_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "LeaveRequest" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "staffId" TEXT NOT NULL,
@@ -227,6 +242,19 @@ CREATE TABLE "LeaveRequest" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "LeaveRequest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "LeaveBalance" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "staffId" TEXT NOT NULL,
+    "leaveTypeId" TEXT NOT NULL,
+    "balance" INTEGER NOT NULL DEFAULT 0,
+    "used" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "LeaveBalance_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -510,6 +538,7 @@ CREATE TABLE "PunchIn" (
     "qrCodeValue" TEXT,
     "photoUrl" TEXT,
     "location" TEXT NOT NULL,
+    "fine" TEXT,
 
     CONSTRAINT "PunchIn_pkey" PRIMARY KEY ("id")
 );
@@ -524,6 +553,7 @@ CREATE TABLE "PunchOut" (
     "qrCodeValue" TEXT,
     "photoUrl" TEXT,
     "location" TEXT NOT NULL,
+    "overtime" TEXT,
 
     CONSTRAINT "PunchOut_pkey" PRIMARY KEY ("id")
 );
@@ -562,7 +592,6 @@ CREATE TABLE "TaskStatus" (
     "taskStatusName" TEXT NOT NULL,
     "statusColor" TEXT NOT NULL,
     "statusOrder" INTEGER NOT NULL DEFAULT 0,
-    "isHiddenId" TEXT[],
     "canBeChangedId" TEXT[],
 
     CONSTRAINT "TaskStatus_pkey" PRIMARY KEY ("id")
@@ -585,9 +614,6 @@ CREATE TABLE "TaskDetail" (
     "startDate" TEXT NOT NULL,
     "endDate" TEXT,
     "dueDate" TEXT,
-    "selectProjectId" TEXT NOT NULL,
-    "selectDepartmentId" TEXT NOT NULL,
-    "taskAssign" TEXT[],
     "taskDescription" TEXT NOT NULL,
     "taskTag" TEXT,
     "attachFile" TEXT,
@@ -613,17 +639,16 @@ CREATE TABLE "ProjectFiles" (
 CREATE TABLE "Project" (
     "id" TEXT NOT NULL,
     "project_name" TEXT NOT NULL,
-    "customer" TEXT NOT NULL,
     "billing_type" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "total_rate" INTEGER NOT NULL,
     "estimated_hours" INTEGER NOT NULL,
-    "department" TEXT[],
     "start_date" TEXT NOT NULL,
     "deadline" TEXT NOT NULL,
     "tags" TEXT[],
     "description" TEXT NOT NULL,
     "send_mail" BOOLEAN NOT NULL DEFAULT false,
+    "customerId" TEXT,
 
     CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
 );
@@ -744,11 +769,38 @@ CREATE TABLE "Earnings" (
     CONSTRAINT "Earnings_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+-- CreateTable
+CREATE TABLE "_UserRooms" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_staffId" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_departmentId" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_ProjectStaff" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_projectId" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
 
 -- CreateIndex
-CREATE UNIQUE INDEX "StaffLogin_mobile_key" ON "StaffLogin"("mobile");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AdminDetails_userId_key" ON "AdminDetails"("userId");
@@ -764,6 +816,9 @@ CREATE UNIQUE INDEX "AttendanceMode_staffId_key" ON "AttendanceMode"("staffId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "StaffBackgroundVerification_staffId_key" ON "StaffBackgroundVerification"("staffId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PastEmployment_staffId_key" ON "PastEmployment"("staffId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "BankDetails_staffId_key" ON "BankDetails"("staffId");
@@ -819,14 +874,50 @@ CREATE UNIQUE INDEX "ClientDetails_vat_number_key" ON "ClientDetails"("vat_numbe
 -- CreateIndex
 CREATE UNIQUE INDEX "UpiDetails_staffId_key" ON "UpiDetails"("staffId");
 
--- AddForeignKey
-ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffLoginId_fkey" FOREIGN KEY ("staffLoginId") REFERENCES "StaffLogin"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- CreateIndex
+CREATE UNIQUE INDEX "_UserRooms_AB_unique" ON "_UserRooms"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_UserRooms_B_index" ON "_UserRooms"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_staffId_AB_unique" ON "_staffId"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_staffId_B_index" ON "_staffId"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_departmentId_AB_unique" ON "_departmentId"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_departmentId_B_index" ON "_departmentId"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_ProjectStaff_AB_unique" ON "_ProjectStaff"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_ProjectStaff_B_index" ON "_ProjectStaff"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_projectId_AB_unique" ON "_projectId"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_projectId_B_index" ON "_projectId"("B");
 
 -- AddForeignKey
-ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffDetailsId_fkey" FOREIGN KEY ("staffDetailsId") REFERENCES "StaffDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_clientDetailsId_fkey" FOREIGN KEY ("clientDetailsId") REFERENCES "ClientDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AdminDetails" ADD CONSTRAINT "AdminDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_adminDetailsId_fkey" FOREIGN KEY ("adminDetailsId") REFERENCES "AdminDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffDetailsId_fkey" FOREIGN KEY ("staffDetailsId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Message" ADD CONSTRAINT "Message_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -847,22 +938,25 @@ ALTER TABLE "AttendanceMode" ADD CONSTRAINT "AttendanceMode_staffId_fkey" FOREIG
 ALTER TABLE "StaffBackgroundVerification" ADD CONSTRAINT "StaffBackgroundVerification_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "PastEmployment" ADD CONSTRAINT "PastEmployment_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "BankDetails" ADD CONSTRAINT "BankDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LeavePolicy" ADD CONSTRAINT "LeavePolicy_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_leaveTypeId_fkey" FOREIGN KEY ("leaveTypeId") REFERENCES "LeavePolicy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "LeaveRequest" ADD CONSTRAINT "LeaveRequest_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "LeaveRequest" ADD CONSTRAINT "LeaveRequest_leaveTypeId_fkey" FOREIGN KEY ("leaveTypeId") REFERENCES "LeavePolicy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_leaveTypeId_fkey" FOREIGN KEY ("leaveTypeId") REFERENCES "LeavePolicy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CustomDetails" ADD CONSTRAINT "CustomDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -940,10 +1034,10 @@ ALTER TABLE "StartBreak" ADD CONSTRAINT "StartBreak_staffId_fkey" FOREIGN KEY ("
 ALTER TABLE "EndBreak" ADD CONSTRAINT "EndBreak_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TicketInformation" ADD CONSTRAINT "TicketInformation_staffIdd_fkey" FOREIGN KEY ("staffIdd") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Project" ADD CONSTRAINT "Project_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "ClientDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ClientDetails" ADD CONSTRAINT "ClientDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "TicketInformation" ADD CONSTRAINT "TicketInformation_staffIdd_fkey" FOREIGN KEY ("staffIdd") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UpiDetails" ADD CONSTRAINT "UpiDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -953,3 +1047,33 @@ ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_staffId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "Earnings" ADD CONSTRAINT "Earnings_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserRooms" ADD CONSTRAINT "_UserRooms_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_UserRooms" ADD CONSTRAINT "_UserRooms_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_staffId" ADD CONSTRAINT "_staffId_A_fkey" FOREIGN KEY ("A") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_staffId" ADD CONSTRAINT "_staffId_B_fkey" FOREIGN KEY ("B") REFERENCES "TaskStatus"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_departmentId" ADD CONSTRAINT "_departmentId_A_fkey" FOREIGN KEY ("A") REFERENCES "Department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_departmentId" ADD CONSTRAINT "_departmentId_B_fkey" FOREIGN KEY ("B") REFERENCES "TaskDetail"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_ProjectStaff" ADD CONSTRAINT "_ProjectStaff_A_fkey" FOREIGN KEY ("A") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_ProjectStaff" ADD CONSTRAINT "_ProjectStaff_B_fkey" FOREIGN KEY ("B") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_projectId" ADD CONSTRAINT "_projectId_A_fkey" FOREIGN KEY ("A") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_projectId" ADD CONSTRAINT "_projectId_B_fkey" FOREIGN KEY ("B") REFERENCES "TaskDetail"("id") ON DELETE CASCADE ON UPDATE CASCADE;
