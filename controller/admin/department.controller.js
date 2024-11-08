@@ -56,7 +56,11 @@ const updateDepartment = async (req, res) => {
 // Fetch All Department
 
 const fetchDepartment = async (req, res) => {
-  const department = await prisma.department.findMany({});
+  const department = await prisma.department.findMany({
+    include: {
+      TaskDetail: true,
+    }
+  });
   try {
     if (department.length === 0) {
       return res
@@ -64,7 +68,7 @@ const fetchDepartment = async (req, res) => {
         .json({ status: 400, message: "Department not found!" });
     }
     return res.json({ status: 200, data: department });
-  } catch {}
+  } catch { }
 };
 
 // Delete Department By Id
@@ -99,6 +103,9 @@ const showDepartment = async (req, res) => {
       where: {
         id,
       },
+      include: {
+        TaskDetail: true,
+      }
     });
     if (!showDepartment) {
       return res

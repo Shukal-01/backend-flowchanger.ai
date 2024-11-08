@@ -114,6 +114,9 @@ model StaffDetails {
   WorkEntry                WorkEntry[]
   Deduction                Deductions[]
   Earning                  Earnings[]
+  TaskDetail               TaskDetail[]                 @relation("staffId")
+  projects                 Project[]                    @relation("ProjectStaff")
+  TaskStatus               TaskStatus[]                 @relation("staffId")
 }
 
 enum UserType {
@@ -125,6 +128,7 @@ enum UserType {
 model Department {
   id              String         @id @default(dbgenerated("gen_random_uuid()"))
   department_name String
+  TaskDetail      TaskDetail[]   @relation("departmentId")
   staffs          StaffDetails[]
 }
 
@@ -608,12 +612,12 @@ model EndBreak {
 }
 
 model TaskStatus {
-  id             String   @id @default(dbgenerated("gen_random_uuid()"))
+  id             String         @id @default(dbgenerated("gen_random_uuid()"))
   taskStatusName String
   // TaskDetail     TaskDetail[]
   statusColor    String
-  statusOrder    Int      @default(0)
-  isHiddenId     String[]
+  statusOrder    Int            @default(0)
+  isHiddenId     StaffDetails[] @relation("staffId")
   canBeChangedId String[]
 }
 
@@ -624,19 +628,20 @@ model TaskPriority {
 }
 
 model TaskDetail {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()"))
+  id                 String         @id @default(dbgenerated("gen_random_uuid()"))
   taskName           String
   taskStatusId       String
   taskPriorityId     String
   startDate          String
   endDate            String?
   dueDate            String?
-  selectProjectId    String
-  selectDepartmentId String
-  taskAssign         String[]
+  selectProjectId    Project[]      @relation("projectId")
+  selectDepartmentId Department[]   @relation("departmentId")
+  taskAssign         StaffDetails[] @relation("staffId")
   taskDescription    String
   taskTag            String?
   attachFile         String?
+  // taskAssign         StaffDetails[] @relation("staffId")
 }
 
 model ProjectFiles {
@@ -651,19 +656,21 @@ model ProjectFiles {
 }
 
 model Project {
-  id              String   @id @default(uuid())
+  id              String         @id @default(uuid())
   project_name    String
-  customer        String
   billing_type    String
   status          String
   total_rate      Int
   estimated_hours Int
-  department      String[]
   start_date      String
   deadline        String
   tags            String[]
   description     String
-  send_mail       Boolean  @default(false)
+  send_mail       Boolean        @default(false)
+  customerId      String?
+  customerDetails ClientDetails? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  staffId         StaffDetails[] @relation("ProjectStaff")
+  TaskDetail      TaskDetail[]   @relation("projectId")
 }
 
 model TicketInformation {
@@ -697,10 +704,10 @@ model Discussion {
 }
 
 model ClientDetails {
-  id               String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId           String   @unique
+  id               String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId           String    @unique
   company          String
-  vat_number       String   @unique
+  vat_number       String    @unique
   website          String?
   groups           String[]
   currency         String[]
@@ -709,11 +716,12 @@ model ClientDetails {
   country          String
   state            String
   city             String
-  status           Boolean  @default(false)
+  status           Boolean   @default(false)
   zip_code         String
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
-  User             User     @relation(fields: [userId], references: [id])
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  User             User      @relation(fields: [userId], references: [id])
+  Project          Project[]
 }
 
 model UpiDetails {

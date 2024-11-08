@@ -11,10 +11,19 @@ const {
 async function createPunchIn(req, res) {
   try {
     const { punchInMethod, biometricData, qrCodeValue, location } = req.body;
-    const photoUrl = String(req.file);
-    if (!req.file) {
-      return res.status(400).send("No file uploaded.");
+
+    if (punchInMethod === "PHOTOCLICK" && !req.file.cloudinaryUrl) {
+      return res.status(400).send("No photo uploaded.");
     }
+
+    // const photoUrl = String(req.file);
+    // if (!req.file) {
+    //   return res.status(400).send("No file uploaded.");
+    // }
+
+    // Set photoUrl as the Cloudinary URL
+    // const photoUrl = req.cloudinaryUrl;
+    const photoUrl = req.file.cloudinaryUrl || "null";
 
     // Validate input using zod schema
     PunchInSchema.parse({
@@ -28,7 +37,7 @@ async function createPunchIn(req, res) {
     let punchInData = { punchInMethod, location };
 
     if (punchInMethod === "PHOTOCLICK") {
-      punchInData = { ...punchInData, photoUrl: req.savedFilename };
+      punchInData = { ...punchInData, photoUrl };// Use Cloudinary URL
     } else if (punchInMethod === "QRSCAN") {
       punchInData = { ...punchInData, qrCodeValue };
     } else if (punchInMethod === "BIOMETRIC") {
@@ -99,8 +108,6 @@ async function createPunchIn(req, res) {
 }
 
 
-
-
 async function getAllPunchIn(req, res) {
   try {
     const records = await prisma.punchIn.findMany();
@@ -116,11 +123,11 @@ async function getAllPunchIn(req, res) {
 async function createPunchOut(req, res) {
   try {
     const { punchOutMethod, biometricData, qrCodeValue, location } = req.body;
-    const photoUrl = String(req.file);
-    if (!req.file) {
-      return res.status(400).send("No file uploaded.");
-    }
-
+    // const photoUrl = String(req.file);
+    // if (!req.file) {
+    //   return res.status(400).send("No file uploaded.");
+    // }
+    const photoUrl = req.file.cloudinaryUrl || "null";
     // Validate input using zod schema
     PunchOutSchema.parse({
       punchOutMethod,
@@ -133,7 +140,7 @@ async function createPunchOut(req, res) {
     let punchOutData = { punchOutMethod, location };
 
     if (punchOutMethod === "PHOTOCLICK") {
-      punchOutData = { ...punchOutData, photoUrl: req.savedFilename };
+      punchOutData = { ...punchOutData, photoUrl };
     } else if (punchOutMethod === "QRSCAN") {
       punchOutData = { ...punchOutData, qrCodeValue };
     } else if (punchOutMethod === "BIOMETRIC") {

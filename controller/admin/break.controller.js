@@ -11,10 +11,11 @@ async function createStartBreak(req, res) {
     try {
         const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
         // const photoUrl = JSON.stringify(req.file);
-        const photoUrl = String(req.file);
-        if (!req.file) {
-            return res.status(400).send("No file uploaded.");
-        }
+        // const photoUrl = String(req.file);
+        // if (!req.file) {
+        //     return res.status(400).send("No file uploaded.");
+        // }
+        const photoUrl = req.file.cloudinaryUrl || "null";
 
         // Validate input using zod schema
         StartBreakSchema.parse({
@@ -25,12 +26,12 @@ async function createStartBreak(req, res) {
             photoUrl,
             location
         });
-
+        // console.log(req.body)
         // Check if there’s an existing startBreak without an endBreak for the same staffId
         const existingStartBreak = await prisma.startBreak.findFirst({
             where: {
                 staffId,
-                endBreak: null  // Ensure no endBreak is associated
+                // endBreak: null  // Ensure no endBreak is associated
             }
         });
 
@@ -40,18 +41,14 @@ async function createStartBreak(req, res) {
 
         let breakData = { breakMethod, location, staffId };
 
-        // console.log(location);
-        // Determine the method of punch-in and set the appropriate data
         if (breakMethod === "PHOTOCLICK") {
-            // punchInData = { ...punchInData, photoUrl: req.file.originalname };
-            breakData = { ...breakData, photoUrl: req.savedFilename };
+            breakData = { ...breakData, photoUrl };
         } else if (breakMethod === "QRSCAN") {
             breakData = { ...breakData, qrCodeValue };
         } else if (breakMethod === "BIOMETRIC") {
             breakData = { ...breakData, biometricData };
         }
 
-        // Create the punch-in record in the database
         const startBreak = await prisma.startBreak.create({
             data: {
                 breakMethod: breakMethod || "PHOTOCLICK", // default to PHOTOCLICK if not provided
@@ -101,10 +98,11 @@ async function createEndBreak(req, res) {
     try {
         const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
         // const photoUrl = JSON.stringify(req.file);
-        const photoUrl = String(req.file);
-        if (!req.file) {
-            return res.status(400).send("No file uploaded.");
-        }
+        // const photoUrl = String(req.file);
+        // if (!req.file) {
+        //     return res.status(400).send("No file uploaded.");
+        // }
+        const photoUrl = req.file.cloudinaryUrl || "null";
 
         // Validate input using zod schema
         EndBreakSchema.parse({
@@ -119,7 +117,7 @@ async function createEndBreak(req, res) {
         // Check if a startBreak exists for this staffId
         const existingStartBreak = await prisma.startBreak.findFirst({
             where: { staffId },
-            orderBy: { createdAt: 'desc' } // Order by the most recent startBreak
+            orderBy: { startBreakTime: 'desc' } // Order by the most recent startBreak
         });
 
         if (!existingStartBreak) {
@@ -133,7 +131,7 @@ async function createEndBreak(req, res) {
         // Determine the method of punch-in and set the appropriate data
         if (breakMethod === "PHOTOCLICK") {
             // punchInData = { ...punchInData, photoUrl: req.file.originalname };
-            breakData = { ...breakData, photoUrl: req.savedFilename };
+            breakData = { ...breakData, photoUrl };
         } else if (breakMethod === "QRSCAN") {
             breakData = { ...breakData, qrCodeValue };
         } else if (breakMethod === "BIOMETRIC") {

@@ -34,7 +34,7 @@ const addWorkEntry = async (req, res) => {
         work_name: work_name,
         units: units,
         discription: description, // Corrected field
-        attachments: file_name,
+        attachments: req.file.cloudinaryUrl,
         location: location,
         staffLoginId: staffLoginId,
       },
@@ -70,7 +70,7 @@ const getAllWorkEntry = async (req, res) => {
 // update work entry
 const updateWorkEntry = async (req, res) => {
   const { id } = req.params;
-  const { work_name, units, discription, location } = req.body;
+  const { work_name, units, discription, location, attachments } = req.body;
   try {
     const updateWorkEntry = await prisma.workEntry.update({
       where: { id: id },
@@ -78,7 +78,8 @@ const updateWorkEntry = async (req, res) => {
         work_name: work_name,
         units: units,
         discription: discription,
-        location: location
+        location: location,
+        attachments: req.file.cloudinaryUrl,
       },
     });
     return res.status(200).json({ status: 200, message: "Work Entry Updated Successfully!", data: updateWorkEntry });

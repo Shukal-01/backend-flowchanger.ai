@@ -94,8 +94,8 @@ const updateStaffBgVerifcation = async (req, res) => {
 
         const { id, verificationType } = req.params;
         const verificationData = req.body;
-         
-        const verificationFile = req.file;
+
+        const verificationFile = req.file.cloudinaryUrl;
 
 
         // Collect the new fields based on verification type

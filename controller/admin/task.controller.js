@@ -119,7 +119,7 @@ async function updateTaskStatus(req, res) {
 
     // Update the task status in the database
     const updatedTaskStatus = await prisma.taskStatus.update({
-      where: { id: Number(id) }, // Convert ID to a number if necessary
+      where: { id: id }, // Convert ID to a number if necessary
       data: TaskStatusResult.data,
     });
 
@@ -195,7 +195,7 @@ async function updateTaskPriority(req, res) {
 
     // Update the task priority in the database
     const updatedTaskPriority = await prisma.taskPriority.update({
-      where: { id: Number(id) }, // Convert ID to a number if necessary
+      where: { id: id }, // Convert ID to a number if necessary
       data: taskPriorityResult.data,
     });
 
@@ -242,7 +242,7 @@ async function createTaskDetail(req, res) {
       taskAssign,
       taskDescription,
       taskTag,
-      attachFile: req.savedFilename,
+      attachFile: req.file.cloudinaryUrl,
     });
 
     console.log(taskDetailResult);
@@ -322,7 +322,7 @@ async function updateTaskDetail(req, res) {
       taskDescription,
       taskTag,
     } = req.body;
-    const attachFile = req.file ? req.savedFilename : null; // Check if a new file is uploaded
+    // const attachFile = req.file ? req.savedFilename : null; // Check if a new file is uploaded
 
     // Validate the input data using Zod schema
     const taskDetailResult = TaskDetailSchema.safeParse({
@@ -337,7 +337,7 @@ async function updateTaskDetail(req, res) {
       taskAssign,
       taskDescription,
       taskTag,
-      attachFile,
+      attachFile: req.file.cloudinaryUrl,
     });
 
     if (!taskDetailResult.success) {

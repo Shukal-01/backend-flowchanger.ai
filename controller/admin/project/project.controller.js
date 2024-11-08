@@ -5,17 +5,16 @@ const { projectSchema } = require("../../../utils/validations.js");
 const app = express();
 const prisma = new PrismaClient();
 
-// Add Project Query............................
 
 const addProject = async (req, res) => {
     const {
+        staffId,
         project_name,
-        customer,
+        customerId,
         billing_type,
         status,
         total_rate,
         start_date,
-        department,
         deadline,
         description,
         tags,
@@ -25,19 +24,20 @@ const addProject = async (req, res) => {
 
     // Validate request body using projectSchema
     const validationResult = projectSchema.safeParse({
+        staffId,
         project_name,
-        customer,
+        customerId,
         billing_type,
         status,
         total_rate,
         start_date,
-        department,
         deadline,
         description,
         tags,
         estimated_hours,
         send_mail
     });
+    console.log(validationResult);
 
     // If validation fails, return a 400 error with validation issues
     if (!validationResult.success) {
@@ -52,20 +52,25 @@ const addProject = async (req, res) => {
         const createdProject = await prisma.project.create({
             data: {
                 project_name: validationResult.data.project_name,
-                customer: validationResult.data.customer,
+                customerId: validationResult.data.customerId,
+                staffId: {
+                    connect: validationResult.data.staffId.map(id => ({ id }))
+                },
                 billing_type: validationResult.data.billing_type,
                 status: validationResult.data.status,
                 total_rate: validationResult.data.total_rate,
                 start_date: validationResult.data.start_date,
-                department: validationResult.data.department,
                 deadline: validationResult.data.deadline,
                 description: validationResult.data.description,
                 tags: validationResult.data.tags,
                 estimated_hours: validationResult.data.estimated_hours,
                 send_mail: validationResult.data.send_mail
-            }
+            },
+            include: {
+                staffId: true
+            },
         });
-
+        console.log(createdProject);
         return res.status(201).json({ status: 201, data: createdProject, msg: "Project Created Successfully" });
     } catch (error) {
         console.error("Error creating project:", error);
@@ -82,11 +87,16 @@ const addProject = async (req, res) => {
 
 
 
+
 // Fetch All Project Query............................
 
 const getProject = async (req, res) => {
     // const ProjectID = req.params.id;      
-    const Projects = await prisma.project.findMany({});
+    const Projects = await prisma.project.findMany({
+        include: {
+            TaskDetail: true,
+        }
+    });
     try {
         if (Projects.length === 0) {
             return res.status(400).json({ status: 400, message: "users not found!" });
@@ -106,7 +116,7 @@ const showProject = async (req, res) => {
     });
     try {
         if (Projects.length === 0) {
-            return res.status(400).json({ status: 400, message: "Project not found!" });
+            return res.status(400).json({ status: 400, message: "Show Project not found!" });
         }
         return res.json({ status: 200, data: Projects });
     } catch { }
@@ -126,7 +136,7 @@ const deleteProject = async (req, res) => {
         return res.json({ status: 200, message: "Project deleted successfully!", deletedProject });
     } catch (error) {
         if (error.code) {
-            return res.status(404).json({ status: 404, message: "Project not found!" });
+            return res.status(404).json({ status: 404, message: "Delete Project not found!" });
         }
     }
 }
@@ -137,28 +147,29 @@ const updateProject = async (req, res) => {
     const projectID = req.params.id;
     try {
         const {
+            staffId,
             project_name,
-            customer,
+            customerId,
             billing_type,
             status,
             total_rate,
             start_date,
-            department,
             deadline,
             description,
             tags,
             estimated_hours,
             send_mail
         } = req.body;
+
         // Validate request body using projectSchema
         const validationResult = projectSchema.safeParse({
+            staffId,
             project_name,
-            customer,
+            customerId,
             billing_type,
             status,
             total_rate,
             start_date,
-            department,
             deadline,
             description,
             tags,
@@ -180,27 +191,54 @@ const updateProject = async (req, res) => {
             },
             data: {
                 project_name: validationResult.data.project_name,
-                customer: validationResult.data.customer,
+                customerId: validationResult.data.customerId,
+                staffId: {
+                    connect: validationResult.data.staffId.map(id => ({ id }))
+                },
                 billing_type: validationResult.data.billing_type,
                 status: validationResult.data.status,
                 total_rate: validationResult.data.total_rate,
                 start_date: validationResult.data.start_date,
-                department: validationResult.data.department,
                 deadline: validationResult.data.deadline,
                 description: validationResult.data.description,
                 tags: validationResult.data.tags,
                 estimated_hours: validationResult.data.estimated_hours,
                 send_mail: validationResult.data.send_mail
             },
+            include: {
+                staffId: true
+            },
         })
         return res.json({ status: 200, message: "Project updated successfully!" });
     } catch (error) {
         if (error.code) {
-            return res.status(400).json({ status: 400, message: "Project not found!" });
+            return res.status(400).json({ status: 400, message: "Update Project not found!" });
         }
     }
 
 }
 
+// Search Project Query............................
 
-module.exports = { addProject, updateProject, deleteProject, showProject, getProject }
+const SearchingProjectsByName = async (req, res) => {
+    const { project_name } = req.query;
+    console.log(project_name);
+    try {
+        const projects = await prisma.project.findMany({
+            where: {
+                project_name: {
+                    contains: project_name,
+                    mode: 'insensitive',
+                },
+            },
+        });
+        res.status(200).json(projects);
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+
+module.exports = { addProject, updateProject, deleteProject, showProject, getProject, SearchingProjectsByName }
