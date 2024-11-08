@@ -211,18 +211,19 @@ model StaffBackgroundVerification {
 }
 
 model PastEmployment {
-  id           String        @id @default(dbgenerated("gen_random_uuid()"))
-  company_name String
-  designation  String?
-  joining_date DateTime      @default(now())
-  leaving_date DateTime      @default(now())
-  currency     String?
-  salary       Float?
-  company_gst  String?
-  staff        StaffDetails? @relation(fields: [staffId], references: [id])
-  staffId      String?       @unique
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id                     String             @id @default(dbgenerated("gen_random_uuid()"))
+  company_name           String
+  designation            String?
+  joining_date           DateTime           @default(now())
+  leaving_date           DateTime           @default(now())
+  currency               String?
+  salary                 Float?
+  company_gst            String?
+  past_Employment_status VerificationStatus @default(PENDING)
+  staff                  StaffDetails?      @relation(fields: [staffId], references: [id])
+  staffId                String?            @unique
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 }
 
 model BankDetails {

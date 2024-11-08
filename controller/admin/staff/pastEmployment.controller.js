@@ -1,30 +1,31 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { pastEmploymentSchema } = require("../../../utils/validations");
 
 // Create Past Employment
 const createPastEmployment = async (req, res) => {
-  const {
-    staffId,
-    company_name,
-    designation,
-    joining_date,
-    leaving_date,
-    currency,
-    salary,
-    company_gst,
-  } = req.body;
-
   try {
+    const validationResult = pastEmploymentSchema.safeParse(req.body);
+
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: validationResult.error.errors,
+      });
+    }
+
+    // console.log(validationResult.data);
+
     const newEmployment = await prisma.pastEmployment.create({
       data: {
-        staffId,
-        company_name,
-        designation,
-        joining_date: joining_date,
-        leaving_date: leaving_date,
-        currency,
-        salary: parseFloat(salary),
-        company_gst,
+        staffId: validationResult.data.staffId,
+        company_name: validationResult.data.company_name,
+        designation: validationResult.data.designation,
+        joining_date: validationResult.data.joining_date,
+        leaving_date: validationResult.data.leaving_date,
+        currency: validationResult.data.currency,
+        salary: parseFloat(validationResult.data.salary),
+        company_gst: validationResult.data.company_gst,
       },
     });
     res.status(201).json(
@@ -79,27 +80,27 @@ const getPastEmploymentById = async (req, res) => {
 // Update Past Employment by ID
 const updatePastEmployment = async (req, res) => {
   const { id } = req.params;
-  const {
-    company_name,
-    designation,
-    joining_date,
-    leaving_date,
-    currency,
-    salary,
-    company_gst,
-  } = req.body;
+  const validationResult = pastEmploymentSchema.safeParse(req.body);
+
+  if (!validationResult.success) {
+    return res.status(400).json({
+      error: "Validation failed",
+      details: validationResult.error.errors,
+    });
+  }
+
 
   try {
     const updatedEmployment = await prisma.pastEmployment.update({
       where: { staffId: id },
       data: {
-        company_name,
-        designation,
-        joining_date: joining_date,
-        leaving_date: leaving_date,
-        currency,
-        salary: parseFloat(salary),
-        company_gst,
+        company_name: validationResult.data.company_name,
+        designation: validationResult.data.designation,
+        joining_date: validationResult.data.joining_date,
+        leaving_date: validationResult.data.leaving_date,
+        currency: validationResult.data.currency,
+        salary: parseFloat(validationResult.data.salary),
+        company_gst: validationResult.data.company_gst,
       },
     });
     res.status(200).json(

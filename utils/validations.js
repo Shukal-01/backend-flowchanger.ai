@@ -2,6 +2,21 @@ const z = require("zod");
 
 const idSchema = z.string().uuid("Invalid UUID format");
 
+const pastEmploymentSchema = z.object({
+  id: z.string().optional(), // UUID is generated, so it can be optional
+  company_name: z.string().min(1, "Company name is required."),
+  designation: z.string().optional(),
+  joining_date: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()),
+  leaving_date: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()),
+  currency: z.string().optional(),
+  salary: z.number().optional(),
+  company_gst: z.string().optional(),
+  staffId: z.string().optional(), // UUID format is optional if not linked initially
+  createdAt: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()).optional(),
+  updatedAt: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()).optional()
+});
+
+
 const allPermissionSchema = z.object({
   clients_permissions: z
     .object({
@@ -639,6 +654,7 @@ module.exports = {
   projectPrioritySchema,
   salaryDetailsSchema,
   deductionsEarningsSchema,
-  projectSchema
+  projectSchema,
+  pastEmploymentSchema
 };
 
