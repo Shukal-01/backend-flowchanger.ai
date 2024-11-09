@@ -563,7 +563,7 @@ const projectStatusSchema = z.object({
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
   project_name: z.string().min(1, "required"),
-  customer: z.string().min(1, "required"),
+  customerId: z.string().min(1, "required"),
   billing_type: z.string().min(1, "required"),
   status: z.string().min(1, "required"),
   total_rate: z.number().positive("Total rate must be a positive number").min(1, "required"),

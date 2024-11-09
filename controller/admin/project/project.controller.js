@@ -92,34 +92,35 @@ const addProject = async (req, res) => {
 
 const getProject = async (req, res) => {
     // const ProjectID = req.params.id;      
-    const Projects = await prisma.project.findMany({
-        include: {
-            TaskDetail: true,
-        }
-    });
     try {
-        if (Projects.length === 0) {
-            return res.status(400).json({ status: 400, message: "users not found!" });
-        }
+        const Projects = await prisma.project.findMany({
+            include: {
+                TaskDetail: true,
+            }
+        });
+        // if (Projects.length === 0) {
+        //     return res.status(400).json({ status: 400, message: "users not found!" });
+        // }
         return res.json({ status: 200, data: Projects });
-    } catch { }
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "failed to get projects, server error" });
+    }
 }
 
 // Show By ID Project Query............................
 
 const showProject = async (req, res) => {
-    const ProjectID = req.params.id;
-    const Projects = await prisma.project.findMany({
-        where: {
-            id: ProjectID,
-        },
-    });
     try {
-        if (Projects.length === 0) {
-            return res.status(400).json({ status: 400, message: "Show Project not found!" });
-        }
+        const ProjectID = req.params.id;
+        const Projects = await prisma.project.findMany({
+            where: {
+                id: ProjectID,
+            },
+        });
         return res.json({ status: 200, data: Projects });
-    } catch { }
+    } catch (error) {
+        return res.status(500).json({ status: 500, message: "failed to get projects, server error" });
+    }
 }
 
 
