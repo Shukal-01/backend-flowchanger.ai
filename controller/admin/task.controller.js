@@ -60,7 +60,11 @@ async function createTaskStatus(req, res) {
 
 async function getAllTaskStatus(req, res) {
   try {
-    const taskStatus = await prisma.taskStatus.findMany();
+    const taskStatus = await prisma.taskStatus.findMany({
+      include: {
+        isHiddenId: true, // Include the isHiddenId relation in the response
+      },
+    });
     res.status(200).json(taskStatus);
   } catch (error) {
     console.log(error);
