@@ -19,13 +19,11 @@ model User {
   otp          Int?
   otpExpiresAt DateTime?
 
-  messages        Message[]      @relation("UserMessages")
-  rooms           ChatRoom[]     @relation("UserRooms")
-  clientDetails   ClientDetails? @relation(fields: [clientDetailsId], references: [id])
-  adminDetails    AdminDetails?  @relation(fields: [adminDetailsId], references: [id])
-  staffDetails    StaffDetails?  @relation
-  clientDetailsId String?
-  adminDetailsId  String?
+  messages      Message[]      @relation("UserMessages")
+  rooms         ChatRoom[]     @relation("UserRooms")
+  clientDetails ClientDetails?
+  adminDetails  AdminDetails?
+  staffDetails  StaffDetails?
 }
 
 model WorkEntry {
@@ -79,7 +77,7 @@ model AdminDetails {
   date_format   String?
   week_format   String?
 
-  User User[]
+  user User @relation(fields: [userId], references: [id])
 }
 
 model StaffDetails {
@@ -752,7 +750,7 @@ model ClientDetails {
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
-  User    User[]
+  user    User      @relation(fields: [userId], references: [id])
   Project Project[]
 }
 

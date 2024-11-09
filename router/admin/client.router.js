@@ -8,6 +8,7 @@ const {
   changeStatus,
   createClient,
   searchClientByCompanyOrVatNumber,
+  loginClient,
 } = require("../../controller/admin/client/detail.controller");
 
 const clientRouter = Router();
@@ -31,5 +32,6 @@ clientRouter.delete("/:id", deleteSpecificClient);
 
 // search for a specific client By Name
 clientRouter.get("/search", searchClientByCompanyOrVatNumber)
+clientRouter.post("/login", loginClient);
 
 module.exports = clientRouter;

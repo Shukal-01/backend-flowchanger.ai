@@ -1,7 +1,49 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { clientSchema, idSchema } = require("../../../utils/validations.js");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
+
+const searchClientByCompanyOrVatNumber = async (req, res) => {
+  const { company, vat_number } = req.query;
+
+  try {
+    const whereDataArray = {};
+    if (company) {
+      whereDataArray.company = {
+        contains: company,
+        mode: 'insensitive',
+      };
+    }
+    if (vat_number) {
+      whereDataArray.vat_number = {
+        contains: vat_number,
+        mode: 'insensitive',
+      };
+    }
+    const clients = await prisma.clientDetails.findMany({
+      where: whereDataArray,
+    });
+    if (clients.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "Client not found",
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      data: clients,
+      message: "Client details Search successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching client by name:", error);
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while fetching the client details",
+    });
+  }
+};
 const createClient = async (req, res) => {
   const validation = clientSchema.safeParse(req.body);
 
@@ -36,6 +78,7 @@ const createClient = async (req, res) => {
         is_verified: false,
         mobile: phone,
         name: req.body.name,
+        password: await bcrypt.hash(req.body.password, 10),
       },
     });
     const clientDetails = await prisma.clientDetails.create({
@@ -77,11 +120,7 @@ const fetchAllClients = async (req, res) => {
       },
     });
 
-    return res.status(200).json({
-      status: true,
-      data: clients,
-      message: "Fetched all client data successfully",
-    });
+    return res.status(200).json(clients);
   } catch (error) {
     console.error("Error fetching all clients:", error);
     return res.status(500).json({
@@ -268,46 +307,48 @@ const fetchClientInfoSpecificID = async (req, res) => {
   }
 };
 
-// Search Client Data By Company or VAT Number --------------------------------
+const loginClient = (req, res) => {
+  const { email, password } = req.body;
 
-const searchClientByCompanyOrVatNumber = async (req, res) => {
-  const { company, vat_number } = req.query;
-
-  try {
-    const whereDataArray = {};
-    if (company) {
-      whereDataArray.company = {
-        contains: company,
-        mode: 'insensitive',
-      };
-    }
-    if (vat_number) {
-      whereDataArray.vat_number = {
-        contains: vat_number,
-        mode: 'insensitive',
-      };
-    }
-    const clients = await prisma.clientDetails.findMany({
-      where: whereDataArray,
-    });
-    if (clients.length === 0) {
-      return res.status(404).json({
-        status: false,
-        message: "Client not found",
-      });
-    }
-    return res.status(200).json({
-      status: true,
-      data: clients,
-      message: "Client details Search successfully",
-    });
-  } catch (error) {
-    console.error("Error fetching client by name:", error);
-    return res.status(500).json({
+  if (!email || !password) {
+    return res.status(400).json({
       status: false,
-      message: "An error occurred while fetching the client details",
+      message: "Email and password are required",
     });
   }
+
+  prisma.user
+    .findUnique({
+      where: { email, role: "CLIENT" },
+    })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: "User not found",
+        });
+      }
+      const isPasswordMatch = bcrypt.compareSync(password, user.password);
+      if (!isPasswordMatch) {
+        return res.status(401).json({
+          status: false,
+          message: "Invalid password",
+        });
+      }
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
+      return res.status(200).json({
+        status: true,
+        message: "Login successful",
+        token,
+      });
+    })
+    .catch((error) => {
+      console.error("Error during login:", error);
+      return res.status(500).json({
+        status: false,
+        message: "An error occurred during login",
+      });
+    });
 };
 
 module.exports = {
@@ -317,5 +358,6 @@ module.exports = {
   deleteSpecificClient,
   fetchClientInfoSpecificID,
   changeStatus,
-  searchClientByCompanyOrVatNumber,
+  loginClient,
+  searchClientByCompanyOrVatNumber
 };

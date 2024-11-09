@@ -568,12 +568,12 @@ const projectSchema = z.object({
   status: z.string().min(1, "required"),
   total_rate: z.number().positive("Total rate must be a positive number").min(1, "required"),
   estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "required"),
-  department: z.array(z.string().min(1, "required")),
   start_date: z.string().min(1, "required"),
   deadline: z.string().min(1, "required"),
   tags: z.array(z.string().min(1, "required")),
   description: z.string().min(1, "required"),
-  send_mail: z.boolean().default(false)
+  send_mail: z.boolean().default(false),
+  staffId: z.array(z.string()).min(1, "Select at least one option for Staff Id"),
 });
 
 // project Priority Schema

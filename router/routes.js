@@ -70,7 +70,6 @@ rootRouter.use("/work-entry", workRouter);
 rootRouter.use("/past-employment", pastEmploymentRouter);
 
 rootRouter.use("/chat", ChatRouter);
-
 rootRouter.use("/message", MessageRouter);
 
 module.exports = rootRouter;
