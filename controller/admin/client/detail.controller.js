@@ -99,7 +99,7 @@ const createClient = async (req, res) => {
       },
     });
 
-    res.status(201).json(newClient);
+    res.status(201).json(clientDetails);
   } catch (error) {
     console.error(error);
     res.status(500).json({
