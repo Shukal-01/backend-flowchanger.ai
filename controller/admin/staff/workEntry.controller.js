@@ -1,20 +1,22 @@
 const { PrismaClient } = require("@prisma/client");
 const nodemailer = require("nodemailer");
 const upload = require('../../../middleware/upload.js');
+const { workEntrySchema } = require("../../../utils/validations.js");
 const prisma = new PrismaClient();
 
 // Add Work Entry Query
 const addWorkEntry = async (req, res) => {
   try {
-    const { staffDetailsId, work_name, units, attachments, discription, location } = req.body;
+    const { staffDetailsId, work_name, units, discription, location } = req.body;
     const file_name = req.file ? req.file.originalname : "";
-
+    const attachments = req.file.cloudinaryUrl
     const validation = workEntrySchema.safeParse({
       staffDetailsId,
       work_name,
       units,
       discription,
       location,
+      attachments
     });
     console.log(validation);
     if (validation.error) {
@@ -50,7 +52,7 @@ const addWorkEntry = async (req, res) => {
         work_name: work_name,
         units: units,
         discription: discription,
-        attachments: file_name ? file_name : null,
+        attachments: attachments,
         location: location,
         staffDetailsId: staffDetailsId,
       },
@@ -86,7 +88,8 @@ const getAllWorkEntry = async (req, res) => {
 // update work entry
 const updateWorkEntry = async (req, res) => {
   const { id } = req.params;
-  const { work_name, units, discription, location, attachments } = req.body;
+  const { work_name, units, discription, location } = req.body;
+  const attachments = req.file.cloudinaryUrl
   const file_name = req.file ? req.file.originalname : null;
   try {
     const updateWorkEntry = await prisma.workEntry.update({
@@ -96,7 +99,7 @@ const updateWorkEntry = async (req, res) => {
         units: units,
         discription: discription,
         location: location,
-        attachments: file_name
+        attachments: attachments
       },
     });
     return res.status(200).json({ status: 200, message: "Work Entry Updated Successfully!", data: updateWorkEntry });
