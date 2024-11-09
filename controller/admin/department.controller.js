@@ -56,11 +56,7 @@ const updateDepartment = async (req, res) => {
 // Fetch All Department
 
 const fetchDepartment = async (req, res) => {
-  const department = await prisma.department.findMany({
-    include: {
-      TaskDetail: true,
-    }
-  });
+  const department = await prisma.department.findMany({});
   try {
     if (department.length === 0) {
       return res
@@ -103,9 +99,6 @@ const showDepartment = async (req, res) => {
       where: {
         id,
       },
-      include: {
-        TaskDetail: true,
-      }
     });
     if (!showDepartment) {
       return res

@@ -27,15 +27,15 @@ model User {
 }
 
 model WorkEntry {
-  id             String        @id @default(uuid())
+  id             String       @id @default(uuid())
   work_name      String
   units          String
-  description    String
+  discription    String
   attachments    String?
-  location       String?
-  staffDetailsId String?
-  createdAt      DateTime      @default(now())
-  staff          StaffDetails? @relation(fields: [staffDetailsId], references: [id], onDelete: Cascade)
+  location       String
+  staffDetailsId String
+  createdAt      DateTime     @default(now())
+  StaffDetails   StaffDetails @relation(fields: [staffDetailsId], references: [id], onDelete: Cascade)
 }
 
 enum UserRole {

@@ -6,8 +6,24 @@ const prisma = new PrismaClient();
 // Add Work Entry Query
 const addWorkEntry = async (req, res) => {
   try {
-    const { staffLoginId, work_name, units, attachments, description, location } = req.body;
-    const file_name = req.file ? req.file.originalname : null;
+    const { staffDetailsId, work_name, units, attachments, discription, location } = req.body;
+    const file_name = req.file ? req.file.originalname : "";
+
+    const validation = workEntrySchema.safeParse({
+      staffDetailsId,
+      work_name,
+      units,
+      discription,
+      location,
+    });
+    console.log(validation);
+    if (validation.error) {
+      return res.status(400).json({
+        status: 400,
+        msg: "Invalid request data",
+        errors: validation.error.issues.map(issue => issue.message)
+      });
+    }
 
     // Get today's date (set time to midnight)
     const today = new Date();
@@ -16,7 +32,7 @@ const addWorkEntry = async (req, res) => {
     // Check if a work entry already exists for today
     const existingEntry = await prisma.workEntry.findFirst({
       where: {
-        staffLoginId: staffLoginId,
+        staffDetailsId: validation.data.staffDetailsId,
         createdAt: {
           gte: today,                       // Start of today
           lt: new Date(today.getTime() + 86400000) // Start of tomorrow
@@ -25,7 +41,7 @@ const addWorkEntry = async (req, res) => {
     });
 
     if (existingEntry) {
-      return res.status(400).json({ status: 400, message: "You cannot create more than one entry per day." });
+      return res.json({ message: "You cannot create more than one entry per day." });
     }
 
     // Create new work entry if no existing entry found for today
@@ -33,17 +49,17 @@ const addWorkEntry = async (req, res) => {
       data: {
         work_name: work_name,
         units: units,
-        discription: description, // Corrected field
-        attachments: req.file.cloudinaryUrl,
+        discription: discription,
+        attachments: file_name ? file_name : null,
         location: location,
-        staffLoginId: staffLoginId,
+        staffDetailsId: staffDetailsId,
       },
     });
-
-    return res.status(200).json({ status: 200, message: "Work Entry Created Successfully!", data: newWorkEntry });
+    console.log(newWorkEntry);
+    return res.status(201).json({ status: 201, message: "Work Entry Created Successfully!", data: newWorkEntry });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ status: 500, message: "An error occurred while creating the work entry" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error!" });
   }
 };
 
@@ -57,13 +73,13 @@ const getAllWorkEntry = async (req, res) => {
   try {
     const getAllWorkEntry = await prisma.workEntry.findMany({
       where: {
-        staffLoginId: req.params.id
+        staffDetailsId: req.params.id
       }
     });
     return res.status(200).json({ status: 200, message: "All Work Entry Data!", data: getAllWorkEntry });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ status: 500, message: "An error occurred while fetching all work entry data" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
   }
 }
 
@@ -71,6 +87,7 @@ const getAllWorkEntry = async (req, res) => {
 const updateWorkEntry = async (req, res) => {
   const { id } = req.params;
   const { work_name, units, discription, location, attachments } = req.body;
+  const file_name = req.file ? req.file.originalname : null;
   try {
     const updateWorkEntry = await prisma.workEntry.update({
       where: { id: id },
@@ -79,13 +96,13 @@ const updateWorkEntry = async (req, res) => {
         units: units,
         discription: discription,
         location: location,
-        attachments: req.file.cloudinaryUrl,
+        attachments: file_name
       },
     });
     return res.status(200).json({ status: 200, message: "Work Entry Updated Successfully!", data: updateWorkEntry });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ status: 500, message: "An error occurred while updating the work entry" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
   }
 }
 
@@ -99,7 +116,7 @@ const deleteWorkEntry = async (req, res) => {
     return res.status(200).json({ status: 200, message: "Work Entry Deleted Successfully!" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ status: 500, message: "An error occurred while deleting the work entry" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
   }
 }
 
@@ -113,7 +130,7 @@ const getWorkEntryById = async (req, res) => {
     return res.status(200).json({ status: 200, message: "Work Entry Data!", data: getWorkEntryById });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ status: 500, message: "An error occurred while fetching work entry data" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
   }
 }
 

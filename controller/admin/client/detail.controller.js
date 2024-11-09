@@ -148,19 +148,19 @@ const updateSpecificClient = async (req, res) => {
   } = req.body;
 
   try {
-    const validateId = idSchema.safeParse(id);
-    const validateNewClientData = clientSchema.safeParse(req.body);
+    // const validateId = idSchema.safeParse(id);
+    // const validateNewClientData = clientSchema.safeParse(req.body);
 
-    if (!validateNewClientData.success || !validateId.success) {
-      console.log(validateNewClientData, validateId);
-      return res.status(400).json({
-        success: false,
-        message: "Invalid updated client data or id provided",
-      });
-    }
+    // if (!validateNewClientData.success || !validateId.success) {
+    //   console.log(validateNewClientData, validateId);
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid updated client data or id provided",
+    //   });
+    // }
 
     const updatedClient = await prisma.clientDetails.update({
-      where: { id },
+      where: { id: id },
       data: {
         company,
         vat_number,
