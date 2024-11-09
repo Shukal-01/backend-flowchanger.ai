@@ -7,6 +7,7 @@ const {
   deleteSpecificClient,
   changeStatus,
   createClient,
+  loginClient,
 } = require("../../controller/admin/client/detail.controller");
 
 const clientRouter = Router();
@@ -27,5 +28,7 @@ clientRouter.get("/:id", fetchClientInfoSpecificID);
 
 // delete a client with specific id
 clientRouter.delete("/:id", deleteSpecificClient);
+
+clientRouter.post("/login", loginClient);
 
 module.exports = clientRouter;

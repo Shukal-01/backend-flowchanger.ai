@@ -1,6 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const { clientSchema, idSchema } = require("../../../utils/validations.js");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const createClient = async (req, res) => {
   const validation = clientSchema.safeParse(req.body);
@@ -36,25 +38,25 @@ const createClient = async (req, res) => {
         is_verified: false,
         mobile: phone,
         name: req.body.name,
-
-        clientDetails: {
-          create: {
-            company,
-            vat_number,
-            website,
-            groups,
-            currency,
-            default_language,
-            address,
-            country,
-            state,
-            city,
-            zip_code,
-            status,
-          },
-        },
+        password: await bcrypt.hash(req.body.password, 10),
       },
-      include: { clientDetails: true },
+    });
+    const clientDetails = await prisma.clientDetails.create({
+      data: {
+        company,
+        vat_number,
+        website,
+        groups,
+        currency,
+        default_language,
+        address,
+        country,
+        state,
+        city,
+        zip_code,
+        status,
+        userId: newClient.id,
+      },
     });
 
     res.status(201).json(newClient);
@@ -78,11 +80,7 @@ const fetchAllClients = async (req, res) => {
       },
     });
 
-    return res.status(200).json({
-      status: true,
-      data: clients,
-      message: "Fetched all client data successfully",
-    });
+    return res.status(200).json(clients);
   } catch (error) {
     console.error("Error fetching all clients:", error);
     return res.status(500).json({
@@ -269,6 +267,50 @@ const fetchClientInfoSpecificID = async (req, res) => {
   }
 };
 
+const loginClient = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      status: false,
+      message: "Email and password are required",
+    });
+  }
+
+  prisma.user
+    .findUnique({
+      where: { email, role: "CLIENT" },
+    })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({
+          status: false,
+          message: "User not found",
+        });
+      }
+      const isPasswordMatch = bcrypt.compareSync(password, user.password);
+      if (!isPasswordMatch) {
+        return res.status(401).json({
+          status: false,
+          message: "Invalid password",
+        });
+      }
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
+      return res.status(200).json({
+        status: true,
+        message: "Login successful",
+        token,
+      });
+    })
+    .catch((error) => {
+      console.error("Error during login:", error);
+      return res.status(500).json({
+        status: false,
+        message: "An error occurred during login",
+      });
+    });
+};
+
 module.exports = {
   createClient,
   fetchAllClients,
@@ -276,4 +318,5 @@ module.exports = {
   deleteSpecificClient,
   fetchClientInfoSpecificID,
   changeStatus,
+  loginClient,
 };

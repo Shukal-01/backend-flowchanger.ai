@@ -19,13 +19,12 @@ model User {
   otp          Int?
   otpExpiresAt DateTime?
 
-  messages        Message[]      @relation("UserMessages")
-  rooms           ChatRoom[]     @relation("UserRooms")
-  clientDetails   ClientDetails? @relation(fields: [clientDetailsId], references: [id])
-  adminDetails    AdminDetails?  @relation(fields: [adminDetailsId], references: [id])
-  staffDetails    StaffDetails?  @relation
-  clientDetailsId String?
-  adminDetailsId  String?
+  messages       Message[]      @relation("UserMessages")
+  rooms          ChatRoom[]     @relation("UserRooms")
+  clientDetails  ClientDetails?
+  adminDetails   AdminDetails?
+  staffDetails   StaffDetails?
+  adminDetailsId String?
 }
 
 enum UserRole {
@@ -79,7 +78,7 @@ model AdminDetails {
   date_format   String?
   week_format   String?
 
-  User User[]
+  user User @relation(fields: [userId], references: [id])
 }
 
 model StaffDetails {
@@ -749,7 +748,7 @@ model ClientDetails {
   updated_at       DateTime  @updatedAt
   Project          Project[]
 
-  User User[]
+  user User @relation(fields: [userId], references: [id])
 }
 
 model UpiDetails {

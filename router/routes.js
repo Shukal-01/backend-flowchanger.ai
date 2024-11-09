@@ -60,7 +60,6 @@ rootRouter.use("/staff-login", loginRouter);
 rootRouter.use("/work-entry", workRouter);
 
 rootRouter.use("/chat", ChatRouter);
-
 rootRouter.use("/message", MessageRouter);
 
 module.exports = rootRouter;
