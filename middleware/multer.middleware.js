@@ -32,11 +32,12 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
+// Function to create Multer instance
+const upload = () => multer({
   storage,
   limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 10MB
   fileFilter,
-}).single("photoUrl");
+});
 
 // Middleware to handle Cloudinary upload
 const uploadAndSaveToCloudinary = (req, res, next) => {
@@ -62,6 +63,13 @@ const uploadAndSaveToCloudinary = (req, res, next) => {
     else if (req.route.path.includes("out")) {
       folderName = "Punch_Out_Images";
     }
+    if (req.route.path.includes("verify")) {
+      folderName = "Backgound_Verification_Images";
+    } else if (req.route.path.includes("work-entry")) {
+      folderName = "Work_Entry_Images";
+    } else if (req.route.path.includes("project-files")) {
+      folderName = "Project_File_Images";
+    }
 
     if (req.file) {
       try {
@@ -86,4 +94,4 @@ const uploadAndSaveToCloudinary = (req, res, next) => {
   });
 };
 
-module.exports = { uploadAndSaveToCloudinary };
+module.exports = { upload, uploadAndSaveToCloudinary };
