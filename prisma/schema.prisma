@@ -643,7 +643,6 @@ model EndBreak {
 model TaskStatus {
   id             String         @id @default(dbgenerated("gen_random_uuid()"))
   taskStatusName String
-  // TaskDetail     TaskDetail[]
   statusColor    String
   statusOrder    Int            @default(0)
   isHiddenId     StaffDetails[] @relation("staffId")

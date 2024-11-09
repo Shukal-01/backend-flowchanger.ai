@@ -22,6 +22,9 @@ async function createTaskStatus(req, res) {
       taskStatusName,
       statusColor,
       statusOrder,
+      // isHiddenId: {
+      //   connect: isHiddenId.map((id) => ({ id })), // Connect existing StaffDetails by id
+      // },
       isHiddenId,
       canBeChangedId,
     });
@@ -38,7 +41,10 @@ async function createTaskStatus(req, res) {
         isHiddenId: {
           connect: isHiddenId.map((id) => ({ id })), // Connect existing StaffDetails by id
         },
-      }
+      },
+      include: {
+        isHiddenId: true, // Include the isHiddenId relation in the response
+      },
     });
 
     res.status(201).json(taskStatus);
