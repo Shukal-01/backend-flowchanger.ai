@@ -262,10 +262,63 @@ const deleteStaff = async (req, res) => {
   }
 };
 
+// Search staff by name department and date
+const searchStaffByName = async (req, res) => {
+  try {
+    const { name, department_name, date_of_joining } = req.query;
+
+    const searchStaff = await prisma.user.findMany({
+      where: {
+        role: "STAFF",
+        name: name
+          ? {
+            contains: name,
+            mode: "insensitive",
+          }
+          : undefined,
+        staffDetails: {
+          department: department_name
+            ? {
+              name: {
+                contains: department_name,
+                mode: "insensitive",
+              },
+            }
+            : undefined,
+          date_of_joining: date_of_joining
+            ? new Date(date_of_joining)
+            : undefined,
+        },
+      },
+      include: {
+        staffDetails: {
+          include: {
+            department: true,
+          },
+        },
+      },
+    });
+
+    if (searchStaff.length === 0) {
+      return res.status(404).json({ status: false, message: "Staff not found!" });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "Staff search successful!",
+      data: searchStaff,
+    });
+  } catch (error) {
+    console.error("Error fetching staff:", error);
+    return res.status(500).json({ status: false, message: "Something went wrong!" });
+  }
+};
+
 module.exports = {
   createStaff,
   getAllStaff,
   getStaffById,
   updateStaff,
+  searchStaffByName,
   deleteStaff,
 };

@@ -20,4 +20,7 @@ taskRouter.delete("/detail/:id", deleteTaskDetail);
 taskRouter.put("/detail/:id", uploadAndSaveToCloudinary, updateTaskDetail);
 taskRouter.get("/detailById/:id", getTaskDetailById);
 
+taskRouter.get("/searchTaskPriority", searchTaskDetailByName);
+taskRouter.get("/searchTaskStatus", searchTaskStatusByName);
+
 module.exports = taskRouter

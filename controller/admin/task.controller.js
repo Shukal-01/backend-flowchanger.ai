@@ -369,6 +369,46 @@ async function getTaskDetailById(req, res) {
   }
 }
 
+// Search Data by task priority Name
+
+const searchTaskDetailByName = async (req, res) => {
+  try {
+    const { taskPriorityName } = req.query;
+    const taskDetail = await prisma.taskPriority.findMany({
+      where: {
+        taskPriorityName: {
+          contains: taskPriorityName,
+          mode: "insensitive",
+        },
+      },
+    });
+    res.status(200).json(taskDetail);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch task detail" });
+  }
+};
+
+// Search Task Status By taskStatusName -----------------------------
+
+const searchTaskStatusByName = async (req, res) => {
+  try {
+    const { taskStatusName } = req.query;
+    const taskStatus = await prisma.taskStatus.findMany({
+      where: {
+        taskStatusName: {
+          contains: taskStatusName,
+          mode: "insensitive",
+        },
+      },
+    });
+    res.status(200).json(taskStatus);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch task status" });
+  }
+};
+
 module.exports = {
   createTaskStatus,
   getAllTaskStatus,
@@ -380,5 +420,7 @@ module.exports = {
   updateTaskDetail,
   getTaskDetailById,
   updateTaskStatus,
+  searchTaskDetailByName,
+  searchTaskStatusByName,
   updateTaskPriority,
 };

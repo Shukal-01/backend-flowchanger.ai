@@ -76,10 +76,29 @@ const updateProjectPriority = async (req, res) => {
     }
 }
 
-
+const searchProjectPriorityByName = async (req, res) => {
+    try {
+        const { name } = req.query;
+        const projectPriority = await prisma.projectPriority.findMany({
+            where: {
+                Priority_name: {
+                    contains: name
+                }
+            }
+        });
+        if (projectPriority.length === 0) {
+            return res.status(404).json({ status: false, message: "No Searching project priorities found!" });
+        }
+        return res.status(201).json({ status: true, message: "Project Priority Search Successfully!", data: projectPriority });
+    } catch (error) {
+        console.error("Error retrieving project Priority:", error);
+        return res.status(500).json({ status: false, message: "Something went wrong!" });
+    }
+};
 
 module.exports = {
     createProjectPriority,
     getProjectPriority,
-    updateProjectPriority
+    updateProjectPriority,
+    searchProjectPriorityByName
 }

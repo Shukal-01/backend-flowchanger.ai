@@ -126,6 +126,28 @@ const showDepartment = async (req, res) => {
   }
 };
 
+// Search Department Query............................
+const searchDepartmentByName = async (req, res) => {
+  try {
+    const { department_name } = req.query;
+    const SearchDepartment = await prisma.department.findMany({
+      where: {
+        department_name: {
+          contains: department_name,
+          mode: "insensitive",
+        },
+      },
+    });
+    if (SearchDepartment.length === 0) {
+      return res.status(404).json({ status: false, message: "Department Search Not Found!" });
+    }
+    return res.status(201).json({ status: true, message: "Department Search Successfully!", data: SearchDepartment });
+  } catch (error) {
+    console.error("Error adding department:", error);
+    return res.status(500).json({ status: false, message: "Something went wrong!" });
+  }
+};
+
 // Export all modules by default
 module.exports = {
   addDepartment,
@@ -133,4 +155,5 @@ module.exports = {
   fetchDepartment,
   deleteDepartment,
   showDepartment,
+  searchDepartmentByName
 };

@@ -126,10 +126,30 @@ const updateProjectStatus = async (req, res) => {
     }
 };
 
-
+const searchProjectStatusByName = async (req, res) => {
+    try {
+        const { project_name } = req.query;
+        const SearchProjectStatus = await prisma.projectStatus.findMany({
+            where: {
+                project_name: {
+                    contains: project_name,
+                    mode: "insensitive",
+                },
+            },
+        });
+        if (SearchProjectStatus.length === 0) {
+            return res.status(404).json({ status: false, message: "Project Status Search Not Found!" });
+        }
+        return res.status(201).json({ status: true, message: "Project Status Search Successfully!", data: SearchProjectStatus });
+    } catch (error) {
+        console.error("Error adding project status:", error);
+        return res.status(500).json({ status: false, message: "Something went wrong!" });
+    }
+};
 
 module.exports = {
     projectStatus,
     getProjectStatus,
-    updateProjectStatus
+    updateProjectStatus,
+    searchProjectStatusByName
 };

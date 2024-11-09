@@ -5,7 +5,7 @@ const projectPriorityRouter = express.Router();
 const projectPriorityController = require("../../controller/admin/project/projectPriority.controller.js");
 
 projectPriorityRouter.post('/', projectPriorityController.createProjectPriority);
+projectPriorityRouter.get('/search', projectPriorityController.searchProjectPriorityByName);
 projectPriorityRouter.get('/:id?', projectPriorityController.getProjectPriority);
 projectPriorityRouter.put('/:id', projectPriorityController.updateProjectPriority);
-
 module.exports = projectPriorityRouter;

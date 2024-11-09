@@ -12,6 +12,8 @@ const staffRouter = express.Router();
 
 staffRouter.post("/", createStaff);
 
+staffRouter.get('/search', searchStaffByName)
+
 staffRouter.get("/", getAllStaff);
 
 staffRouter.get("/one", authorizationMiddleware, getStaffById);
@@ -19,5 +21,6 @@ staffRouter.get("/one", authorizationMiddleware, getStaffById);
 staffRouter.put("/:id", updateStaff);
 
 staffRouter.delete("/:id", deleteStaff);
+
 
 module.exports = staffRouter;

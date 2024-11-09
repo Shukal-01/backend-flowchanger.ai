@@ -268,6 +268,48 @@ const fetchClientInfoSpecificID = async (req, res) => {
   }
 };
 
+// Search Client Data By Company or VAT Number --------------------------------
+
+const searchClientByCompanyOrVatNumber = async (req, res) => {
+  const { company, vat_number } = req.query;
+
+  try {
+    const whereDataArray = {};
+    if (company) {
+      whereDataArray.company = {
+        contains: company,
+        mode: 'insensitive',
+      };
+    }
+    if (vat_number) {
+      whereDataArray.vat_number = {
+        contains: vat_number,
+        mode: 'insensitive',
+      };
+    }
+    const clients = await prisma.clientDetails.findMany({
+      where: whereDataArray,
+    });
+    if (clients.length === 0) {
+      return res.status(404).json({
+        status: false,
+        message: "Client not found",
+      });
+    }
+    return res.status(200).json({
+      status: true,
+      data: clients,
+      message: "Client details Search successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching client by name:", error);
+    return res.status(500).json({
+      status: false,
+      message: "An error occurred while fetching the client details",
+    });
+  }
+};
+
 module.exports = {
   createClient,
   fetchAllClients,

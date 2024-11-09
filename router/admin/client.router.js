@@ -28,4 +28,7 @@ clientRouter.get("/:id", fetchClientInfoSpecificID);
 // delete a client with specific id
 clientRouter.delete("/:id", deleteSpecificClient);
 
+// search for a specific client By Name
+clientRouter.get("/search", searchClientByCompanyOrVatNumber)
+
 module.exports = clientRouter;
