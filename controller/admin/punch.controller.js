@@ -142,6 +142,13 @@ async function createPunchOut(req, res) {
     // if (!req.file) {
     //   return res.status(400).send("No file uploaded.");
     // }
+    const user = await prisma.user.findFirst({
+      where: { id: req.userId, role: "STAFF" }
+    })
+
+    if (!user) {
+      return res.status(404).send("user not found");
+    }
     const photoUrl = req.file.cloudinaryUrl || "null";
     // Validate input using zod schema
     PunchOutSchema.parse({

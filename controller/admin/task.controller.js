@@ -236,6 +236,17 @@ async function createTaskDetail(req, res) {
         taskAssign: {
           connect: taskAssign.map((id) => ({ id })), // Connect assigned users by IDs
         },
+        selectDepartmentId: {
+          connect: selectDepartmentId.map((id) => ({ id })),
+        },
+        selectProjectId: {
+          connect: selectProjectId.map((id) => ({ id })),
+        }
+      },
+      include: {
+        taskAssign: true,
+        selectDepartmentId: true,
+        selectProjectId: true
       },
     });
 
@@ -253,7 +264,13 @@ async function createTaskDetail(req, res) {
 
 async function getAllTaskDetail(req, res) {
   try {
-    const taskDetail = await prisma.taskDetail.findMany();
+    const taskDetail = await prisma.taskDetail.findMany({
+      include: {
+        taskAssign: true,
+        selectDepartmentId: true,
+        selectProjectId: true
+      },
+    });
     res.status(200).json(taskDetail);
   } catch (error) {
     console.log(error);
