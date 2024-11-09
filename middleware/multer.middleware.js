@@ -40,51 +40,31 @@ const upload = () => multer({
 });
 
 // Middleware to handle Cloudinary upload
-const uploadAndSaveToCloudinary = (req, res, next) => {
-  upload(req, res, async (err) => {
+const uploadAndSaveToCloudinary = (fieldName) => (req, res, next) => {
+  upload().single(fieldName)(req, res, async (err) => {
     if (err) {
       return res.status(400).send(err.message);
     }
-    // console.log(req.file)
-    // Define folder name based on route or controller
-    let folderName = "Default_Folder"; // default folder
-    // console.log(req.route.path)
-    if (req.route.path.includes("in")) {
-      folderName = "Punch_In_Images";
-    } else if (req.route.path.includes("start")) {
-      folderName = "Start_Break_Images";
-    }
-    else if (req.route.path.includes("end")) {
-      folderName = "End_Break_Images";
-    }
-    else if (req.route.path.includes("out")) {
-      folderName = "Punch_Out_Images";
-    }
-    else if (req.route.path.includes("out")) {
-      folderName = "Punch_Out_Images";
-    }
-    if (req.route.path.includes("verify")) {
-      folderName = "Backgound_Verification_Images";
-    } else if (req.route.path.includes("work-entry")) {
-      folderName = "Work_Entry_Images";
-    } else if (req.route.path.includes("project-files")) {
-      folderName = "Project_File_Images";
-    }
+
+    let folderName = "Default_Folder";
+    if (req.route.path.includes("in")) folderName = "Punch_In_Images";
+    else if (req.route.path.includes("start")) folderName = "Start_Break_Images";
+    else if (req.route.path.includes("end")) folderName = "End_Break_Images";
+    else if (req.route.path.includes("out")) folderName = "Punch_Out_Images";
+    else if (req.route.path.includes("verify")) folderName = "Background_Verification_Images";
+    else if (req.route.path.includes("work-entry")) folderName = "Work_Entry_Images";
+    else if (req.route.path.includes("project-files")) folderName = "Project_File_Images";
 
     if (req.file) {
       try {
-        // Upload to Cloudinary
         const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
-          folder: folderName, // Optional folder in Cloudinary
+          folder: folderName,
           public_id: req.savedFilename,
         });
-        console.log(cloudinaryResult);
 
-        // Set Cloudinary URL in request for database storage
         req.file.cloudinaryUrl = cloudinaryResult.secure_url;
-        console.log(req.file.cloudinaryUrl);
-        // Optionally, delete the file from local storage after uploading to Cloudinary
-        fs.unlinkSync(req.file.path);
+        fs.unlinkSync(req.file.path);  // Delete local file
+
       } catch (uploadError) {
         return res.status(500).json({ error: "Cloudinary upload failed", details: uploadError });
       }
@@ -94,4 +74,4 @@ const uploadAndSaveToCloudinary = (req, res, next) => {
   });
 };
 
-module.exports = { upload, uploadAndSaveToCloudinary };
+module.exports = { uploadAndSaveToCloudinary };
