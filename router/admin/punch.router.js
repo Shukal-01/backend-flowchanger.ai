@@ -13,7 +13,7 @@ const authorizationMiddleware = require("../../middleware/auth.js");
 
 punchRouter.post("/in", uploadAndSaveToCloudinary("photoUrl"), authorizationMiddleware, createPunchIn);
 punchRouter.get("/in", getAllPunchIn);
-punchRouter.post("/out", uploadAndSaveToCloudinary, authorizationMiddleware, createPunchOut);
+punchRouter.post("/out", uploadAndSaveToCloudinary("photoUrl"), authorizationMiddleware, createPunchOut);
 punchRouter.get("/out", getAllPunchOut);
 punchRouter.get("/records", getPunchRecords);
 punchRouter.get("/records/:id", getPunchRecordById);

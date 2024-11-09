@@ -85,7 +85,7 @@ async function createPunchIn(req, res) {
     // Set fine as a string based on lateness
     let fine;
     if (latenessMinutes > 0) {
-      fine = `${hoursLate > 0 ? hoursLate : ""} : ${minutesLate} `;
+      fine = `${hoursLate > 0 ? hoursLate : ""} : ${minutesLate}`;
     } else {
       fine = "On time";
     }
@@ -233,6 +233,7 @@ async function createPunchOut(req, res) {
     punchOutData = { ...punchOutData, punchOutTime: currentPunchOutTime };
 
     //find user then punchrecord 
+
     // Create the punch-out record in the database
     const punchOut = await prisma.punchOut.create({
       data: {

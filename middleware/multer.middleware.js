@@ -47,13 +47,13 @@ const uploadAndSaveToCloudinary = (fieldName) => (req, res, next) => {
     }
 
     let folderName = "Default_Folder";
-    if (req.route.path.includes("in")) folderName = "Punch_In_Images";
-    else if (req.route.path.includes("start")) folderName = "Start_Break_Images";
-    else if (req.route.path.includes("end")) folderName = "End_Break_Images";
-    else if (req.route.path.includes("out")) folderName = "Punch_Out_Images";
-    else if (req.route.path.includes("verify")) folderName = "Background_Verification_Images";
-    else if (req.route.path.includes("work-entry")) folderName = "Work_Entry_Images";
-    else if (req.route.path.includes("project-files")) folderName = "Project_File_Images";
+    if (req.route.path.includes("/in")) folderName = "Punch_In_Images";
+    else if (req.route.path.includes("/start")) folderName = "Start_Break_Images";
+    else if (req.route.path.includes("/end")) folderName = "End_Break_Images";
+    else if (req.route.path.includes("/out")) folderName = "Punch_Out_Images";
+    else if (req.route.path.includes("/verify")) folderName = "Background_Verification_Images";
+    else if (req.route.path.includes("/work-entry")) folderName = "Work_Entry_Images";
+    else if (req.route.path.includes("/project-files")) folderName = "Project_File_Images";
 
     if (req.file) {
       try {
