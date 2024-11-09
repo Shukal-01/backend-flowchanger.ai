@@ -9,10 +9,11 @@ const {
   getPunchRecords,
   getPunchRecordById,
 } = require("../../controller/admin/punch.controller.js");
+const authorizationMiddleware = require("../../middleware/auth.js");
 
-punchRouter.post("/in", uploadAndSaveToCloudinary, createPunchIn);
+punchRouter.post("/in", uploadAndSaveToCloudinary, authorizationMiddleware, createPunchIn);
 punchRouter.get("/in", getAllPunchIn);
-punchRouter.post("/out", uploadAndSaveToCloudinary, createPunchOut);
+punchRouter.post("/out", uploadAndSaveToCloudinary, authorizationMiddleware, createPunchOut);
 punchRouter.get("/out", getAllPunchOut);
 punchRouter.get("/records", getPunchRecords);
 punchRouter.get("/records/:id", getPunchRecordById);

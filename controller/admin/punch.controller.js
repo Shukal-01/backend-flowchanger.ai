@@ -16,14 +16,21 @@ async function createPunchIn(req, res) {
       return res.status(400).send("No photo uploaded.");
     }
 
+
     // const photoUrl = String(req.file);
     // if (!req.file) {
     //   return res.status(400).send("No file uploaded.");
     // }
+    const user = await prisma.user.findFirst({
+      where: { id: req.userId, role: "STAFF" }
+    })
 
+    if (!user) {
+      return res.status(404).send("user not found");
+    }
     // Set photoUrl as the Cloudinary URL
     // const photoUrl = req.cloudinaryUrl;
-    const photoUrl = req.file.cloudinaryUrl || "null";
+    const photoUrl = req.file.cloudinaryUrl ?? "null";
 
     // Validate input using zod schema
     PunchInSchema.parse({
@@ -95,6 +102,14 @@ async function createPunchIn(req, res) {
         fine: fine
       },
     });
+
+    const punchRecords = await prisma.punchRecords.create({
+      data: {
+        punchIn: punchIn.id,
+        staffId: user.staffDetails.id
+      }
+    })
+    console.log(punchRecords)
 
     return res.status(201).json(punchIn);
   } catch (error) {
@@ -210,6 +225,7 @@ async function createPunchOut(req, res) {
     // Add punch-out time and overtime information to punchOutData
     punchOutData = { ...punchOutData, punchOutTime: currentPunchOutTime };
 
+    //find user then punchrecord 
     // Create the punch-out record in the database
     const punchOut = await prisma.punchOut.create({
       data: {
@@ -262,7 +278,12 @@ async function getPunchRecordById(req, res) {
 
 async function getPunchRecords(req, res) {
   try {
-    const punchRecords = await prisma.punchRecords.findMany();
+    const punchRecords = await prisma.punchRecords.findMany({
+      include: {
+        punchIn: true,
+        punchOut: true
+      }
+    });
     res.status(200).json(punchRecords);
   } catch (error) {
     console.log(error);
