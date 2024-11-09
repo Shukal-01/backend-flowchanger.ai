@@ -1,7 +1,7 @@
 const express = require("express");
 const taskRouter = express.Router();
 const { uploadAndSaveToCloudinary } = require("../../middleware/multer.middleware.js")
-const { createTaskStatus, getAllTaskStatus, createTaskPriority, getAllTaskPriority, createTaskDetail, getAllTaskDetail, deleteTaskDetail, updateTaskDetail, getTaskDetailById, updateTaskStatus, updateTaskPriority } = require("../../controller/admin/task.controller");
+const { createTaskStatus, getAllTaskStatus, createTaskPriority, getAllTaskPriority, createTaskDetail, getAllTaskDetail, deleteTaskDetail, updateTaskDetail, getTaskDetailById, updateTaskStatus, updateTaskPriority, searchTaskDetailByName, searchTaskStatusByName } = require("../../controller/admin/task.controller");
 
 // taskRouter.post("/createTaskType", createTaskType);
 // taskRouter.get("/getAllTaskType", getAllTaskType);

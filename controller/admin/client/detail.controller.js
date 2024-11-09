@@ -317,4 +317,5 @@ module.exports = {
   deleteSpecificClient,
   fetchClientInfoSpecificID,
   changeStatus,
+  searchClientByCompanyOrVatNumber,
 };

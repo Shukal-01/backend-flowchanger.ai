@@ -5,6 +5,7 @@ const {
   getStaffById,
   updateStaff,
   deleteStaff,
+  searchStaffByName,
 } = require("../../controller/admin/staff/staff.controller");
 const authorizationMiddleware = require("../../middleware/auth");
 

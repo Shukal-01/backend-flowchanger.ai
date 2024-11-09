@@ -7,6 +7,7 @@ const {
   deleteSpecificClient,
   changeStatus,
   createClient,
+  searchClientByCompanyOrVatNumber,
 } = require("../../controller/admin/client/detail.controller");
 
 const clientRouter = Router();
