@@ -101,8 +101,8 @@ model StaffDetails {
   guardian_name              String?
   status                     String?
   employment                 String?
-  marital_status             String?
-  blood_group                String?
+  // marital_status             String?
+  // blood_group                String?
 
   // relations
   department               Department?                  @relation(fields: [departmentId], references: [id])
