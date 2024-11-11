@@ -565,10 +565,44 @@ const deleteRole = async (req, res) => {
   }
 };
 
+// Search role by name
+// const searchRoleByName = async (req, res) => {
+//   try {
+//     if (roleName) {
+//       req.query.roleName = {
+//         contains: roleName,
+//         mode: 'insensitive',
+//       };
+//     }
+//   } catch (error) {
+
+//   }
+// }
+
+const searchRoleByName = async (req, res) => {
+  try {
+    const { role_name } = req.query;
+    const roleData = await prisma.role.findMany({
+      where: {
+        role_name: {
+          contains: role_name,
+          mode: "insensitive",
+        },
+      },
+    });
+    res.status(200).json(roleData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch task status" });
+  }
+};
+
+
 module.exports = {
   fetchRole,
   fetchRoleWithId,
   addRole,
   updateRole,
   deleteRole,
+  searchRoleByName
 };
