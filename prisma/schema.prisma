@@ -98,6 +98,7 @@ model StaffDetails {
   emergency_contact_mobile   String?
   emergency_contact_relation String?
   emergency_contact_address  String?
+  guardian_name              String?
   status                     String?
   employment                 String?
   marital_status             String?

@@ -357,10 +357,7 @@ const searchStaffByStatus = async (req, res) => {
       where: whereDataArray,
     });
     if (filteredData.length === 0) {
-      return res.json({
-        status: false,
-        message: "Staff not found",
-      });
+      return res.json({ data: filteredData });
     }
 
     return res.status(200).json({
