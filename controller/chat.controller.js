@@ -71,4 +71,33 @@ const getOneOnOneChat = async (req, res) => {
   }
 };
 
-module.exports = { getOneOnOneChat };
+const createGroupChat = async (req, res) => {
+  try {
+    const { name, userIds } = req.body;
+    console.log(req.body);
+
+    if (!name || !userIds || userIds.length < 1) {
+      return res.status(400).json({ message: "Name and userIds are required" });
+    }
+
+    const chatRoom = await prisma.chatRoom.create({
+      data: {
+        name,
+        isGroup: true,
+        users: {
+          connect: userIds.map((id) => ({ id })),
+        },
+      },
+      include: {
+        users: true,
+      },
+    });
+
+    res.status(201).json(chatRoom);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to create group chat" });
+  }
+};
+
+module.exports = { getOneOnOneChat, createGroupChat };
