@@ -78,7 +78,7 @@ const createClient = async (req, res) => {
         is_verified: false,
         mobile: phone,
         name: req.body.name,
-        password: await bcrypt.hash(req.body.password, 10),
+        password: req.body.password ? await bcrypt.hash(req.body.password, 10) : "",
       },
     });
     const clientDetails = await prisma.clientDetails.create({
@@ -150,7 +150,7 @@ const updateSpecificClient = async (req, res) => {
   try {
     // Check if the clientDetails with the provided id exists
     const client = await prisma.clientDetails.findUnique({
-      where: { id: parseInt(id) }, // Ensure you're using the correct ID type (e.g., int or string)
+      where: { id: id }, // Ensure you're using the correct ID type (e.g., int or string)
     });
 
     if (!client) {

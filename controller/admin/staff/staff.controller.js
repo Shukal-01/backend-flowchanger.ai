@@ -324,7 +324,58 @@ const searchStaffByName = async (req, res) => {
   }
 };
 
+// Search staff by status gender employment
+const searchStaffByStatus = async (req, res) => {
+  const { status, gender, employment } = req.query;
+  try {
+    // Filter criteria object
+    const whereDataArray = {};
 
+    if (status) {
+      whereDataArray.status = {
+        contains: status,
+        mode: 'insensitive',
+      };
+    }
+
+    if (gender) {
+      whereDataArray.gender = {
+        contains: gender,
+        mode: 'insensitive',
+      };
+    }
+
+    if (employment) {
+      whereDataArray.employment = {
+        contains: employment,
+        mode: 'insensitive',
+      };
+    }
+
+    // Fetch data based on filtered criteria
+    const filteredData = await prisma.staffDetails.findMany({
+      where: whereDataArray,
+    });
+    if (filteredData.length === 0) {
+      return res.json({
+        status: false,
+        message: "Staff not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      data: filteredData,
+      message: "Staff filtered successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal server error",
+    });
+  }
+};
 module.exports = {
   createStaff,
   getAllStaff,
@@ -332,4 +383,5 @@ module.exports = {
   updateStaff,
   searchStaffByName,
   deleteStaff,
+  searchStaffByStatus
 };
