@@ -33,11 +33,12 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Function to create Multer instance
-const upload = () => multer({
-  storage,
-  limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 10MB
-  fileFilter,
-});
+const upload = () =>
+  multer({
+    storage,
+    limits: { fileSize: 1024 * 1024 * 10 }, // Limit file size to 10MB
+    fileFilter,
+  });
 
 // Middleware to handle Cloudinary upload
 const uploadAndSaveToCloudinary = (fieldName) => (req, res, next) => {
@@ -48,25 +49,33 @@ const uploadAndSaveToCloudinary = (fieldName) => (req, res, next) => {
 
     let folderName = "Default_Folder";
     if (req.route.path.includes("in")) folderName = "Punch_In_Images";
-    else if (req.route.path.includes("start")) folderName = "Start_Break_Images";
+    else if (req.route.path.includes("start"))
+      folderName = "Start_Break_Images";
     else if (req.route.path.includes("end")) folderName = "End_Break_Images";
     else if (req.route.path.includes("out")) folderName = "Punch_Out_Images";
-    else if (req.route.path.includes("verify")) folderName = "Background_Verification_Images";
-    else if (req.route.path.includes("work-entry")) folderName = "Work_Entry_Images";
-    else if (req.route.path.includes("project-files")) folderName = "Project_File_Images";
+    else if (req.route.path.includes("verify"))
+      folderName = "Background_Verification_Images";
+    else if (req.route.path.includes("work-entry"))
+      folderName = "Work_Entry_Images";
+    else if (req.route.path.includes("project-files"))
+      folderName = "Project_File_Images";
 
     if (req.file) {
       try {
-        const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
-          folder: folderName,
-          public_id: req.savedFilename,
-        });
+        const cloudinaryResult = await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            folder: folderName,
+            public_id: req.savedFilename,
+          }
+        );
 
         req.file.cloudinaryUrl = cloudinaryResult.secure_url;
-        fs.unlinkSync(req.file.path);  // Delete local file
-
+        fs.unlinkSync(req.file.path); // Delete local file
       } catch (uploadError) {
-        return res.status(500).json({ error: "Cloudinary upload failed", details: uploadError });
+        return res
+          .status(500)
+          .json({ error: "Cloudinary upload failed", details: uploadError });
       }
     }
 
