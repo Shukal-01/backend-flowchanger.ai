@@ -183,29 +183,32 @@ enum VerificationStatus {
 }
 
 model StaffBackgroundVerification {
-  id                          String             @id @default(dbgenerated("gen_random_uuid()"))
-  aadhaar_number              String?
-  aadhaar_verification_status VerificationStatus @default(PENDING)
-  aadhaar_file                String?
-  pan_number                  String?
-  pan_verification_status     VerificationStatus @default(PENDING)
-  pan_file                    String?
-  uan_number                  String?
-  uan_verification_status     VerificationStatus @default(PENDING)
-  uan_file                    String?
-  driving_license_number      String?
-  driving_license_status      VerificationStatus @default(PENDING)
-  driving_license_file        String?
-  face_file                   String?
-  face_verification_status    VerificationStatus @default(PENDING)
-  current_address             String?
-  permanent_address           String?
-  address_status              VerificationStatus @default(PENDING)
-  address_file                String?
-  staff                       StaffDetails?      @relation(fields: [staffId], references: [id])
-  staffId                     String?            @unique
-  createdAt                   DateTime           @default(now())
-  updatedAt                   DateTime           @updatedAt
+  id                           String             @id @default(dbgenerated("gen_random_uuid()"))
+  aadhaar_number               String?
+  aadhaar_verification_status  VerificationStatus @default(PENDING)
+  aadhaar_file                 String?
+  voter_id_number              String?
+  voter_id_verification_status VerificationStatus @default(PENDING)
+  voter_id_file                String?
+  pan_number                   String?
+  pan_verification_status      VerificationStatus @default(PENDING)
+  pan_file                     String?
+  uan_number                   String?
+  uan_verification_status      VerificationStatus @default(PENDING)
+  uan_file                     String?
+  driving_license_number       String?
+  driving_license_status       VerificationStatus @default(PENDING)
+  driving_license_file         String?
+  face_file                    String?
+  face_verification_status     VerificationStatus @default(PENDING)
+  current_address              String?
+  permanent_address            String?
+  address_status               VerificationStatus @default(PENDING)
+  address_file                 String?
+  staff                        StaffDetails?      @relation(fields: [staffId], references: [id])
+  staffId                      String?            @unique
+  createdAt                    DateTime           @default(now())
+  updatedAt                    DateTime           @updatedAt
 }
 
 model PastEmployment {
