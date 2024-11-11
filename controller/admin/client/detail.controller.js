@@ -40,7 +40,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
     console.error("Error fetching client by name:", error);
     return res.status(500).json({
       status: false,
-      message: "An error occurred while fetching the client details",
+      message: "Internal server error",
     });
   }
 };
@@ -148,19 +148,21 @@ const updateSpecificClient = async (req, res) => {
   } = req.body;
 
   try {
-    // const validateId = idSchema.safeParse(id);
-    // const validateNewClientData = clientSchema.safeParse(req.body);
+    // Check if the clientDetails with the provided id exists
+    const client = await prisma.clientDetails.findUnique({
+      where: { id: parseInt(id) }, // Ensure you're using the correct ID type (e.g., int or string)
+    });
 
-    // if (!validateNewClientData.success || !validateId.success) {
-    //   console.log(validateNewClientData, validateId);
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Invalid updated client data or id provided",
-    //   });
-    // }
+    if (!client) {
+      return res.status(404).json({
+        status: false,
+        message: "Client not found.",
+      });
+    }
 
+    // Proceed with the update if the client exists
     const updatedClient = await prisma.clientDetails.update({
-      where: { id: id },
+      where: { id: parseInt(id) },
       data: {
         company,
         vat_number,
@@ -198,6 +200,7 @@ const updateSpecificClient = async (req, res) => {
     });
   }
 };
+
 
 const changeStatus = async (req, res) => {
   const { id } = req.params;

@@ -30,6 +30,8 @@ const createStaff = async (req, res) => {
     emergency_contact_relation,
     emergency_contact_address,
     name,
+    status,
+    employment
   } = validation.data;
 
   try {
@@ -57,6 +59,8 @@ const createStaff = async (req, res) => {
             emergency_contact_mobile,
             emergency_contact_relation,
             emergency_contact_address,
+            status,
+            employment
           },
         },
       },
@@ -101,7 +105,9 @@ const updateStaff = async (req, res) => {
     emergency_contact_mobile,
     emergency_contact_relation,
     emergency_contact_address,
-    name, // Updated field from User model
+    name, // Updated field from User model,
+    status,
+    employment
   } = validation.data;
 
   try {
@@ -132,6 +138,8 @@ const updateStaff = async (req, res) => {
         emergency_contact_mobile,
         emergency_contact_relation,
         emergency_contact_address,
+        status,
+        employment
       },
     });
     res.status(200).json(updatedStaff);
@@ -316,6 +324,39 @@ const searchStaffByName = async (req, res) => {
   }
 };
 
+// Search staff by status gender and employment
+
+const searchStaffByStatus = async (req, res) => {
+  const { status, gender, employment } = req.query;
+  try {
+    const whereDataArray = {};
+    if (status) {
+      whereDataArray.status = {
+        contains: status,
+        mode: 'insensitive',
+      };
+    }
+    if (gender) {
+      whereDataArray.gender = {
+        contains: gender,
+        mode: 'insensitive',
+      }
+    }
+    if (employment) {
+      whereDataArray.employment = {
+        contains: employment,
+        mode: 'insensitive',
+      }
+    }
+    return res.status(200).json({
+      status: true,
+      data: clients,
+      message: "Staff Search successfully",
+    });
+  } catch (error) { }
+}
+
+
 module.exports = {
   createStaff,
   getAllStaff,
@@ -323,4 +364,5 @@ module.exports = {
   updateStaff,
   searchStaffByName,
   deleteStaff,
+  searchStaffByStatus
 };
