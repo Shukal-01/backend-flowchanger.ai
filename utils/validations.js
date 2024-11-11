@@ -157,6 +157,7 @@ const aadhaarNumberPattern = /^\d{4}-\d{4}-\d{4}$/; // Format: 1234-5678-9012
 const panNumberPattern = /^[A-Z]{5}\d{4}[A-Z]$/; // Format: ABCDE1234F
 const uanNumberPattern = /^\d{12}$/; // 12 digits
 const drivingLicensePattern = /^[A-Z]{2}[0-9]{2}[0-9]{1,11}$/;
+const voterIdPattern = /^[A-Z]{3}[0-9]{7}$/;
 
 const staffBackgroundVerificationSchema = z.object({
   aadhaar_number: z
@@ -164,31 +165,37 @@ const staffBackgroundVerificationSchema = z.object({
     .regex(aadhaarNumberPattern, "invalid Aadhaar number format")
     .optional(),
   aadhaar_verification_status: z.string().default("Not Verified").optional(),
-  aadhaar_file: z.string().optional(),
+  aadhaar_file: z.string().optional().nullable(),
+  voter_id_number: z
+    .string()
+    .regex(voterIdPattern, "invalid voter id number format")
+    .optional(),
+  voter_id_verification_status: z.string().default("Not Verified").optional(),
+  voter_id_file: z.string().optional().nullable(),
   pan_number: z
     .string()
     .regex(panNumberPattern, "invalid pan number format")
     .optional(),
   pan_verification_status: z.string().default("Not Verified").optional(),
-  pan_file: z.string().optional(),
+  pan_file: z.string().optional().nullable(),
   uan_number: z
     .string()
     .regex(uanNumberPattern, "Invalid uan number format")
     .optional(),
   uan_verification_status: z.string().default("Not Verified").optional(),
-  uan_file: z.string().optional(),
+  uan_file: z.string().optional().nullable(),
   driving_license_number: z
     .string()
     .regex(drivingLicensePattern, "Invalid driving license number format")
     .optional(),
   driving_license_status: z.string().default("Not Verified").optional(),
-  driving_license_file: z.string().optional(),
-  face_file: z.string().optional(),
+  driving_license_file: z.string().optional().nullable(),
+  face_file: z.string().optional().nullable(),
   face_verification_status: z.string().default("Not Verified").optional(),
   current_address: z.string().optional(),
   permanent_address: z.string().optional(),
   address_status: z.string().default("Not Verified").optional(),
-  address_file: z.string().optional(),
+  address_file: z.string().optional().nullable(),
   staffId: z.string().optional(),
 });
 
@@ -616,6 +623,15 @@ const deductionsEarningsSchema = z.object({
   calculation: z.string().min(1, "Calculation is required").optional(),
 });
 
+const workEntrySchema = z.object({
+  work_name: z.string().min(1, "Work Name is required"),
+  units: z.string().min(1, "Units is required"),
+  discription: z.string().min(1, "Description is required"),
+  location: z.string().min(1, "Location is required"),
+  // attachments: z.string().min(1, "Attachments is required").optional(),
+  staffDetailsId: z.string().uuid("Staff ID is required"),
+});
+
 
 module.exports = {
   clientSchema,
@@ -655,6 +671,7 @@ module.exports = {
   salaryDetailsSchema,
   deductionsEarningsSchema,
   projectSchema,
-  pastEmploymentSchema
+  pastEmploymentSchema,
+  workEntrySchema
 };
 

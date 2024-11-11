@@ -99,7 +99,7 @@ const createClient = async (req, res) => {
       },
     });
 
-    res.status(201).json(newClient);
+    res.status(201).json(clientDetails);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -227,43 +227,109 @@ const changeStatus = async (req, res) => {
 
 const deleteSpecificClient = async (req, res) => {
   const { id } = req.params;
+  if (id === "bulk") {
+    return deleteBulkClient(req, res);
+  }
+  else {
+
+    try {
+      const validateId = idSchema.safeParse(id);
+      if (!validateId.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid id provided",
+        });
+      }
+
+      const client = await prisma.clientDetails.findUnique({
+        where: { id },
+        select: { userId: true },
+      });
+
+      if (!client) {
+        return res.status(404).json({
+          status: false,
+          message: "Client not found",
+        });
+      }
+
+      await prisma.clientDetails.delete({ where: { id } });
+      await prisma.user.delete({ where: { id: client.userId } });
+
+      return res.status(200).json({
+        status: true,
+        message: `Client with id ${id} and associated user deleted successfully`,
+      });
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      return res.status(500).json({
+        status: false,
+        message: "An error occurred while deleting the client",
+      });
+    }
+  }
+};
+const deleteBulkClient = async (req, res) => {
+  const ids = req.body; // expecting an array of client UUIDs
 
   try {
-    const validateId = idSchema.safeParse(id);
-    if (!validateId.success) {
+    // Validate the array of IDs
+    if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Invalid id provided",
+        message: "Invalid or empty IDs provided",
       });
     }
 
-    const client = await prisma.clientDetails.findUnique({
-      where: { id },
-      select: { userId: true },
+    // Validate each ID individually using idSchema
+    for (const id of ids) {
+      const validateId = idSchema.safeParse(id);
+      if (!validateId.success) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid ID provided: ${id}`,
+        });
+      }
+    }
+
+    // Retrieve clients to get associated userIds
+    const clients = await prisma.clientDetails.findMany({
+      where: { userId: { in: ids } },
+      select: { id: true, userId: true },
     });
 
-    if (!client) {
+    if (clients.length === 0) {
       return res.status(404).json({
-        status: false,
-        message: "Client not found",
+        success: false,
+        message: "No clients found with the provided IDs",
       });
     }
 
-    await prisma.clientDetails.delete({ where: { id } });
-    await prisma.user.delete({ where: { id: client.userId } });
+    // Extract client and user IDs for deletion
+    const clientIds = clients.map(client => client.id);
+    const userIds = clients.map(client => client.userId);
+
+    // Delete clients and associated users in bulk
+    await prisma.clientDetails.deleteMany({
+      where: { id: { in: clientIds } },
+    });
+    await prisma.user.deleteMany({
+      where: { id: { in: userIds } },
+    });
 
     return res.status(200).json({
-      status: true,
-      message: `Client with id ${id} and associated user deleted successfully`,
+      success: true,
+      message: "Clients and associated users deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting client:", error);
+    console.error("Error deleting clients:", error);
     return res.status(500).json({
-      status: false,
-      message: "An error occurred while deleting the client",
+      success: false,
+      message: "An error occurred while deleting the clients: " + error.message,
     });
   }
 };
+
 
 const fetchClientInfoSpecificID = async (req, res) => {
   const { id } = req.params;

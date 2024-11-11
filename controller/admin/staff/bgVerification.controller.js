@@ -9,28 +9,34 @@ const getNewFields = (verificationType, data, verificationFile) => {
         case 'aadhaar':
             newFields = {
                 aadhaar_number: data.aadhaar_number,
-                aadhaar_file: JSON.stringify(verificationFile),
+                aadhaar_file: verificationFile,
             };
             break;
 
         case 'pan':
             newFields = {
                 pan_number: data.pan_number,
-                pan_file: JSON.stringify(verificationFile),
+                pan_file: verificationFile,
+            };
+            break;
+        case 'voter_id':
+            newFields = {
+                voter_id_number: data.voter_id_number,
+                voter_id_file: verificationFile,
             };
             break;
 
         case 'uan':
             newFields = {
                 uan_number: data.uan_number,
-                uan_file: JSON.stringify(verificationFile),
+                uan_file: verificationFile,
             };
             break;
 
         case 'driving_license':
             newFields = {
                 driving_license_number: data.driving_license_number,
-                driving_license_file: JSON.stringify(verificationFile),
+                driving_license_file: verificationFile,
             };
             break;
 
@@ -38,13 +44,13 @@ const getNewFields = (verificationType, data, verificationFile) => {
             newFields = {
                 current_address: data.current_address,
                 permanent_address: data.permanent_address,
-                address_file: JSON.stringify(verificationFile),
+                address_file: verificationFile,
             };
             break;
 
         case 'face':
             newFields = {
-                face_file: JSON.stringify(verificationFile),
+                face_file: verificationFile,
             };
             break;
 
@@ -95,7 +101,7 @@ const updateStaffBgVerifcation = async (req, res) => {
         const { id, verificationType } = req.params;
         const verificationData = req.body;
 
-        const verificationFile = req.file.cloudinaryUrl;
+        const verificationFile = req?.file?.cloudinaryUrl || null;
 
 
         // Collect the new fields based on verification type
@@ -108,7 +114,16 @@ const updateStaffBgVerifcation = async (req, res) => {
                 error: "Invalid staff background verification format or length provided",
             })
         }
-        // Create a new verification record in the database
+
+        for (const key in staffVerificationFields) {
+            if (staffVerificationFields[key] === null || staffVerificationFields[key] === undefined) {
+                delete staffVerificationFields[key];
+            }
+        }
+
+
+        console.log(staffVerificationFields);
+        // // Create a new verification record in the database
         const newStaffVerification = await prisma.StaffBackgroundVerification.upsert({
             where: {
                 staffId: id,
