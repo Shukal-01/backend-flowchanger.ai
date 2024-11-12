@@ -48,21 +48,21 @@ const addOrUpdateSalaryDetails = async (req, res) => {
 
     const staffEarningsData = await prisma.staffDetails.findFirst({
       where: { id: staffId },
-      include: { Earnings: true, deductions: true },
+      include: { Earning: true, Deduction: true },
     });
 
     let deductionsDetails = [];
     let earningsDetails = [];
 
-    if (staffEarningsData?.Earnings?.length > 0 || staffEarningsData?.deductions?.length > 0) {
-      earningsDetails = staffEarningsData.Earnings.map((earning) => ({
+    if (staffEarningsData?.Earning?.length > 0 || staffEarningsData?.Deduction?.length > 0) {
+      earningsDetails = staffEarningsData.Earning.map((earning) => ({
         id: earning.id,
         heads: earning.heads,
         calculation: earning.calculation,
         amount: earning.amount,
       }));
 
-      deductionsDetails = staffEarningsData.deductions.map((deduction) => ({
+      deductionsDetails = staffEarningsData.Deduction.map((deduction) => ({
         id: deduction.id,
         heads: deduction.heads,
         calculation: deduction.calculation,

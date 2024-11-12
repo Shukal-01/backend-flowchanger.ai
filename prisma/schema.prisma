@@ -488,25 +488,24 @@ model Permissions {
 }
 
 model SalaryDetails {
-  id                   String       @id @default(uuid())
-  effective_date       DateTime?
-  salary_type          String?
-  ctc_amount           Float?
-  earnings_heads       String[]
-  earnings_calculation String[]
-  earnings_amount      String[]
-  employer_pf          Float?
-  employer_esi         Float?
-  employer_lwf         Float?
-  employee_pf          Float?
-  employee_esi         Float?
-  professional_tax     Float?
-  employee_lwf         Float?
-  tds                  Float?
-  created_at           DateTime?    @default(now())
-  updated_at           DateTime?    @updatedAt
-  staffId              String
-  Staff                StaffDetails @relation(fields: [staffId], references: [id])
+  id               String       @id @default(uuid())
+  effective_date   DateTime?
+  salary_type      String?
+  ctc_amount       Float?
+  employer_pf      Float?
+  employer_esi     Float?
+  employer_lwf     Float?
+  employee_pf      Float?
+  employee_esi     Float?
+  professional_tax Float?
+  employee_lwf     Float?
+  tds              Float?
+  created_at       DateTime?    @default(now())
+  updated_at       DateTime?    @updatedAt
+  staffId          String
+  earnings         Earnings[]
+  deductions       Deductions[]
+  Staff            StaffDetails @relation(fields: [staffId], references: [id])
 }
 
 // {
@@ -562,9 +561,9 @@ model PunchRecords {
   id         String            @id @default(dbgenerated("gen_random_uuid()"))
   punchDate  DateTime          @default(now())
   punchInId  String?           @unique
-  punchIn    PunchIn?           @relation(fields: [punchInId], references: [id], onDelete: Cascade)
-  punchOutId String?            @unique
-  punchOut   PunchOut?          @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  punchIn    PunchIn?          @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId String?           @unique
+  punchOut   PunchOut?         @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
   staffId    String?
   staff      StaffDetails?     @relation(fields: [staffId], references: [id], onDelete: Cascade)
   status     punchRecordStatus @default(ABSENT)
@@ -637,7 +636,6 @@ model PunchOut {
   // staffId        String
   // staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
-
 
 // model TaskType {
 //   id           String       @id @default(dbgenerated("gen_random_uuid()"))
@@ -816,25 +814,28 @@ model ProjectPriority {
 }
 
 model Deductions {
-  id              String        @id @default(dbgenerated("gen_random_uuid()"))
+  id              String         @id @default(dbgenerated("gen_random_uuid()"))
   heads           String?
   calculation     String?
   amount          Float?
   deduction_month String?
   staffId         String?
-  staff           StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
   // SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
   salaryDetailsId String?
+  SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
 }
 
 model Earnings {
-  id           String        @id @default(dbgenerated("gen_random_uuid()"))
-  heads        String?
-  calculation  String?
-  amount       Float?
-  salaryId     String?
-  staffId      String?
-  salary_month String?
-  staff        StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  id              String         @id @default(dbgenerated("gen_random_uuid()"))
+  heads           String?
+  calculation     String?
+  amount          Float?
+  salaryId        String?
+  staffId         String?
+  salary_month    String?
+  staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
   // SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
+  SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
+  salaryDetailsId String?
 }
