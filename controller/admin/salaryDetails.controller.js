@@ -46,7 +46,7 @@ const addOrUpdateSalaryDetails = async (req, res) => {
       },
     });
 
-    const staffEarningsData = await prisma.staff.findMany({
+    const staffEarningsData = await prisma.staffDetails.findFirst({
       where: { id: staffId },
       include: { Earnings: true, deductions: true },
     });
