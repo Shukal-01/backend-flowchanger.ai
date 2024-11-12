@@ -130,7 +130,11 @@ const getProject = async (req, res) => {
 // Show By ID Project Query............................
 
 const showProject = async (req, res) => {
+  if (req.params.id === "search-projectByName") {
+    return SearchingProjectsByName(req, res);
+  }
   try {
+
     const ProjectID = req.params.id;
     const Projects = await prisma.project.findMany({
       where: {
