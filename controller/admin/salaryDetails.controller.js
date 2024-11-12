@@ -466,7 +466,7 @@ const createEarningHead = async (req, res) => {
     const headData = await prisma.earnings.create({
       data: {
         staffId: validation.data.staffId,
-        heads: validation.data.heas,
+        heads: validation.data.heads,
       },
     });
 
