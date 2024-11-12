@@ -560,12 +560,12 @@ model FlexibleShift {
 model PunchRecords {
   id         String        @id @default(dbgenerated("gen_random_uuid()"))
   punchDate  DateTime      @default(now())
-  punchInId  String        @unique
-  punchIn    PunchIn       @relation(fields: [punchInId], references: [id], onDelete: Cascade)
-  punchOutId String        @unique
-  punchOut   PunchOut      @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
-  staffId    String?
+  punchInId  String?       @unique
+  punchOutId String?       @unique
+  staffId    String?       
   staff      StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  punchIn    PunchIn?      @relation(fields: [punchInId], references: [id], onDelete: Cascade)  // Make punchIn optional
+  punchOut   PunchOut?     @relation(fields: [punchOutId], references: [id], onDelete: Cascade) // Make punchOut optional
 }
 
 enum PunchInMethod {
@@ -584,7 +584,9 @@ model PunchIn {
   photoUrl      String?
   location      String
   fine          String?
-  PunchRecords  PunchRecords?
+  punchRecords  PunchRecords?
+
+  // Uncomment if needed: 
   // staffId       String
   // staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
@@ -605,10 +607,13 @@ model PunchOut {
   photoUrl       String?
   location       String
   overtime       String?
-  PunchRecords   PunchRecords?
+  punchRecords   PunchRecords?
+
+  // Uncomment if needed:
   // staffId        String
   // staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
+
 
 // model TaskType {
 //   id           String       @id @default(dbgenerated("gen_random_uuid()"))

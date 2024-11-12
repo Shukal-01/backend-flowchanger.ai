@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "PunchRecords" ALTER COLUMN "punchInId" DROP NOT NULL,
+ALTER COLUMN "punchOutId" DROP NOT NULL;

@@ -70,7 +70,7 @@ const uploadAndSaveToCloudinary = (fieldName) => (req, res, next) => {
           }
         );
 
-        req.file.cloudinaryUrl = cloudinaryResult.secure_url;
+        req.imageUrl = cloudinaryResult.secure_url;
         fs.unlinkSync(req.file.path); // Delete local file
       } catch (uploadError) {
         return res
