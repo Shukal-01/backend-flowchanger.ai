@@ -101,8 +101,8 @@ model StaffDetails {
   guardian_name              String?
   status                     String?
   employment                 String?
-  // marital_status             String?
-  // blood_group                String?
+  marital_status             String?
+  blood_group                String?
 
   // relations
   department               Department?                  @relation(fields: [departmentId], references: [id])
@@ -528,6 +528,7 @@ model Shifts {
   allowPunchOutHours   Int?
   FixedShift           FixedShift[]
   FlexibleShift        FlexibleShift[]
+  Fine                 Fine[]
 }
 
 enum PunchTime {
@@ -558,14 +559,38 @@ model FlexibleShift {
 }
 
 model PunchRecords {
-  id         String        @id @default(dbgenerated("gen_random_uuid()"))
-  punchDate  DateTime      @default(now())
-  punchInId  String?       @unique
-  punchOutId String?       @unique
-  staffId    String?       
-  staff      StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  punchIn    PunchIn?      @relation(fields: [punchInId], references: [id], onDelete: Cascade)  // Make punchIn optional
-  punchOut   PunchOut?     @relation(fields: [punchOutId], references: [id], onDelete: Cascade) // Make punchOut optional
+  id         String            @id @default(dbgenerated("gen_random_uuid()"))
+  punchDate  DateTime          @default(now())
+  punchInId  String?           @unique
+  punchIn    PunchIn?           @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId String?            @unique
+  punchOut   PunchOut?          @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  staffId    String?
+  staff      StaffDetails?     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  status     punchRecordStatus @default(ABSENT)
+  Fine       Fine?
+}
+
+enum punchRecordStatus {
+  ABSENT
+  PRESENT
+  HALFDAY
+  PAIDLEAVE
+}
+
+model Fine {
+  id                    String        @id @default(dbgenerated("gen_random_uuid()"))
+  lateEntryFineAmount   String?       @default("1")
+  lateEntryAmount       String?       @default("0")
+  excessBreakFineAmount String?       @default("1")
+  excessBreakAmount     String?       @default("0")
+  earlyOutFineAmount    String?       @default("1")
+  earlyOutAmount        String?       @default("0")
+  totalAmount           String?       @default("0")
+  shiftId               String?
+  punchRecordId         String?       @unique
+  shiftDetails          Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  punchRecord           PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
 }
 
 enum PunchInMethod {
@@ -584,9 +609,8 @@ model PunchIn {
   photoUrl      String?
   location      String
   fine          String?
-  punchRecords  PunchRecords?
-
-  // Uncomment if needed: 
+  PunchRecords  PunchRecords?
+  approve       String?       @default("Pending")
   // staffId       String
   // staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }

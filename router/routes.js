@@ -35,6 +35,7 @@ const loginRouter = require("./admin/staffLogin.router.js");
 const workRouter = require("./admin/workEntry.router.js");
 const ChatRouter = require("./chat.router.js");
 const MessageRouter = require("./message.router.js");
+const fineData = require("./admin/fineData.router.js");
 
 rootRouter.use("/role", roleRouter);
 rootRouter.use("/attendance", attendanceRouter);
@@ -71,5 +72,7 @@ rootRouter.use("/past-employment", pastEmploymentRouter);
 
 rootRouter.use("/chat", ChatRouter);
 rootRouter.use("/message", MessageRouter);
+
+rootRouter.use("/fine", fineData);
 
 module.exports = rootRouter;

@@ -26,8 +26,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
       where: whereDataArray,
     });
     if (clients.length === 0) {
-      return res.status(404).json({
-        status: false,
+      return res.json({
         message: "Client not found",
       });
     }

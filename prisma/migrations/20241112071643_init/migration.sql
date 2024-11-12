@@ -20,6 +20,9 @@ CREATE TYPE "FineType" AS ENUM ('HOURLY', 'DAILY');
 CREATE TYPE "PunchTime" AS ENUM ('ANYTIME', 'ADDLIMIT');
 
 -- CreateEnum
+CREATE TYPE "punchRecordStatus" AS ENUM ('ABSENT', 'PRESENT', 'HALFDAY', 'PAIDLEAVE');
+
+-- CreateEnum
 CREATE TYPE "PunchInMethod" AS ENUM ('BIOMETRIC', 'QRSCAN', 'PHOTOCLICK');
 
 -- CreateEnum
@@ -39,8 +42,6 @@ CREATE TABLE "User" (
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "otp" INTEGER,
     "otpExpiresAt" TIMESTAMP(3),
-    "clientDetailsId" TEXT,
-    "adminDetailsId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -50,10 +51,10 @@ CREATE TABLE "WorkEntry" (
     "id" TEXT NOT NULL,
     "work_name" TEXT NOT NULL,
     "units" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "discription" TEXT NOT NULL,
     "attachments" TEXT,
-    "location" TEXT,
-    "staffDetailsId" TEXT,
+    "location" TEXT NOT NULL,
+    "staffDetailsId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "WorkEntry_pkey" PRIMARY KEY ("id")
@@ -115,6 +116,11 @@ CREATE TABLE "StaffDetails" (
     "emergency_contact_mobile" TEXT,
     "emergency_contact_relation" TEXT,
     "emergency_contact_address" TEXT,
+    "guardian_name" TEXT,
+    "status" TEXT,
+    "employment" TEXT,
+    "marital_status" TEXT,
+    "blood_group" TEXT,
 
     CONSTRAINT "StaffDetails_pkey" PRIMARY KEY ("id")
 );
@@ -163,6 +169,9 @@ CREATE TABLE "StaffBackgroundVerification" (
     "aadhaar_number" TEXT,
     "aadhaar_verification_status" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
     "aadhaar_file" TEXT,
+    "voter_id_number" TEXT,
+    "voter_id_verification_status" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
+    "voter_id_file" TEXT,
     "pan_number" TEXT,
     "pan_verification_status" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
     "pan_file" TEXT,
@@ -195,6 +204,7 @@ CREATE TABLE "PastEmployment" (
     "currency" TEXT,
     "salary" DOUBLE PRECISION,
     "company_gst" TEXT,
+    "past_Employment_status" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
     "staffId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -521,11 +531,28 @@ CREATE TABLE "FlexibleShift" (
 CREATE TABLE "PunchRecords" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "punchDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "punchInId" TEXT NOT NULL,
-    "punchOutId" TEXT NOT NULL,
+    "punchInId" TEXT,
+    "punchOutId" TEXT,
     "staffId" TEXT,
+    "status" "punchRecordStatus" NOT NULL DEFAULT 'ABSENT',
 
     CONSTRAINT "PunchRecords_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Fine" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "lateEntryFineAmount" TEXT DEFAULT '1',
+    "lateEntryAmount" TEXT DEFAULT '0',
+    "excessBreakFineAmount" TEXT DEFAULT '1',
+    "excessBreakAmount" TEXT DEFAULT '0',
+    "earlyOutFineAmount" TEXT DEFAULT '1',
+    "earlyOutAmount" TEXT DEFAULT '0',
+    "totalAmount" TEXT DEFAULT '0',
+    "shiftId" TEXT,
+    "punchRecordId" TEXT,
+
+    CONSTRAINT "Fine_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -539,6 +566,7 @@ CREATE TABLE "PunchIn" (
     "photoUrl" TEXT,
     "location" TEXT NOT NULL,
     "fine" TEXT,
+    "approve" TEXT DEFAULT 'Pending',
 
     CONSTRAINT "PunchIn_pkey" PRIMARY KEY ("id")
 );
@@ -905,12 +933,6 @@ CREATE UNIQUE INDEX "_projectId_AB_unique" ON "_projectId"("A", "B");
 CREATE INDEX "_projectId_B_index" ON "_projectId"("B");
 
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_clientDetailsId_fkey" FOREIGN KEY ("clientDetailsId") REFERENCES "ClientDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_adminDetailsId_fkey" FOREIGN KEY ("adminDetailsId") REFERENCES "AdminDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "WorkEntry" ADD CONSTRAINT "WorkEntry_staffDetailsId_fkey" FOREIGN KEY ("staffDetailsId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -918,6 +940,9 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_senderId_fkey" FOREIGN KEY ("sende
 
 -- AddForeignKey
 ALTER TABLE "Message" ADD CONSTRAINT "Message_roomId_fkey" FOREIGN KEY ("roomId") REFERENCES "ChatRoom"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AdminDetails" ADD CONSTRAINT "AdminDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1028,6 +1053,12 @@ ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_punchOutId_fkey" FOREIGN
 ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Fine" ADD CONSTRAINT "Fine_shiftId_fkey" FOREIGN KEY ("shiftId") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Fine" ADD CONSTRAINT "Fine_punchRecordId_fkey" FOREIGN KEY ("punchRecordId") REFERENCES "PunchRecords"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "StartBreak" ADD CONSTRAINT "StartBreak_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1038,6 +1069,9 @@ ALTER TABLE "Project" ADD CONSTRAINT "Project_customerId_fkey" FOREIGN KEY ("cus
 
 -- AddForeignKey
 ALTER TABLE "TicketInformation" ADD CONSTRAINT "TicketInformation_staffIdd_fkey" FOREIGN KEY ("staffIdd") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ClientDetails" ADD CONSTRAINT "ClientDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UpiDetails" ADD CONSTRAINT "UpiDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

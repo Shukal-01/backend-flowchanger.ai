@@ -3,7 +3,8 @@ const {
   deleteRole,
   fetchRole,
   fetchRoleWithId,   // Added this line
-  updateRole
+  updateRole,
+  searchRoleByName,
 } = require("../../controller/admin/role.controller.js");
 
 const { Router } = require("express");
@@ -12,6 +13,9 @@ const roleRouter = Router();
 
 // Create a new Role
 roleRouter.post("/", addRole);
+
+// search role by name 
+roleRouter.get('/search', searchRoleByName)
 
 // Get all Roles
 roleRouter.get("/", fetchRole);
