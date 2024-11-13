@@ -20,7 +20,7 @@ const addOrUpdateSalaryDetails = async (req, res) => {
         errors: validation.error.errors,
       });
     }
-
+    console.log(validation);
     const {
       effective_date,
       salary_type,
@@ -36,6 +36,11 @@ const addOrUpdateSalaryDetails = async (req, res) => {
       staffId,
     } = validation.data;
 
+    const {
+      deductions = [],
+      earnings = [],
+    } = req.body;
+
     const formattedEffectiveDate = new Date(effective_date);
 
     // Check if a record with the same staffId and effective_date exists
@@ -46,29 +51,27 @@ const addOrUpdateSalaryDetails = async (req, res) => {
       },
     });
 
-    const staffEarningsData = await prisma.staffDetails.findFirst({
+    const staffEarningsData = await prisma.staffDetails.findMany({
       where: { id: staffId },
       include: { Earning: true, Deduction: true },
     });
 
-    let deductionsDetails = [];
-    let earningsDetails = [];
+    let deductionsDetails = deductions.map((deduction) => ({
+      id: deduction.id,
+      heads: deduction.heads,
+      calculation: deduction.calculation,
+      amount: deduction.amount,
+    }));
 
-    if (staffEarningsData?.Earning?.length > 0 || staffEarningsData?.Deduction?.length > 0) {
-      earningsDetails = staffEarningsData.Earning.map((earning) => ({
-        id: earning.id,
-        heads: earning.heads,
-        calculation: earning.calculation,
-        amount: earning.amount,
-      }));
+    let earningsDetails = earnings.map((earning) => ({
+      id: earning.id,
+      heads: earning.heads,
+      calculation: earning.calculation,
+      amount: earning.amount,
+    }));
 
-      deductionsDetails = staffEarningsData.Deduction.map((deduction) => ({
-        id: deduction.id,
-        heads: deduction.heads,
-        calculation: deduction.calculation,
-        amount: deduction.amount,
-      }));
-    }
+    console.log(deductionsDetails);
+    console.log(earningsDetails);
 
     if (existingSalaryDetails) {
       // Update the existing record for the same effective date
@@ -129,6 +132,7 @@ const addOrUpdateSalaryDetails = async (req, res) => {
     });
   }
 };
+
 
 
 // Salary Data Fetch By Id:
@@ -221,7 +225,8 @@ const updateSalaryData = async (req, res) => {
     professional_tax,
     employee_lwf,
     tds,
-    earnings // Array of earnings objects
+    earnings = [], // Array of earnings objects, default to empty array
+    deductions = [], // Array of deductions objects, default to empty array
   } = req.body;
 
   try {
@@ -242,14 +247,15 @@ const updateSalaryData = async (req, res) => {
         tds: tds ? parseFloat(tds) : undefined,
       },
     });
+
     const staffId = updatedSalaryDetails.staffId;
-    // console.log(staffId);
-    // Update or create earnings details
+
+    // Update or create deductions details
     await Promise.all(
       deductions.map(async (deduction) => {
         if (deduction.id) {
           await prisma.deductions.update({
-            where: { id: deduction.id }, // Update by deduction ID
+            where: { id: deduction.id },
             data: {
               heads: deduction.heads,
               calculation: deduction.calculation,
@@ -257,7 +263,6 @@ const updateSalaryData = async (req, res) => {
             },
           });
         } else {
-          // If there is no ID, create a new deductions entry
           await prisma.deductions.create({
             data: {
               heads: deduction.heads,
@@ -269,12 +274,14 @@ const updateSalaryData = async (req, res) => {
           });
         }
       })
-    )
+    );
+
+    // Update or create earnings details
     await Promise.all(
       earnings.map(async (earning) => {
         if (earning.id) {
           await prisma.earnings.update({
-            where: { id: earning.id }, // Update by earning ID
+            where: { id: earning.id },
             data: {
               heads: earning.heads,
               calculation: earning.calculation,
@@ -282,14 +289,13 @@ const updateSalaryData = async (req, res) => {
             },
           });
         } else {
-          // If there is no ID, create a new earnings entry
           await prisma.earnings.create({
             data: {
               heads: earning.heads,
               calculation: earning.calculation,
               amount: earning.amount !== null ? parseFloat(earning.amount) : null,
               salaryId: id,
-              staffId: staffId
+              staffId: staffId,
             },
           });
         }

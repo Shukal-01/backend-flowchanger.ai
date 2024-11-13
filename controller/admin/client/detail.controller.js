@@ -25,21 +25,12 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
     const clients = await prisma.clientDetails.findMany({
       where: whereDataArray,
     });
-    if (clients.length === 0) {
-      return res.json({
-        message: "Client not found",
-      });
-    }
-    return res.status(200).json({
-      status: true,
-      data: clients,
-      message: "Client details Search successfully",
-    });
+    return res.status(200).json(clients);
   } catch (error) {
     console.error("Error fetching client by name:", error);
     return res.status(500).json({
       status: false,
-      message: "Internal server error",
+      message: "Internal Server Error!",
     });
   }
 };

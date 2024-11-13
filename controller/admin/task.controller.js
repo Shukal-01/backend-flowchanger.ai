@@ -412,7 +412,7 @@ const searchTaskDetailByName = async (req, res) => {
     res.status(200).json(taskDetail);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to fetch task detail" });
+    res.status(500).json({ status: false, message: "Internal Server Error!" });
   }
 };
 
@@ -432,7 +432,7 @@ const searchTaskStatusByName = async (req, res) => {
     res.status(200).json(taskStatus);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to fetch task status" });
+    res.status(500).json({ status: false, message: "Internal Server Error!" });
   }
 };
 

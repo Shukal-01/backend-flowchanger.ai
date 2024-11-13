@@ -131,13 +131,10 @@ const searchDepartmentByName = async (req, res) => {
         },
       },
     });
-    if (SearchDepartment.length === 0) {
-      return res.status(404).json({ status: false, message: "Department Search Not Found!" });
-    }
-    return res.status(201).json({ status: true, message: "Department Search Successfully!", data: SearchDepartment });
+    return res.status(201).json(SearchDepartment);
   } catch (error) {
     console.error("Error adding department:", error);
-    return res.status(500).json({ status: false, message: "Something went wrong!" });
+    return res.status(500).json({ status: false, message: "Internal Server Error!" });
   }
 };
 
