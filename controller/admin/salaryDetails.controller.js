@@ -298,6 +298,8 @@ const updateSalaryData = async (req, res) => {
           },
         });
 
+        const salaryId = updatedSalaryDetails.id || ''; // Get the salary ID for the updated entry
+
         if (existingDeduction) {
           // If deduction exists, update it
           await prisma.deductions.update({
@@ -314,7 +316,7 @@ const updateSalaryData = async (req, res) => {
               heads: deduction.heads,
               calculation: deduction.calculation,
               amount: deduction.amount !== null ? parseFloat(deduction.amount) : null,
-              salaryId: id,
+              salaryId: salaryId,
               staffId: staffId,
             },
           });
@@ -332,6 +334,8 @@ const updateSalaryData = async (req, res) => {
           },
         });
 
+        const salaryId = updatedSalaryDetails.id || ''; // Get the salary ID for the updated entry
+
         if (existingEarning) {
           // If earning exists, update it
           await prisma.earnings.update({
@@ -348,7 +352,7 @@ const updateSalaryData = async (req, res) => {
               heads: earning.heads,
               calculation: earning.calculation,
               amount: earning.amount !== null ? parseFloat(earning.amount) : null,
-              salaryId: updatedSalaryDetails.id || null,
+              salaryId: salaryId,
               staffId: staffId,
             },
           });
@@ -370,6 +374,7 @@ const updateSalaryData = async (req, res) => {
     });
   }
 };
+
 
 
 
