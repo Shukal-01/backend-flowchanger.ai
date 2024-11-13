@@ -12,7 +12,7 @@ const addProjectFiles = async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ status: 400, msg: "No file uploaded" });
     }
-    const file_name = req.file.cloudinaryUrl;
+    const file_name = req.imageUrl;
     const file_type = req.file.mimetype;
     const date_uploaded = new Date();
 
@@ -58,7 +58,7 @@ const updateProjectFiles = async (req, res) => {
     try {
         const { projectId, last_activity, total_comments, visible_to_customer, uploaded_by } = req.body;
 
-        const file_name = req.file.cloudinaryUrl;
+        const file_name = req.imageUrl;
         const file_type = req.file.mimetype;
         const date_uploaded = new Date();
         const updatedProjects = await prisma.projectFiles.update({

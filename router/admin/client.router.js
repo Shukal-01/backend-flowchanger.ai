@@ -13,6 +13,8 @@ const {
 
 const clientRouter = Router();
 
+// search for a specific client By Name
+clientRouter.get("/search", searchClientByCompanyOrVatNumber)
 // create a new client
 clientRouter.post("/", createClient);
 
@@ -30,8 +32,6 @@ clientRouter.get("/:id", fetchClientInfoSpecificID);
 // delete a client with specific id
 clientRouter.delete("/:id", deleteSpecificClient);
 
-// search for a specific client By Name
-clientRouter.get("/search", searchClientByCompanyOrVatNumber)
 clientRouter.post("/login", loginClient);
 
 module.exports = clientRouter;

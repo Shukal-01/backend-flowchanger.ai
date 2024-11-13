@@ -17,6 +17,8 @@ const addFineData = async (req, res) => {
     } = req.body;
 
     try {
+        // staff -> punchRecord curr day 
+        // if hai -> id && create absent -> create fine -> id
         // Create a new Fine record
         const fine = await prisma.fine.create({
             data: {

@@ -220,7 +220,7 @@ async function createTaskDetail(req, res) {
       taskAssign,
       taskDescription,
       taskTag,
-      attachFile: req.file.cloudinaryUrl, // Set attachFile if available
+      attachFile: req.imageUrl, // Set attachFile if available
     });
 
     if (!taskDetailResult.success) {
@@ -334,7 +334,7 @@ async function updateTaskDetail(req, res) {
       taskAssign,
       taskDescription,
       taskTag,
-      attachFile: req.file.cloudinaryUrl,
+      attachFile: req.imageUrl,
     });
 
     if (!taskDetailResult.success) {
