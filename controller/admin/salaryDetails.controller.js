@@ -491,6 +491,41 @@ const createEarningHead = async (req, res) => {
   }
 };
 
+// get by id earnings 
+
+const getEarningsById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const getById = await prisma.earnings.findUnique({
+      where: { id },
+    });
+    return res
+      .status(200)
+      .json({ status: 200, message: "Get Earnings Data By ID!", data: getById });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Failed To get Earnings Data By ID!" });
+  }
+};
+
+// get all earnings
+
+const getAllEarningsData = async (req, res) => {
+  try {
+    const getAll = await prisma.earnings.findMany({});
+    return res
+      .status(200)
+      .json({ status: 200, message: "Get All Earnings Data!", data: getAll });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Failed To get All Earnings Data!" });
+  }
+};
+
 // Update Earning Head API
 
 const updateEarningHead = async (req, res) => {
@@ -536,6 +571,38 @@ const updateEarningHead = async (req, res) => {
   }
 };
 
+// get deduction by id
+const getDeductionById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const getById = await prisma.deductions.findUnique({
+      where: { id },
+    });
+    return res
+      .status(200)
+      .json(getById);
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Inernal Server Error" });
+  }
+};
+
+// get all deductions 
+const getAllDeductions = async (req, res) => {
+  try {
+    const getAll = await prisma.deductions.findMany();
+    return res
+      .status(200)
+      .json(getAll);
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error" });
+  }
+};
 
 module.exports = {
   addOrUpdateSalaryDetails,
@@ -547,4 +614,8 @@ module.exports = {
   updateDeductions,
   createEarningHead,
   updateEarningHead,
+  getEarningsById,
+  getAllEarningsData,
+  getDeductionById,
+  getAllDeductions
 };
