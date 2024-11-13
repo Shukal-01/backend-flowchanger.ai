@@ -4,7 +4,7 @@ const earningsDataController = require("../../controller/admin/salaryDetails.con
 
 // earningsController.post('/', earningsDataController.EarningsData)
 earningsController.get('/all-earnings', earningsDataController.getAllEarningsData)
-earningsController.delete('/delete', earningsDataController.deleteEarningsByID)
+earningsController.delete('/delete/:id', earningsDataController.deleteEarningsByID)
 earningsController.post('/create', earningsDataController.createEarningHead)
 earningsController.get('/:id', earningsDataController.getEarningsById)
 earningsController.put('/update', earningsDataController.updateEarningHead)
