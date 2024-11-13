@@ -288,25 +288,35 @@ const updateSalaryData = async (req, res) => {
 
     const staffId = updatedSalaryDetails.staffId;
 
-    // Update or create deductions details
+    // Update or create deductions details based on 'heads'
     await Promise.all(
       deductions.map(async (deduction) => {
-        if (deduction.id) {
+        const existingDeduction = await prisma.deductions.findFirst({
+          where: {
+            staffId: staffId,
+            heads: deduction.heads,
+          },
+        });
+
+        const salaryId = updatedSalaryDetails.id || ''; // Get the salary ID for the updated entry
+
+        if (existingDeduction) {
+          // If deduction exists, update it
           await prisma.deductions.update({
-            where: { id: deduction.id },
+            where: { id: existingDeduction.id },
             data: {
-              heads: deduction.heads,
               calculation: deduction.calculation,
               amount: deduction.amount !== null ? parseFloat(deduction.amount) : null,
             },
           });
         } else {
+          // If deduction does not exist, create a new one
           await prisma.deductions.create({
             data: {
               heads: deduction.heads,
               calculation: deduction.calculation,
               amount: deduction.amount !== null ? parseFloat(deduction.amount) : null,
-              salaryId: id,
+              salaryId: salaryId,
               staffId: staffId,
             },
           });
@@ -314,25 +324,35 @@ const updateSalaryData = async (req, res) => {
       })
     );
 
-    // Update or create earnings details
+    // Update or create earnings details based on 'heads'
     await Promise.all(
       earnings.map(async (earning) => {
-        if (earning.id) {
+        const existingEarning = await prisma.earnings.findFirst({
+          where: {
+            staffId: staffId,
+            heads: earning.heads,
+          },
+        });
+
+        const salaryId = updatedSalaryDetails.id || ''; // Get the salary ID for the updated entry
+
+        if (existingEarning) {
+          // If earning exists, update it
           await prisma.earnings.update({
-            where: { id: earning.id },
+            where: { id: existingEarning.id },
             data: {
-              heads: earning.heads,
               calculation: earning.calculation,
               amount: earning.amount !== null ? parseFloat(earning.amount) : null,
             },
           });
         } else {
+          // If earning does not exist, create a new one
           await prisma.earnings.create({
             data: {
               heads: earning.heads,
               calculation: earning.calculation,
               amount: earning.amount !== null ? parseFloat(earning.amount) : null,
-              salaryId: id,
+              salaryId: salaryId,
               staffId: staffId,
             },
           });
@@ -354,6 +374,8 @@ const updateSalaryData = async (req, res) => {
     });
   }
 };
+
+
 
 
 

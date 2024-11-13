@@ -45,7 +45,7 @@ rootRouter.use("/staff", staffRouter);
 rootRouter.use('/project-status', projectStatus);
 rootRouter.use('/project-Priority', projectPriority);
 rootRouter.use("/earnings", earningsData);
-rootRouter.use("/deduction", deductionsRouter);
+// rootRouter.use("/deduction", deductionsRouter);
 rootRouter.use("/salary", salaryDetailsRouter);
 rootRouter.use("/deduction", deductionsRouter);
 rootRouter.use("/custom-details", customDetailsRouter);
