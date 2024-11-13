@@ -645,16 +645,23 @@ const getAllDeductions = async (req, res) => {
 //  delete earnings by id
 const deleteEarningsByID = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
-  console.log(req.params);
+  // console.log(id);
   try {
-    const deleteData = await prisma.deductions.delete({
+    const head = await prisma.earnings.delete({
       where: { id: id },
     });
-    return res.status(200).json(deleteData);
+    return res.status(200).json({
+      status: 200,
+      message: "Head deleted successfully.",
+      data: head,
+    });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+    console.error(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Internal Server Error.",
+      error: error.message,
+    });
   }
 };
 
