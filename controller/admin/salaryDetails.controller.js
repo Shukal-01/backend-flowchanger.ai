@@ -298,7 +298,7 @@ const updateSalaryData = async (req, res) => {
           },
         });
 
-        const salaryId = updatedSalaryDetails.id || ''; // Get the salary ID for the updated entry
+        // const salaryId = updatedSalaryDetails.id || '';
 
         if (existingDeduction) {
           // If deduction exists, update it
@@ -334,7 +334,7 @@ const updateSalaryData = async (req, res) => {
           },
         });
 
-        const salaryId = updatedSalaryDetails.id || ''; // Get the salary ID for the updated entry
+        // const salaryId = updatedSalaryDetails.id || '';
 
         if (existingEarning) {
           // If earning exists, update it
@@ -352,7 +352,7 @@ const updateSalaryData = async (req, res) => {
               heads: earning.heads,
               calculation: earning.calculation,
               amount: earning.amount !== null ? parseFloat(earning.amount) : null,
-              salaryId: salaryId,
+              // salaryId: salaryId,
               staffId: staffId,
             },
           });
