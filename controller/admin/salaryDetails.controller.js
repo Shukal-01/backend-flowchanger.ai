@@ -642,6 +642,20 @@ const getAllDeductions = async (req, res) => {
   }
 };
 
+//  delete earnings by id
+const deleteEarningsByID = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleteData = await prisma.deductions.delete({
+      where: { id },
+    });
+    return res.status(200).json(deleteData);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   addOrUpdateSalaryDetails,
   deductions,
@@ -655,5 +669,6 @@ module.exports = {
   getEarningsById,
   getAllEarningsData,
   getDeductionById,
-  getAllDeductions
+  getAllDeductions,
+  deleteEarningsByID
 };
