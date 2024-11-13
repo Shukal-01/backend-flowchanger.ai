@@ -645,9 +645,11 @@ const getAllDeductions = async (req, res) => {
 //  delete earnings by id
 const deleteEarningsByID = async (req, res) => {
   const { id } = req.params;
+  console.log(id);
+  console.log(req.params);
   try {
     const deleteData = await prisma.deductions.delete({
-      where: { id },
+      where: { id: id },
     });
     return res.status(200).json(deleteData);
   } catch (error) {
