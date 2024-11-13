@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { workEntrySchema } = require("../../../utils/validations.js");
+const { get } = require("../../../router/admin/workEntry.router.js");
 const prisma = new PrismaClient();
 
 // Add Work Entry Query
@@ -76,23 +77,183 @@ const addWorkEntry = async (req, res) => {
 };
 
 
+// const getAllWorkEntry = async (req, res) => {
+//   try {
+//     const { month, year } = req.query;
+//     // Build the filter dynamically
+//     const filter = {};
+
+//     if (year) {
+//       // Set up date range for the year and month if provided
+//       filter.createdAt = {
+//         gte: new Date(year, month ? month - 1 : 0, 1), // Start of month or start of year
+//         lt: month ? new Date(year, month, 1) : new Date(Number(year) + 1, 0, 1), // End of month or end of year
+//       };
+//     }
+//     // Fetch work entries with optional filtering
+//     const getAllWorkEntry = await prisma.workEntry.findMany({
+//       where: filter,
+//       include: {
+//         StaffDetails: true // here i also want to include user that is in staff details
+//       }
+//     });
+
+//     if (getAllWorkEntry.length === 0) {
+//       return res.status(200).json({ message: "No work entry found for this month!" });
+//     }
+//     // Calculate the count of entries for the specific month and year
+//     const entryCount = getAllWorkEntry.length;
+//     // console.log(entryCount)
+//     return res.status(200).json({
+//       status: 200,
+//       message: "All Work Entry Data!",
+//       data: getAllWorkEntry,
+//       entryCount: entryCount,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ status: 500, message: "Internal Server Error" });
+//   }
+// };
+
+// const getAllWorkEntry = async (req, res) => {
+//   try {
+//     const { month, year } = req.query;
+
+//     // Fetch the user with the role "STAFF" based on the logged-in user's ID (req.userId)
+//     const user = await prisma.user.findFirst({
+//       where: { id: req.userId, role: "STAFF" },
+//     });
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found or user is not a staff member!" });
+//     }
+
+//     // Build the filter dynamically for date (if year and month are provided)
+//     const filter = {};
+
+//     if (year) {
+//       filter.createdAt = {
+//         gte: new Date(year, month ? month - 1 : 0, 1), // Start of the month or start of the year
+//         lt: month ? new Date(year, month, 1) : new Date(Number(year) + 1, 0, 1), // End of the month or end of the year
+//       };
+//     }
+
+//     // Fetch all work entries and include the related StaffDetails and User
+//     const workEntries = await prisma.workEntry.findMany({
+//       where: filter,
+//       include: {
+//         StaffDetails: {
+//           include: {
+//             User: true, // Include the User details related to the StaffDetails
+//           },
+//         },
+//       },
+//     });
+
+//     console.log(workEntries)
+//     // Filter the work entries to include only those with matching userId in StaffDetails
+//     const filteredWorkEntries = workEntries.filter(workEntry =>
+//       workEntry.StaffDetails.some(staffDetail => staffDetail.user.id === user.id)
+//     );
+
+//     if (filteredWorkEntries.length === 0) {
+//       return res.status(200).json({ message: "No work entry found for this month!" });
+//     }
+
+//     // Calculate the count of entries for the specific month and year
+//     const entryCount = filteredWorkEntries.length;
+
+//     return res.status(200).json({
+//       status: 200,
+//       message: "All Work Entry Data!",
+//       data: filteredWorkEntries,
+//       entryCount: entryCount,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ status: 500, message: "Internal Server Error" });
+//   }
+// };
+
+
 const getAllWorkEntry = async (req, res) => {
   try {
-    const getAllWorkEntry = await prisma.workEntry.findMany({
-      where: {
-        staffDetailsId: req.params.id,
+    const { month, year } = req.query;
+
+    // Fetch the user with the role "STAFF" based on the logged-in user's ID (req.userId)
+    const user = await prisma.user.findFirst({
+      where: { id: req.userId, role: "STAFF" },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found or user is not a staff member!" });
+    }
+
+    // Build the filter dynamically for date (if year and month are provided)
+    const filter = {};
+
+    if (year) {
+      filter.createdAt = {
+        gte: new Date(year, month ? month - 1 : 0, 1), // Start of the month or start of the year
+        lt: month ? new Date(year, month, 1) : new Date(Number(year) + 1, 0, 1), // End of the month or end of the year
+      };
+    }
+
+    // Fetch all work entries with relevant StaffDetails and associated User details
+    const workEntries = await prisma.workEntry.findMany({
+      where: filter,
+      include: {
+        StaffDetails: {
+          include: {
+            User: true, // Include related User details for StaffDetails
+          },
+        },
       },
     });
+
+    // Filter work entries where StaffDetails belong to the logged-in user
+    const filteredWorkEntries = workEntries.filter(workEntry =>
+      workEntry.staffDetailsId
+    );
+
+    if (filteredWorkEntries.length === 0) {
+      return res.status(200).json({ message: "No work entry found for this month!" });
+    }
+
+    // Calculate the count of entries for the specific month and year
+    const entryCount = filteredWorkEntries.length;
+
+    // Simplify the response to remove unnecessary nesting
+    const simplifiedWorkEntries = filteredWorkEntries.map(workEntry => {
+      const staffDetails = workEntry.StaffDetails; // There's only one matching StaffDetail
+      return {
+        id: workEntry.id,
+        work_name: workEntry.work_name,
+        units: workEntry.units,
+        description: workEntry.description,
+        attachments: workEntry.attachments,
+        location: workEntry.location,
+        createdAt: workEntry.createdAt,
+        staffDetailsId: staffDetails.id,
+        job_title: staffDetails.job_title,
+        branch: staffDetails.branch,
+        userId: staffDetails.userId, // Include relevant User fields here
+        user_name: staffDetails.User.name,
+        user_email: staffDetails.User.email,
+        current_address: staffDetails.current_address,
+      };
+    });
+
     return res.status(200).json({
       status: 200,
       message: "All Work Entry Data!",
-      data: getAllWorkEntry,
+      data: simplifiedWorkEntries,
+      entryCount: entryCount,
     });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+    return res.status(500).json({ status: 500, message: "Internal Server Error" });
   }
 };
 

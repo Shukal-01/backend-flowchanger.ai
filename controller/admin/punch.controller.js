@@ -76,7 +76,7 @@ async function createPunchIn(req, res) {
 
     let fine;
     if (latenessMinutes > 0) {
-      fine = `${hoursLate > 0 ? hoursLate : ""} : ${minutesLate}`;
+      fine = `${hoursLate > 0 ? hoursLate : ""} hours : ${minutesLate} minutes`;
     } else {
       fine = "On time";
     }
