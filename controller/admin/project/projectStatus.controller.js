@@ -137,13 +137,10 @@ const searchProjectStatusByName = async (req, res) => {
                 },
             },
         });
-        if (SearchProjectStatus.length === 0) {
-            return res.status(404).json({ status: false, message: "Project Status Search Not Found!" });
-        }
-        return res.status(201).json({ status: true, message: "Project Status Search Successfully!", data: SearchProjectStatus });
+        res.status(200).json(projects);
     } catch (error) {
-        console.error("Error adding project status:", error);
-        return res.status(500).json({ status: false, message: "Something went wrong!" });
+        console.error('Error fetching projects:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 

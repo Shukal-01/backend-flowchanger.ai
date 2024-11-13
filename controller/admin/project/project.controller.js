@@ -261,7 +261,7 @@ const SearchingProjectsByName = async (req, res) => {
     res.status(200).json(projects);
   } catch (error) {
     console.error('Error fetching projects:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ status: false, message: 'Internal server error' });
   }
 };
 
