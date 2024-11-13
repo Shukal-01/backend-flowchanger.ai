@@ -626,9 +626,9 @@ const deductionsEarningsSchema = z.object({
 const workEntrySchema = z.object({
   work_name: z.string().min(1, "Work Name is required"),
   units: z.string().min(1, "Units is required"),
-  discription: z.string().min(1, "Description is required"),
-  location: z.string().min(1, "Location is required"),
-  // attachments: z.string().min(1, "Attachments is required").optional(),
+  description: z.string().min(1, "Description is required"),
+  location: z.string().optional(),
+  attachments: z.string().optional(),
   staffDetailsId: z.string().uuid("Staff ID is required"),
 });
 

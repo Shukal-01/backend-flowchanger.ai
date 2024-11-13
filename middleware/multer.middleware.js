@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+  const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/svg", "image/pdf", "image/txt"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -55,10 +55,10 @@ const uploadAndSaveToCloudinary = (fieldName) => (req, res, next) => {
     else if (req.route.path.includes("out")) folderName = "Punch_Out_Images";
     else if (req.route.path.includes("verify"))
       folderName = "Background_Verification_Images";
-    else if (req.route.path.includes("work-entry"))
-      folderName = "Work_Entry_Images";
     else if (req.route.path.includes("project-files"))
       folderName = "Project_File_Images";
+    else if (req.route.path.includes("work-entry"))
+      folderName = "Work_Entry_Images";
 
     if (req.file) {
       try {

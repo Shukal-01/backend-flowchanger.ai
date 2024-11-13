@@ -289,7 +289,7 @@ const searchStaffByName = async (req, res) => {
         staffDetails: {
           department: department_name
             ? {
-              name: {
+              department_name: {
                 contains: department_name,
                 mode: "insensitive",
               },
