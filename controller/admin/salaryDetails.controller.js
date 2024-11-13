@@ -373,6 +373,7 @@ const updateSalaryData = async (req, res) => {
 
 
 
+
 // Delete Salary Data Record By ID
 
 const deleteSalaryRecord = async (req, res) => {
