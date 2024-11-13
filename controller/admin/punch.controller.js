@@ -103,7 +103,7 @@ async function createPunchIn(req, res) {
         status: "PRESENT",
       },
     });
-    console.log(punchRecords);
+    // console.log(punchRecords);
 
     return res.status(201).json(punchIn);
   } catch (error) {
@@ -283,18 +283,86 @@ async function getPunchRecordById(req, res) {
 
 async function getPunchRecords(req, res) {
   try {
+    const { month, year } = req.query; // Month and Year are passed as query params
+
+    // Initialize the date range filter
+    let filter = {};
+
+    // If both month and year are provided, apply the date range filter
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1); // Start of the month
+      const endDate = new Date(year, month, 0); // End of the month
+
+      filter.punchDate = {
+        gte: startDate,
+        lt: endDate,
+      };
+    }
+
+    // Fetch the punch records based on the filter
     const punchRecords = await prisma.punchRecords.findMany({
+      where: filter,
       include: {
         punchIn: true,
         punchOut: true,
+        staff: true, // Include staff details
       },
     });
-    res.status(200).json(punchRecords);
+
+    // If no records are found, return a message
+    if (punchRecords.length === 0) {
+      return res.status(200).json({
+        message: month && year
+          ? `No punch records found for ${month}-${year}.`
+          : "No punch records found.",
+      });
+    }
+
+    // Calculate the totals for each status
+    let totalLeave = 0;
+    let totalPresent = 0;
+    let totalAbsent = 0;
+    let totalHalfDay = 0;
+
+    // Iterate over punch records to calculate the totals
+    punchRecords.forEach((record) => {
+      switch (record.status) {
+        case "LEAVE":
+          totalLeave++;
+          break;
+        case "PRESENT":
+          totalPresent++;
+          break;
+        case "ABSENT":
+          totalAbsent++;
+          break;
+        case "HALF_DAY":
+          totalHalfDay++;
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Return the calculated results along with the punch records
+    return res.status(200).json({
+      status: 200,
+      message: `Punch records${month && year ? ` for ${month}-${year}` : ''}`,
+      data: punchRecords,
+      totals: {
+        totalLeave,
+        totalPresent,
+        totalAbsent,
+        totalHalfDay,
+      },
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Failed to fetch punch-in" });
+    res.status(500).json({ error: "Failed to fetch punch records" });
   }
 }
+
+
 
 module.exports = {
   createPunchIn,
