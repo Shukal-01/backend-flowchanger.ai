@@ -348,7 +348,6 @@ const updateSalaryData = async (req, res) => {
               heads: earning.heads,
               calculation: earning.calculation,
               amount: earning.amount !== null ? parseFloat(earning.amount) : null,
-              salaryId: updatedSalaryDetails.id,
               staffId: staffId,
             },
           });
