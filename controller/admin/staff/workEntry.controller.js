@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Add Work Entry Query
 const addWorkEntry = async (req, res) => {
   try {
-    const { staffDetailsId, work_name, units, discription, location } =
+    const { staffDetailsId, work_name, units, description, location } =
       req.body;
     const file_name = req.file ? req.file.originalname : "";
     console.log("cloudinaryUrl:", req.file.cloudinaryUrl);
@@ -16,7 +16,7 @@ const addWorkEntry = async (req, res) => {
       staffDetailsId,
       work_name,
       units,
-      discription,
+      description,
       location,
       attachments,
     });
@@ -55,7 +55,7 @@ const addWorkEntry = async (req, res) => {
       data: {
         work_name: work_name,
         units: units,
-        discription: discription,
+        description: description,
         attachments: attachments,
         location: location,
         staffDetailsId: staffDetailsId,
@@ -99,7 +99,7 @@ const getAllWorkEntry = async (req, res) => {
 // update work entry
 const updateWorkEntry = async (req, res) => {
   const { id } = req.params;
-  const { work_name, units, discription, location } = req.body;
+  const { work_name, units, description, location } = req.body;
   const attachments = req.file.cloudinaryUrl;
   const file_name = req.file ? req.file.originalname : null;
   try {
@@ -108,7 +108,7 @@ const updateWorkEntry = async (req, res) => {
       data: {
         work_name: work_name,
         units: units,
-        discription: discription,
+        description: description,
         location: location,
         attachments: attachments,
       },
