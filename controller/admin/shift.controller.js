@@ -137,7 +137,6 @@ async function getFixedShifts(req, res) {
 async function createFixedShift(req, res) {
     try {
         const { day, weekOff, staffId, shiftId } = req.body;
-        console.log(req.body)
 
         // Check if the staff member exists
         const staffExists = await prisma.staffDetails.findUnique({
@@ -146,7 +145,6 @@ async function createFixedShift(req, res) {
         if (!staffExists) {
             return res.status(404).json({ error: 'Staff not found' });
         }
-        console.log(staffExists)
         // Parse and validate input
         const fixedShiftResult = FixedShiftSchema.parse({
             day,
