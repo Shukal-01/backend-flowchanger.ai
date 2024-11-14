@@ -569,18 +569,18 @@ const projectStatusSchema = z.object({
 
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
-  project_name: z.string().min(1, "required"),
-  customerId: z.string().min(1, "required"),
-  billing_type: z.string().min(1, "required"),
-  status: z.string().min(1, "required"),
-  total_rate: z.number().positive("Total rate must be a positive number").min(1, "required"),
-  estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "required"),
-  start_date: z.string().min(1, "required"),
-  deadline: z.string().min(1, "required"),
-  tags: z.array(z.string().min(1, "required")),
-  description: z.string().min(1, "required"),
+  project_name: z.string().min(1, " project name is required"),
+  customerId: z.string().min(1, "client is required"),
+  billing_type: z.string().min(1, "billing type is required"),
+  status: z.string().min(1, "status isrequired"),
+  total_rate: z.number().positive("Total rate must be a positive number").min(1, "total rate is required"),
+  estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "estimated hours is required"),
+  start_date: z.string().min(1, "start date is required"),
+  deadline: z.string().min(1, " deadline is required"),
+  tags: z.array(z.string().min(1, " tag is required")),
+  description: z.string().min(1, " description is required"),
   send_mail: z.boolean().default(false),
-  staffId: z.array(z.string()).min(1, "Select at least one option for Staff Id"),
+  staffId: z.array(z.string()).min(1, "Select at least one option for Staff"),
 });
 
 // project Priority Schema
