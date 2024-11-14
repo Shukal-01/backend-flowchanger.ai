@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const ShiftSchema = require('../../utils/validations').ShiftSchema;
 const { ZodError } = require('zod');
-const { FixedShiftSchema, FlexibleShiftSchema } = require('../../utils/validations');
+const { FixedShiftSchema, FlexibleShiftSchema, weekOffShiftSchema } = require('../../utils/validations');
 
 
 async function getShiftById(req, res) {
@@ -137,6 +137,7 @@ async function getFixedShifts(req, res) {
 async function createFixedShift(req, res) {
     try {
         const { day, weekOff, staffId, shiftId } = req.body;
+        console.log(req.body)
 
         // Check if the staff member exists
         const staffExists = await prisma.staffDetails.findUnique({
@@ -145,7 +146,7 @@ async function createFixedShift(req, res) {
         if (!staffExists) {
             return res.status(404).json({ error: 'Staff not found' });
         }
-
+        console.log(staffExists)
         // Parse and validate input
         const fixedShiftResult = FixedShiftSchema.parse({
             day,
@@ -159,17 +160,22 @@ async function createFixedShift(req, res) {
 
         // Create a WeekOff entry if weekOff is true
         if (weekOff) {
-            const weekOffEntry = await prisma.weekOff.create({
-                data: {
-                    weekOne: req.body.weekOne || false,
-                    weekTwo: req.body.weekTwo || false,
-                    weekThree: req.body.weekThree || false,
-                    weekFour: req.body.weekFour || false,
-                    weekFive: req.body.weekFive || false,
-                },
+            // Validate the weekOffShift data
+            const weekOffShiftData = weekOffShiftSchema.parse({
+                weekOne: req.body.weekOne,
+                weekTwo: req.body.weekTwo,
+                weekThree: req.body.weekThree,
+                weekFour: req.body.weekFour,
+                weekFive: req.body.weekFive,
+            });
+
+            const weekOffEntry = await prisma.weekOffShift.create({
+                data: weekOffShiftData,
             });
             weekId = weekOffEntry.id;
+            console.log(weekOffEntry)
         }
+
 
         // Create the FixedShift entry, including the newly created weekId if applicable
         const fixedShift = await prisma.fixedShift.create({
@@ -182,11 +188,11 @@ async function createFixedShift(req, res) {
             },
             include: {
                 week: true, // Include related WeekOff entry
-                shiftId: true, // Include related shifts
-                staff: true, // Include related staff details
+                Shifts: true, // Include related shifts
+                staffDetails: true, // Include related staff details
             },
         });
-
+        console.log(fixedShift)
         res.status(201).json(fixedShift);
     } catch (error) {
         if (error instanceof ZodError) {

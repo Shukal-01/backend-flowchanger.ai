@@ -20,6 +20,9 @@ CREATE TYPE "FineType" AS ENUM ('HOURLY', 'DAILY');
 CREATE TYPE "PunchTime" AS ENUM ('ANYTIME', 'ADDLIMIT');
 
 -- CreateEnum
+CREATE TYPE "Day" AS ENUM ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
+
+-- CreateEnum
 CREATE TYPE "punchRecordStatus" AS ENUM ('ABSENT', 'PRESENT', 'HALFDAY', 'PAIDLEAVE');
 
 -- CreateEnum
@@ -51,9 +54,9 @@ CREATE TABLE "WorkEntry" (
     "id" TEXT NOT NULL,
     "work_name" TEXT NOT NULL,
     "units" TEXT NOT NULL,
-    "discription" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     "attachments" TEXT,
-    "location" TEXT NOT NULL,
+    "location" TEXT,
     "staffDetailsId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -469,9 +472,6 @@ CREATE TABLE "SalaryDetails" (
     "effective_date" TIMESTAMP(3),
     "salary_type" TEXT,
     "ctc_amount" DOUBLE PRECISION,
-    "earnings_heads" TEXT[],
-    "earnings_calculation" TEXT[],
-    "earnings_amount" TEXT[],
     "employer_pf" DOUBLE PRECISION,
     "employer_esi" DOUBLE PRECISION,
     "employer_lwf" DOUBLE PRECISION,
@@ -504,12 +504,24 @@ CREATE TABLE "Shifts" (
 );
 
 -- CreateTable
+CREATE TABLE "WeekOffShift" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "weekOne" BOOLEAN DEFAULT false,
+    "weekTwo" BOOLEAN DEFAULT false,
+    "weekThree" BOOLEAN DEFAULT false,
+    "weekFour" BOOLEAN DEFAULT false,
+    "weekFive" BOOLEAN DEFAULT false,
+
+    CONSTRAINT "WeekOffShift_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "FixedShift" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "day" TEXT NOT NULL,
+    "day" "Day" NOT NULL DEFAULT 'Mon',
     "weekOff" BOOLEAN NOT NULL DEFAULT false,
     "staffId" TEXT,
-    "shiftId" TEXT,
+    "weekId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "FixedShift_pkey" PRIMARY KEY ("id")
@@ -521,7 +533,6 @@ CREATE TABLE "FlexibleShift" (
     "dateTime" TEXT NOT NULL,
     "weekOff" BOOLEAN NOT NULL DEFAULT false,
     "staffId" TEXT,
-    "shiftId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "FlexibleShift_pkey" PRIMARY KEY ("id")
@@ -790,9 +801,9 @@ CREATE TABLE "Earnings" (
     "heads" TEXT,
     "calculation" TEXT,
     "amount" DOUBLE PRECISION,
-    "salaryId" TEXT,
     "staffId" TEXT,
     "salary_month" TEXT,
+    "salaryDetailsId" TEXT,
 
     CONSTRAINT "Earnings_pkey" PRIMARY KEY ("id")
 );
@@ -811,6 +822,12 @@ CREATE TABLE "_staffId" (
 
 -- CreateTable
 CREATE TABLE "_departmentId" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_shiftId" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -888,10 +905,16 @@ CREATE UNIQUE INDEX "AIPermissions_permissionsId_key" ON "AIPermissions"("permis
 CREATE UNIQUE INDEX "Permissions_roleId_key" ON "Permissions"("roleId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "FixedShift_weekId_key" ON "FixedShift"("weekId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "PunchRecords_punchInId_key" ON "PunchRecords"("punchInId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PunchRecords_punchOutId_key" ON "PunchRecords"("punchOutId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Fine_punchRecordId_key" ON "Fine"("punchRecordId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ClientDetails_userId_key" ON "ClientDetails"("userId");
@@ -919,6 +942,12 @@ CREATE UNIQUE INDEX "_departmentId_AB_unique" ON "_departmentId"("A", "B");
 
 -- CreateIndex
 CREATE INDEX "_departmentId_B_index" ON "_departmentId"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_shiftId_AB_unique" ON "_shiftId"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_shiftId_B_index" ON "_shiftId"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_ProjectStaff_AB_unique" ON "_ProjectStaff"("A", "B");
@@ -1035,13 +1064,10 @@ ALTER TABLE "SalaryDetails" ADD CONSTRAINT "SalaryDetails_staffId_fkey" FOREIGN 
 ALTER TABLE "FixedShift" ADD CONSTRAINT "FixedShift_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FixedShift" ADD CONSTRAINT "FixedShift_shiftId_fkey" FOREIGN KEY ("shiftId") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "FixedShift" ADD CONSTRAINT "FixedShift_weekId_fkey" FOREIGN KEY ("weekId") REFERENCES "WeekOffShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "FlexibleShift" ADD CONSTRAINT "FlexibleShift_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "FlexibleShift" ADD CONSTRAINT "FlexibleShift_shiftId_fkey" FOREIGN KEY ("shiftId") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_punchInId_fkey" FOREIGN KEY ("punchInId") REFERENCES "PunchIn"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1080,7 +1106,13 @@ ALTER TABLE "UpiDetails" ADD CONSTRAINT "UpiDetails_staffId_fkey" FOREIGN KEY ("
 ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Deductions" ADD CONSTRAINT "Deductions_salaryDetailsId_fkey" FOREIGN KEY ("salaryDetailsId") REFERENCES "SalaryDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Earnings" ADD CONSTRAINT "Earnings_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Earnings" ADD CONSTRAINT "Earnings_salaryDetailsId_fkey" FOREIGN KEY ("salaryDetailsId") REFERENCES "SalaryDetails"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_UserRooms" ADD CONSTRAINT "_UserRooms_A_fkey" FOREIGN KEY ("A") REFERENCES "ChatRoom"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1099,6 +1131,12 @@ ALTER TABLE "_departmentId" ADD CONSTRAINT "_departmentId_A_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "_departmentId" ADD CONSTRAINT "_departmentId_B_fkey" FOREIGN KEY ("B") REFERENCES "TaskDetail"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_shiftId" ADD CONSTRAINT "_shiftId_A_fkey" FOREIGN KEY ("A") REFERENCES "FlexibleShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_shiftId" ADD CONSTRAINT "_shiftId_B_fkey" FOREIGN KEY ("B") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ProjectStaff" ADD CONSTRAINT "_ProjectStaff_A_fkey" FOREIGN KEY ("A") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;

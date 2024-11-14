@@ -384,6 +384,14 @@ const OvertimePolicySchema = z.object({
     .min(1, { message: "Staff ID is required." }),
 });
 
+const weekOffShiftSchema = z.object({
+  weekOne: z.boolean().optional().default(false),
+  weekTwo: z.boolean().optional().default(false),
+  weekThree: z.boolean().optional().default(false),
+  weekFour: z.boolean().optional().default(false),
+  weekFive: z.boolean().optional().default(false),
+});
+
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
@@ -673,6 +681,7 @@ module.exports = {
   deductionsEarningsSchema,
   projectSchema,
   pastEmploymentSchema,
-  workEntrySchema
+  workEntrySchema,
+  weekOffShiftSchema,
 };
 
