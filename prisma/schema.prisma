@@ -785,7 +785,7 @@ model Deductions {
   calculation     String?
   amount          Float?
   deduction_month String?
-  staffId         String?
+  staffId         String?  
   staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
   salaryDetailsId String?
   SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
@@ -795,8 +795,7 @@ model Earnings {
   id              String         @id @default(dbgenerated("gen_random_uuid()"))
   heads           String?
   calculation     String?
-  amount          Float?
-  salaryId        String?
+  amount          Float?  
   staffId         String?
   salary_month    String?
   staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
