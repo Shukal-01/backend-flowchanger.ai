@@ -81,15 +81,6 @@ const getAllWorkEntry = async (req, res) => {
   try {
     const { month, year } = req.query;
 
-    // Fetch the user with the role "STAFF" based on the logged-in user's ID (req.userId)
-    const user = await prisma.user.findFirst({
-      where: { id: req.userId, role: "STAFF" },
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found or user is not a staff member!" });
-    }
-
     // Build the filter dynamically for date (if year and month are provided)
     const filter = {};
 
@@ -106,7 +97,7 @@ const getAllWorkEntry = async (req, res) => {
       include: {
         StaffDetails: {
           include: {
-            User: true, // Include related User details for StaffDetails
+            User: true, // this will include the related user data within the staff object
           },
         },
       },
@@ -124,31 +115,10 @@ const getAllWorkEntry = async (req, res) => {
     // Calculate the count of entries for the specific month and year
     const entryCount = filteredWorkEntries.length;
 
-    // Simplify the response to remove unnecessary nesting
-    const simplifiedWorkEntries = filteredWorkEntries.map(workEntry => {
-      const staffDetails = workEntry.StaffDetails; // There's only one matching StaffDetail
-      return {
-        id: workEntry.id,
-        work_name: workEntry.work_name,
-        units: workEntry.units,
-        description: workEntry.description,
-        attachments: workEntry.attachments,
-        location: workEntry.location,
-        createdAt: workEntry.createdAt,
-        staffDetailsId: staffDetails.id,
-        job_title: staffDetails.job_title,
-        branch: staffDetails.branch,
-        userId: staffDetails.userId, // Include relevant User fields here
-        user_name: staffDetails.User.name,
-        user_email: staffDetails.User.email,
-        current_address: staffDetails.current_address,
-      };
-    });
-
     return res.status(200).json({
       status: 200,
       message: "All Work Entry Data!",
-      data: simplifiedWorkEntries,
+      data: workEntries,
       entryCount: entryCount,
     });
   } catch (error) {
