@@ -86,16 +86,12 @@ const searchProjectPriorityByName = async (req, res) => {
                 }
             }
         });
-        if (projectPriority.length === 0) {
-            return res.status(404).json({ status: false, message: "No Searching project priorities found!" });
-        }
-        return res.status(201).json({ status: true, message: "Project Priority Search Successfully!", data: projectPriority });
+        return res.status(200).json(projectPriority);
     } catch (error) {
-        console.error("Error retrieving project Priority:", error);
-        return res.status(500).json({ status: false, message: "Something went wrong!" });
+        console.error('Error fetching projects:', error);
+        return res.status(500).json({ status: false, message: "Internal Server Error!" });
     }
 };
-
 module.exports = {
     createProjectPriority,
     getProjectPriority,

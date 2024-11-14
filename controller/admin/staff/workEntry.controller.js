@@ -1,19 +1,27 @@
 const { PrismaClient } = require("@prisma/client");
-const nodemailer = require("nodemailer");
-const upload = require("../../../middleware/upload.js");
 const { workEntrySchema } = require("../../../utils/validations.js");
+const { get } = require("../../../router/admin/workEntry.router.js");
 const prisma = new PrismaClient();
 
 // Add Work Entry Query
 const addWorkEntry = async (req, res) => {
   try {
-    const { staffDetailsId, work_name, units, description, location } =
-      req.body;
-    const file_name = req.file ? req.file.originalname : "";
-    console.log("cloudinaryUrl:", req.file.cloudinaryUrl);
-    const attachments = req.file.cloudinaryUrl;
+    const { work_name, units, description } = req.body;
+
+    const location = req.body.location ? req.body.location : "null";
+
+    const user = await prisma.user.findFirst({
+      where: { id: req.userId, role: "STAFF" },
+      include: { staffDetails: true },
+    });
+    if (!user) {
+      return res.status(404).send("user not found");
+    }
+
+    const attachments = req.imageUrl || "null";
+
     const validation = workEntrySchema.safeParse({
-      staffDetailsId,
+      staffDetailsId: user.staffDetails.id,
       work_name,
       units,
       description,
@@ -52,20 +60,13 @@ const addWorkEntry = async (req, res) => {
 
     // Create new work entry if no existing entry found for today
     const newWorkEntry = await prisma.workEntry.create({
-      data: {
-        work_name: work_name,
-        units: units,
-        description: description,
-        attachments: attachments,
-        location: location,
-        staffDetailsId: staffDetailsId,
-      },
+      data: validation.data,
     });
     console.log(newWorkEntry);
     return res.status(201).json({
       status: 201,
       message: "Work Entry Created Successfully!",
-      data: newWorkEntry,
+      newWorkEntry,
     });
   } catch (error) {
     console.log(error);
@@ -75,18 +76,51 @@ const addWorkEntry = async (req, res) => {
   }
 };
 
-// get all work entry
 const getAllWorkEntry = async (req, res) => {
   try {
-    const getAllWorkEntry = await prisma.workEntry.findMany({
-      where: {
-        staffDetailsId: req.params.id,
+    const { month, year } = req.query;
+
+    // Build the filter dynamically for date (if year and month are provided)
+    const filter = {};
+
+    if (year) {
+      filter.createdAt = {
+        gte: new Date(year, month ? month - 1 : 0, 1), // Start of the month or start of the year
+        lt: month ? new Date(year, month, 1) : new Date(Number(year) + 1, 0, 1), // End of the month or end of the year
+      };
+    }
+
+    // Fetch all work entries with relevant StaffDetails and associated User details
+    const workEntries = await prisma.workEntry.findMany({
+      where: filter,
+      include: {
+        StaffDetails: {
+          include: {
+            User: true, // this will include the related user data within the staff object
+          },
+        },
       },
     });
+
+    // Filter work entries where StaffDetails belong to the logged-in user
+    const filteredWorkEntries = workEntries.filter(
+      (workEntry) => workEntry.staffDetailsId
+    );
+
+    if (filteredWorkEntries.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "No work entry found for this month!" });
+    }
+
+    // Calculate the count of entries for the specific month and year
+    const entryCount = filteredWorkEntries.length;
+
     return res.status(200).json({
       status: 200,
       message: "All Work Entry Data!",
-      data: getAllWorkEntry,
+      data: workEntries,
+      entryCount: entryCount,
     });
   } catch (error) {
     console.log(error);
@@ -96,12 +130,10 @@ const getAllWorkEntry = async (req, res) => {
   }
 };
 
-// update work entry
 const updateWorkEntry = async (req, res) => {
   const { id } = req.params;
   const { work_name, units, description, location } = req.body;
-  const attachments = req.file.cloudinaryUrl;
-  const file_name = req.file ? req.file.originalname : null;
+  const attachments = req.imageUrl;
   try {
     const updateWorkEntry = await prisma.workEntry.update({
       where: { id: id },
@@ -126,7 +158,6 @@ const updateWorkEntry = async (req, res) => {
   }
 };
 
-// delete work entry
 const deleteWorkEntry = async (req, res) => {
   const { id } = req.params;
   try {
@@ -144,7 +175,6 @@ const deleteWorkEntry = async (req, res) => {
   }
 };
 
-// get by id work entry
 const getWorkEntryById = async (req, res) => {
   const { id } = req.params;
   try {

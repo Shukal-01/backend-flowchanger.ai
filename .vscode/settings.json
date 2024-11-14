@@ -1,6 +1,6 @@
 {
     "editor.formatOnSave": true,
     "[prisma]": {
-        "editor.defaultFormatter": "ajmnz.prisma-import"
+        "editor.defaultFormatter": "Prisma.prisma"
     }
 }

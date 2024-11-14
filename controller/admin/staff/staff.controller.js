@@ -289,7 +289,7 @@ const searchStaffByName = async (req, res) => {
         staffDetails: {
           department: department_name
             ? {
-              name: {
+              department_name: {
                 contains: department_name,
                 mode: "insensitive",
               },
@@ -309,18 +309,10 @@ const searchStaffByName = async (req, res) => {
       },
     });
 
-    if (searchStaff.length === 0) {
-      return res.status(404).json({ status: false, message: "Staff not found!" });
-    }
-
-    return res.status(200).json({
-      status: true,
-      message: "Staff search successful!",
-      data: searchStaff,
-    });
+    return res.status(200).json(searchStaff);
   } catch (error) {
     console.error("Error fetching staff:", error);
-    return res.status(500).json({ status: false, message: "Something went wrong!" });
+    return res.status(500).json({ status: false, message: "Internal Server Error!" });
   }
 };
 
@@ -356,15 +348,8 @@ const searchStaffByStatus = async (req, res) => {
     const filteredData = await prisma.staffDetails.findMany({
       where: whereDataArray,
     });
-    if (filteredData.length === 0) {
-      return res.json({ data: filteredData });
-    }
 
-    return res.status(200).json({
-      status: true,
-      data: filteredData,
-      message: "Staff filtered successfully",
-    });
+    return res.status(200).json(filteredData);
   } catch (error) {
     console.error(error);
     return res.status(500).json({

@@ -10,12 +10,7 @@ const {
 async function createStartBreak(req, res) {
     try {
         const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
-        // const photoUrl = JSON.stringify(req.file);
-        // const photoUrl = String(req.file);
-        // if (!req.file) {
-        //     return res.status(400).send("No file uploaded.");
-        // }
-        const photoUrl = req.file.cloudinaryUrl || "null";
+        const photoUrl = req.imageUrl || "null";
 
         // Validate input using zod schema
         StartBreakSchema.parse({
@@ -26,7 +21,6 @@ async function createStartBreak(req, res) {
             photoUrl,
             location
         });
-        // console.log(req.body)
         // Check if there’s an existing startBreak without an endBreak for the same staffId
         const existingStartBreak = await prisma.startBreak.findFirst({
             where: {
@@ -97,12 +91,7 @@ async function getStartBreakByStaffId(req, res) {
 async function createEndBreak(req, res) {
     try {
         const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
-        // const photoUrl = JSON.stringify(req.file);
-        // const photoUrl = String(req.file);
-        // if (!req.file) {
-        //     return res.status(400).send("No file uploaded.");
-        // }
-        const photoUrl = req.file.cloudinaryUrl || "null";
+        const photoUrl = req.imageUrl || "null";
 
         // Validate input using zod schema
         EndBreakSchema.parse({

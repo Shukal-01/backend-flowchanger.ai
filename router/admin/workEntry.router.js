@@ -10,6 +10,7 @@ workRouter.get("/", workController.getAllWorkEntry);
 workRouter.put(
   "/:id",
   uploadAndSaveToCloudinary("attachments"),
+  authorizationMiddleware,
   workController.updateWorkEntry
 );
 workRouter.delete("/:id", workController.deleteWorkEntry);

@@ -32,7 +32,7 @@ model WorkEntry {
   units          String
   description    String
   attachments    String?
-  location       String
+  location       String?
   staffDetailsId String
   createdAt      DateTime     @default(now())
   StaffDetails   StaffDetails @relation(fields: [staffDetailsId], references: [id], onDelete: Cascade)
@@ -117,7 +117,6 @@ model StaffDetails {
   OverLeavePolicy          OvertimePolicy[]
   EarlyLeavePolicy         EarlyLeavePolicy[]
   LateComingPolicy         LateComingPolicy[]
-  // panaltyOvertimeDetailId  PanaltyOvertimeDetails?
   SalaryDetails            SalaryDetails[]
   PunchRecords             PunchRecords[]
   attendanceAutomationRule AttendanceAutomationRule?
@@ -290,7 +289,7 @@ model LeaveBalance {
   updatedAt     DateTime @updatedAt
 
   staff       StaffDetails @relation(fields: [staffId], references: [id])
-  leavePolicy LeavePolicy  @relation(fields: [leavePolicyId], references: [id],onDelete: Cascade)
+  leavePolicy LeavePolicy  @relation(fields: [leavePolicyId], references: [id], onDelete: Cascade)
 }
 
 enum LeaveRequestStatus {
@@ -306,17 +305,6 @@ model CustomDetails {
   field_value String
   staff       StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
-
-// model PanaltyOvertimeDetails {
-//   id      String @id @default(dbgenerated("gen_random_uuid()"))
-//   staffId String @unique
-
-//   earlyLeavePolicy EarlyLeavePolicy?
-//   lateComingPolicy LateComingPolicy?
-//   overtimePolicy   OvertimePolicy?
-
-//   staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
-// }
 
 enum FineType {
   HOURLY
@@ -494,32 +482,25 @@ model Permissions {
 }
 
 model SalaryDetails {
-  id                   String       @id @default(uuid())
-  effective_date       DateTime?
-  salary_type          String?
-  ctc_amount           Float?
-  earnings_heads       String[]
-  earnings_calculation String[]
-  earnings_amount      String[]
-  employer_pf          Float?
-  employer_esi         Float?
-  employer_lwf         Float?
-  employee_pf          Float?
-  employee_esi         Float?
-  professional_tax     Float?
-  employee_lwf         Float?
-  tds                  Float?
-  created_at           DateTime?    @default(now())
-  updated_at           DateTime?    @updatedAt
-  staffId              String
-  Staff                StaffDetails @relation(fields: [staffId], references: [id])
+  id               String       @id @default(uuid())
+  effective_date   DateTime?
+  salary_type      String?
+  ctc_amount       Float?
+  employer_pf      Float?
+  employer_esi     Float?
+  employer_lwf     Float?
+  employee_pf      Float?
+  employee_esi     Float?
+  professional_tax Float?
+  employee_lwf     Float?
+  tds              Float?
+  created_at       DateTime?    @default(now())
+  updated_at       DateTime?    @updatedAt
+  staffId          String
+  earnings         Earnings[]
+  deductions       Deductions[]
+  Staff            StaffDetails @relation(fields: [staffId], references: [id])
 }
-
-// {
-//  head:"basic"
-//  calucation:"lkdjjafljd"
-//  amount:500
-//}
 
 model Shifts {
   id                   String          @id @default(dbgenerated("gen_random_uuid()"))
@@ -617,8 +598,6 @@ model PunchIn {
   fine          String?
   PunchRecords  PunchRecords?
   approve       String?       @default("Pending")
-  // staffId       String
-  // staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchOutMethod {
@@ -638,17 +617,7 @@ model PunchOut {
   location       String
   overtime       String?
   punchRecords   PunchRecords?
-
-  // Uncomment if needed:
-  // staffId        String
-  // staff          StaffDetails   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
-
-// model TaskType {
-//   id           String       @id @default(dbgenerated("gen_random_uuid()"))
-//   taskTypeName String
-//   TaskDetail   TaskDetail[]
-// }
 
 enum BreakMethod {
   BIOMETRIC
@@ -660,7 +629,6 @@ model StartBreak {
   id             String       @id @default(dbgenerated("gen_random_uuid()"))
   breakMethod    BreakMethod  @default(PHOTOCLICK)
   startBreakTime DateTime     @default(now())
-  // startBreakDate DateTime     @default(now())
   biometricData  String?
   qrCodeValue    String?
   photoUrl       String?
@@ -673,7 +641,6 @@ model EndBreak {
   id            String       @id @default(dbgenerated("gen_random_uuid()"))
   breakMethod   BreakMethod  @default(PHOTOCLICK)
   endBreakTime  DateTime     @default(now())
-  // endBreakDate  DateTime     @default(now())
   biometricData String?
   qrCodeValue   String?
   photoUrl      String?
@@ -694,7 +661,6 @@ model TaskStatus {
 model TaskPriority {
   id               String @id @default(dbgenerated("gen_random_uuid()"))
   taskPriorityName String
-  // TaskDetail       TaskDetail[]
 }
 
 model TaskDetail {
@@ -711,7 +677,6 @@ model TaskDetail {
   taskDescription    String
   taskTag            String?
   attachFile         String?
-  // taskAssign         StaffDetails[] @relation("staffId")
 }
 
 model ProjectFiles {
@@ -821,25 +786,25 @@ model ProjectPriority {
 }
 
 model Deductions {
-  id              String        @id @default(dbgenerated("gen_random_uuid()"))
+  id              String         @id @default(dbgenerated("gen_random_uuid()"))
   heads           String?
   calculation     String?
   amount          Float?
   deduction_month String?
   staffId         String?
-  staff           StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  // SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
+  staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
   salaryDetailsId String?
+  SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
 }
 
 model Earnings {
-  id           String        @id @default(dbgenerated("gen_random_uuid()"))
-  heads        String?
-  calculation  String?
-  amount       Float?
-  salaryId     String?
-  staffId      String?
-  salary_month String?
-  staff        StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  // SalaryDetails SalaryDetails? @relation(fields: [salaryId], references: [id])
+  id              String         @id @default(dbgenerated("gen_random_uuid()"))
+  heads           String?
+  calculation     String?
+  amount          Float?
+  staffId         String?
+  salary_month    String?
+  staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
+  salaryDetailsId String?
 }
