@@ -407,8 +407,8 @@ const weekOffShiftSchema = z.object({
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().min(1, { message: "Staff ID is required." }),
-  shiftId: z.array(z.string()).optional(),
+  staffId: z.string().uuid(1, { message: "Staff ID is required." }),
+  shifts: z.array(z.string()).optional(),
 });
 
 const FixedShiftSchema = z.object({
@@ -419,7 +419,7 @@ const FixedShiftSchema = z.object({
     }),
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().uuid(1, { message: "Staff ID is required." }),
-  shiftId: z.array(z.string()).default([]).optional(),
+  shifts: z.array(z.string()).default([]).optional(),
   weekId: z.string().optional(),
 });
 

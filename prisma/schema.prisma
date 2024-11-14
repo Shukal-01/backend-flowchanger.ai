@@ -513,8 +513,8 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  FixedShift           FixedShift[]    @relation("shiftId")
-  FlexibleShift        FlexibleShift[] @relation("shiftId")
+  fixedShifts          FixedShift[]    @relation("ShiftFixedShift")
+  flexibleShift        FlexibleShift[] @relation("ShiftFlexibleShift")
   Fine                 Fine[]
 }
 
@@ -549,7 +549,7 @@ model FixedShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   Shifts[]      @relation("shiftId")
+  shifts    Shifts[]      @relation("ShiftFixedShift")
   weekId    String?       @unique
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
@@ -561,7 +561,7 @@ model FlexibleShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   Shifts[]      @relation("shiftId")
+  shifts    Shifts[]      @relation("ShiftFlexibleShift")
   createdAt DateTime      @default(now())
 }
 
