@@ -507,8 +507,8 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  FixedShift           FixedShift[]
-  FlexibleShift        FlexibleShift[]
+  FixedShift           FixedShift[]    @relation("shiftId")
+  FlexibleShift        FlexibleShift[] @relation("shiftId")
   Fine                 Fine[]
 }
 
@@ -517,14 +517,35 @@ enum PunchTime {
   ADDLIMIT
 }
 
+enum Day {
+  Mon
+  Tue
+  Wed
+  Thu
+  Fri
+  Sat
+  Sun
+}
+
+model WeekOffShift {
+  id         String      @id @default(dbgenerated("gen_random_uuid()"))
+  weekOne    Boolean?    @default(false)
+  weekTwo    Boolean?    @default(false)
+  weekThree  Boolean?    @default(false)
+  weekFour   Boolean?    @default(false)
+  weekFive   Boolean?    @default(false)
+  FixedShift FixedShift?
+}
+
 model FixedShift {
   id        String        @id @default(dbgenerated("gen_random_uuid()"))
-  day       String
+  day       Day           @default(Mon)
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   String?
-  shift     Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  shiftId   Shifts[]      @relation("shiftId")
+  weekId    String?       @unique
+  week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
 }
 
@@ -534,8 +555,7 @@ model FlexibleShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   String?
-  shift     Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  shiftId   Shifts[]      @relation("shiftId")
   createdAt DateTime      @default(now())
 }
 
@@ -785,7 +805,7 @@ model Deductions {
   calculation     String?
   amount          Float?
   deduction_month String?
-  staffId         String?  
+  staffId         String?
   staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)
   salaryDetailsId String?
   SalaryDetails   SalaryDetails? @relation(fields: [salaryDetailsId], references: [id])
@@ -795,7 +815,7 @@ model Earnings {
   id              String         @id @default(dbgenerated("gen_random_uuid()"))
   heads           String?
   calculation     String?
-  amount          Float?  
+  amount          Float?
   staffId         String?
   salary_month    String?
   staff           StaffDetails?  @relation(fields: [staffId], references: [id], onDelete: Cascade)

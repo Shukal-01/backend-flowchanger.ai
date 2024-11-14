@@ -387,15 +387,20 @@ const OvertimePolicySchema = z.object({
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().optional(),
-  shiftId: z.string().optional(),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
+  shiftId: z.array(z.string()).optional(),
 });
 
 const FixedShiftSchema = z.object({
-  day: z.string().min(1, { message: "Day is required." }),
+  day: z
+    .string()
+    .refine((value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value), {
+      message: "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+    }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().optional(),
-  shiftId: z.string().optional(),
+  staffId: z.string().uuid(1, { message: "Staff ID is required." }),
+  shiftId: z.array(z.string()).default([]).optional(),
+  weekId: z.string().optional(),
 });
 
 const ShiftSchema = z.object({
@@ -435,7 +440,6 @@ const PunchInSchema = z.object({
   photoUrl: z.string().optional(), // Required for photo click
   location: z.string().min(1, { message: "Location is required." }),
   fine: z.string().optional(),
-  // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const PunchOutSchema = z.object({
@@ -460,9 +464,6 @@ const PunchRecordsSchema = z.object({
   staffId: z.string().min(1, { message: 'StaffId is required.' }),
 });
 
-// const TaskTypeSchema = z.object({
-//   taskTypeName: z.string().min(1, "Task Type name is required"),
-// });
 
 const StartBreakSchema = z.object({
   breakMethod: z
