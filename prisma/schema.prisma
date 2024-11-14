@@ -245,17 +245,23 @@ model BankDetails {
 }
 
 model LeavePolicy {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()"))
+  id                   String    @id @default(dbgenerated("gen_random_uuid()"))
   staffId              String
   name                 String
-  allowed_leaves       Int      @default(0)
-  carry_forward_leaves Int      @default(0)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  allowed_leaves       Int       @default(0)
+  carry_forward_leaves Int       @default(0)
+  policy_type          LeaveType
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   staff        StaffDetails   @relation(fields: [staffId], references: [id])
-  LeaveBalance LeaveBalance[]
+  leaveBalance LeaveBalance?
   LeaveRequest LeaveRequest[]
+}
+
+enum LeaveType {
+  MONTHLY
+  YEARLY
 }
 
 model LeaveRequest {
@@ -274,16 +280,16 @@ model LeaveRequest {
 }
 
 model LeaveBalance {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  staffId     String
-  leaveTypeId String
-  balance     Int      @default(0)
-  used        Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(dbgenerated("gen_random_uuid()"))
+  staffId       String
+  leavePolicyId String   @unique
+  balance       Int      @default(0)
+  used          Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   staff       StaffDetails @relation(fields: [staffId], references: [id])
-  leavePolicy LeavePolicy  @relation(fields: [leaveTypeId], references: [id])
+  leavePolicy LeavePolicy  @relation(fields: [leavePolicyId], references: [id], onDelete: Cascade)
 }
 
 enum LeaveRequestStatus {

@@ -188,8 +188,8 @@ async function createFixedShift(req, res) {
             },
             include: {
                 week: true, // Include related WeekOff entry
-                Shifts: true, // Include related shifts
-                staffDetails: true, // Include related staff details
+                shiftId: true, // Include related shifts
+                staff: true, // Include related staff details
             },
         });
         console.log(fixedShift)

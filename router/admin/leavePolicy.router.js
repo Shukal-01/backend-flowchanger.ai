@@ -2,6 +2,8 @@ const express = require("express");
 const leavePolicyRouter = express.Router();
 const leavePolicyController = require("../../controller/admin/staff/leavePolicy.controller");
 
+leavePolicyRouter.post("/bulk", leavePolicyController.createBulkLeavePolicy);
+
 leavePolicyRouter.post("/:id", leavePolicyController.createLeavePolicy);
 
 leavePolicyRouter.get(

@@ -66,7 +66,7 @@ const addWorkEntry = async (req, res) => {
     return res.status(201).json({
       status: 201,
       message: "Work Entry Created Successfully!",
-      newWorkEntry
+      newWorkEntry,
     });
   } catch (error) {
     console.log(error);
@@ -75,7 +75,6 @@ const addWorkEntry = async (req, res) => {
       .json({ status: 500, message: "Internal Server Error!" });
   }
 };
-
 
 const getAllWorkEntry = async (req, res) => {
   try {
@@ -104,12 +103,14 @@ const getAllWorkEntry = async (req, res) => {
     });
 
     // Filter work entries where StaffDetails belong to the logged-in user
-    const filteredWorkEntries = workEntries.filter(workEntry =>
-      workEntry.staffDetailsId
+    const filteredWorkEntries = workEntries.filter(
+      (workEntry) => workEntry.staffDetailsId
     );
 
     if (filteredWorkEntries.length === 0) {
-      return res.status(200).json({ message: "No work entry found for this month!" });
+      return res
+        .status(200)
+        .json({ message: "No work entry found for this month!" });
     }
 
     // Calculate the count of entries for the specific month and year
@@ -123,7 +124,9 @@ const getAllWorkEntry = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ status: 500, message: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ status: 500, message: "Internal Server Error" });
   }
 };
 

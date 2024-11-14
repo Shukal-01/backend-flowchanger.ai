@@ -1,5 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
-const { leavePolicySchema } = require("../../../utils/validations");
+const {
+  leavePolicySchema,
+  bulkLeavePolicySchema,
+} = require("../../../utils/validations");
 const { z } = require("zod");
 const prisma = new PrismaClient();
 
@@ -18,6 +21,17 @@ exports.createLeavePolicy = async (req, res) => {
         name: parsedData.name,
         allowed_leaves: parsedData.allowed_leaves,
         carry_forward_leaves: parsedData.carry_forward_leaves,
+        policy_type: parsedData.policy_type,
+        leaveBalance: {
+          create: {
+            staffId: parsedData.staffId,
+            balance: parsedData.allowed_leaves,
+            used: 0,
+          },
+        },
+      },
+      include: {
+        leaveBalance: true,
       },
     });
 
@@ -37,6 +51,7 @@ exports.getLeavePoliciesByStaff = async (req, res) => {
 
     const leavePolicies = await prisma.leavePolicy.findMany({
       where: { staffId },
+      include: { leaveBalance: true },
     });
 
     if (!leavePolicies.length) {
@@ -66,7 +81,14 @@ exports.updateLeavePolicy = async (req, res) => {
         name: parsedData.name,
         allowed_leaves: parsedData.allowed_leaves,
         carry_forward_leaves: parsedData.carry_forward_leaves,
+        policy_type: parsedData.policy_type,
+        leaveBalance: {
+          update: {
+            balance: parsedData.allowed_leaves,
+          },
+        },
       },
+      include: { leaveBalance: true },
     });
 
     res.status(200).json(updatedPolicy);
@@ -87,9 +109,48 @@ exports.deleteLeavePolicy = async (req, res) => {
       where: { id },
     });
 
-    res.status(200).json({ message: "Leave policy disabled successfully" });
+    res.status(200).json({ message: "Leave policy deleted successfully" });
   } catch (error) {
     console.error("Error deleting leave policy:", error);
-    res.status(500).json({ error: "Failed to disable leave policy" });
+    res.status(500).json({ error: "Failed to delete leave policy" });
+  }
+};
+
+exports.createBulkLeavePolicy = async (req, res) => {
+  try {
+    console.log(req.body);
+    const parsedData = bulkLeavePolicySchema.parse(req.body);
+
+    for (const staffId of req.body.staffIds) {
+      await prisma.leavePolicy.create({
+        data: {
+          staffId: staffId,
+          name: parsedData.name,
+          allowed_leaves: parsedData.allowed_leaves,
+          carry_forward_leaves: parsedData.carry_forward_leaves,
+          policy_type: parsedData.policy_type,
+          leaveBalance: {
+            create: {
+              staffId: staffId,
+              balance: parsedData.allowed_leaves,
+              used: 0,
+            },
+          },
+        },
+        include: { leaveBalance: true },
+      });
+    }
+
+    res.status(201).json({
+      message: "Leave policies created successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+
+    console.error("Error creating leave policies:", error);
+    res.status(500).json({ error: "Failed to create leave policies" });
   }
 };

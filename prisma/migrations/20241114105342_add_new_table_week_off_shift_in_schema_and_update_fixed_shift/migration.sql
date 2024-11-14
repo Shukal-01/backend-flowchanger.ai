@@ -11,6 +11,9 @@ CREATE TYPE "MarkAttendenceType" AS ENUM ('Office', 'Anywhere');
 CREATE TYPE "VerificationStatus" AS ENUM ('VERIFIED', 'PENDING', 'REJECTED');
 
 -- CreateEnum
+CREATE TYPE "LeaveType" AS ENUM ('MONTHLY', 'YEARLY');
+
+-- CreateEnum
 CREATE TYPE "LeaveRequestStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateEnum
@@ -236,6 +239,7 @@ CREATE TABLE "LeavePolicy" (
     "name" TEXT NOT NULL,
     "allowed_leaves" INTEGER NOT NULL DEFAULT 0,
     "carry_forward_leaves" INTEGER NOT NULL DEFAULT 0,
+    "policy_type" "LeaveType" NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -261,7 +265,7 @@ CREATE TABLE "LeaveRequest" (
 CREATE TABLE "LeaveBalance" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "staffId" TEXT NOT NULL,
-    "leaveTypeId" TEXT NOT NULL,
+    "leavePolicyId" TEXT NOT NULL,
     "balance" INTEGER NOT NULL DEFAULT 0,
     "used" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -869,6 +873,9 @@ CREATE UNIQUE INDEX "PastEmployment_staffId_key" ON "PastEmployment"("staffId");
 CREATE UNIQUE INDEX "BankDetails_staffId_key" ON "BankDetails"("staffId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "LeaveBalance_leavePolicyId_key" ON "LeaveBalance"("leavePolicyId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Role_role_name_key" ON "Role"("role_name");
 
 -- CreateIndex
@@ -1010,7 +1017,7 @@ ALTER TABLE "LeaveRequest" ADD CONSTRAINT "LeaveRequest_leaveTypeId_fkey" FOREIG
 ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_leaveTypeId_fkey" FOREIGN KEY ("leaveTypeId") REFERENCES "LeavePolicy"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "LeaveBalance" ADD CONSTRAINT "LeaveBalance_leavePolicyId_fkey" FOREIGN KEY ("leavePolicyId") REFERENCES "LeavePolicy"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CustomDetails" ADD CONSTRAINT "CustomDetails_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
