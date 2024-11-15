@@ -43,8 +43,8 @@ rootRouter.use("/client", clientRouter);
 rootRouter.use("/admin", adminRouter);
 rootRouter.use("/department", department);
 rootRouter.use("/staff", staffRouter);
-rootRouter.use('/project-status', projectStatus);
-rootRouter.use('/project-Priority', projectPriority);
+rootRouter.use("/project-status", projectStatus);
+rootRouter.use("/project-Priority", projectPriority);
 rootRouter.use("/earnings", earningsData);
 // rootRouter.use("/deduction", deductionsRouter);
 rootRouter.use("/salary", salaryDetailsRouter);
@@ -65,7 +65,6 @@ rootRouter.use("/break", breakRouter);
 rootRouter.use("/staff-login", loginRouter);
 rootRouter.use("/work-entry", workRouter);
 rootRouter.use("/past-employment", pastEmploymentRouter);
-
 rootRouter.use("/chat", ChatRouter);
 rootRouter.use("/message", MessageRouter);
 

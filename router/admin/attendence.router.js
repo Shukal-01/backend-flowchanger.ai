@@ -10,6 +10,7 @@ const {
 
 const {
   attendanceRecords,
+  updatePunchRecordStatus,
 } = require("../../controller/admin/staff/attendence/attendance.controller.js");
 
 const attendanceRouter = Router();
@@ -19,6 +20,9 @@ attendanceRouter.put("/automation", addAndUpdateAutomationRuleForStaffs);
 attendanceRouter.get("/mode", fetchAttendenceModeForAllStaff);
 attendanceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
 
+// attendance overview routes here :-
+
+attendanceRouter.patch("/status/:id", updatePunchRecordStatus);
 // attendance records
 
 attendanceRouter.get("/summary", attendanceRecords);
