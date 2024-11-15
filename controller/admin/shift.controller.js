@@ -8,7 +8,15 @@ const { FixedShiftSchema, FlexibleShiftSchema, weekOffShiftSchema } = require('.
 async function getShiftById(req, res) {
     const { id } = req.params;
     try {
-        const shift = await prisma.shifts.findUnique({ where: { id } });
+        const shift = await prisma.shifts.findUnique({
+            where: { id },
+            include: {
+                fixedShifts: true,
+                flexibleShifts: true,
+                weekOffShifts: true,
+                Fine: true
+            }
+        });
         if (!shift) {
             return res.status(404).json({ error: "Shift not found" });
         }
@@ -80,7 +88,9 @@ async function getAllShift(req, res) {
         const shifts = await prisma.shifts.findMany({
             include: {
                 FixedShift: true,
-                FlexibleShift: true
+                FlexibleShift: true,
+                WeekOffShift: true,
+                Fine: true
             }
         });
         res.status(200).json(shifts);
@@ -93,7 +103,13 @@ async function getAllShift(req, res) {
 
 async function getFixedShifts(req, res) {
     try {
-        const fixedShifts = await prisma.fixedShift.findMany();
+        const fixedShifts = await prisma.fixedShift.findMany({
+            include: {
+                week: true, // Include related WeekOff entry
+                shifts: true, // Include related Shifts entries
+                staff: true, // Include related StaffDetails entry
+            },
+        });
         res.status(200).json(fixedShifts);
     } catch (error) {
         console.log(error);
@@ -101,37 +117,6 @@ async function getFixedShifts(req, res) {
     }
 }
 
-// async function createFixedShift(req, res) {
-//     try {
-//         const { day, weekOff, staffId, shiftId } = req.body;
-//         // Check if the staff member exists
-//         const staffExists = await prisma.staff.findUnique({
-//             where: { id: staffId },
-//         });
-//         if (!staffExists) {
-//             return res.status(404).json({ error: 'Staff not found' });
-//         }
-//         const fixedShiftResult = FixedShiftSchema.parse({
-//             day,
-//             weekOff,
-//             staffId,
-//             shiftId
-//         })
-
-
-//         const fixedShift = await prisma.fixedShift.create({
-//             data: fixedShiftResult
-//         });
-//         res.status(201).json(fixedShift);
-//     } catch (error) {
-//         if (error instanceof ZodError) {
-//             res.status(400).json({ error: 'Invalid request data' });
-//         } else {
-//             console.log(error);
-//             res.status(500).json({ error: 'Failed to create new fixedShift' });
-//         }
-//     }
-// }
 
 
 async function createFixedShift(req, res) {
@@ -181,7 +166,8 @@ async function createFixedShift(req, res) {
                 day: fixedShiftResult.day,
                 weekOff: fixedShiftResult.weekOff,
                 staffId: fixedShiftResult.staffId,
-                shifts: { connect: fixedShiftResult.shifts.map(id => ({ id })) }, // Link shift IDs if provided
+                // shifts: { connect: fixedShiftResult.shifts.map(id => ({ id })) }, // Link shift IDs if provided
+                shifts: fixedShiftResult.shifts,
                 weekId, // Link the WeekOff ID if created
             },
             include: {
@@ -233,8 +219,20 @@ async function createFlexibleShift(req, res) {
         })
 
         const flexibleShift = await prisma.flexibleShift.create({
-            data: fexibleShiftResult
-        });
+
+            data: {
+                dateTime: FlexibleShiftSchema.dateTime,
+                weekOff: FlexibleShiftSchema.weekOff,
+                staffId: FlexibleShiftSchema.staffId,
+                // shifts: { connect: FlexibleShiftSchema.shifts.map(id => ({ id })) }, // Link shift IDs if provided
+                shifts: FlexibleShiftSchema.shifts,
+            },
+            include: {
+                // shifts: true, // Include related shifts
+                staff: true, // Include related staff details
+            },
+        }
+        );
 
         res.status(201).json(flexibleShift);
     } catch (error) {
