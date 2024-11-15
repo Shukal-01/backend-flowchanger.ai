@@ -144,7 +144,11 @@ async function createPunchIn(req, res) {
 
 async function getAllPunchIn(req, res) {
   try {
-    const records = await prisma.punchIn.findMany();
+    const records = await prisma.punchIn.findMany({
+      include: {
+        punchRecords: true,
+      },
+    });
     return res.status(200).json(records);
   } catch (error) {
     console.log(error);
@@ -284,7 +288,11 @@ async function createPunchOut(req, res) {
 
 async function getAllPunchOut(req, res) {
   try {
-    const records = await prisma.punchOut.findMany();
+    const records = await prisma.punchOut.findMany({
+      include: {
+        punchRecords: true,
+      },
+    });
     return res.status(200).json(records);
   } catch (error) {
     console.log(error);
@@ -298,7 +306,13 @@ async function getPunchRecordById(req, res) {
   try {
     const { staffId } = req.params;
     const punchRecords = await prisma.punchRecords.findMany({
-      where: { staffId },
+      where: {
+        staffId,
+      },
+      include: {
+        fine: true,
+        overtime: true,
+      },
     });
     res.status(200).json(punchRecords);
   } catch (error) {
