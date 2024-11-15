@@ -134,6 +134,8 @@ model StaffDetails {
   projects                 Project[]                    @relation("ProjectStaff")
   TaskStatus               TaskStatus[]                 @relation("staffId")
   past_Employment          PastEmployment?
+  Fine                     Fine[]
+  Overtime                 Overtime[]
 }
 
 enum UserType {
@@ -513,9 +515,12 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  FixedShift           FixedShift[]    @relation("shiftIds")
-  FlexibleShift        FlexibleShift[] @relation("shiftsId")
+  // fixedShifts          FixedShift[]    @relation("ShiftFixedShift")
+  flexibleShift        FlexibleShift[] @relation("ShiftFlexibleShift")
   Fine                 Fine[]
+  Overtime             Overtime[]
+  // Define many-to-many relationship with FixedShift
+  fixedShifts          FixedShift[]    @relation("FixedShiftShifts")
 }
 
 enum PunchTime {
@@ -549,10 +554,13 @@ model FixedShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   Shifts[]      @relation("shiftIds")
+  // shifts    Shifts[]      @relation("ShiftFixedShift")
+  shiftsId  String
   weekId    String?       @unique
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
+  // Define many-to-many relationship with Shifts
+  shifts    Shifts[]      @relation("FixedShiftShifts")
 }
 
 model FlexibleShift {
@@ -561,7 +569,7 @@ model FlexibleShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   Shifts[]      @relation("shiftsId")
+  shifts    Shifts[]      @relation("ShiftFlexibleShift")
   createdAt DateTime      @default(now())
 }
 
@@ -575,7 +583,8 @@ model PunchRecords {
   staffId    String?
   staff      StaffDetails?     @relation(fields: [staffId], references: [id], onDelete: Cascade)
   status     punchRecordStatus @default(ABSENT)
-  Fine       Fine?
+  Fine       Fine[]
+  Overtime   Overtime[]
 }
 
 enum punchRecordStatus {
@@ -587,17 +596,34 @@ enum punchRecordStatus {
 
 model Fine {
   id                    String        @id @default(dbgenerated("gen_random_uuid()"))
-  lateEntryFineAmount   String?       @default("1")
-  lateEntryAmount       String?       @default("0")
-  excessBreakFineAmount String?       @default("1")
-  excessBreakAmount     String?       @default("0")
-  earlyOutFineAmount    String?       @default("1")
-  earlyOutAmount        String?       @default("0")
-  totalAmount           String?       @default("0")
+  lateEntryFineAmount   Float?        @default(1)
+  lateEntryAmount       Float?        @default(0)
+  excessBreakFineAmount Float?        @default(1)
+  excessBreakAmount     Float?        @default(0)
+  earlyOutFineAmount    Float?        @default(1)
+  earlyOutAmount        Float?        @default(0)
+  totalAmount           Float?        @default(0)
   shiftId               String?
   punchRecordId         String?       @unique
   shiftDetails          Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   punchRecord           PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  staffId               String?
+  staff                 StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model Overtime {
+  id                      String        @id @default(dbgenerated("gen_random_uuid()"))
+  earlyCommingEntryAmount Float?        @default(1)
+  earlyEntryAmount        Float?        @default(0)
+  lateOutOvertimeAmount   Float?        @default(1)
+  lateOutAmount           Float?        @default(0)
+  totalAmount             Float?        @default(0)
+  shiftIds                String?
+  punchRecordId           String?
+  shiftDetails            Shifts?       @relation(fields: [shiftIds], references: [id], onDelete: Cascade)
+  punchRecord             PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  staffId                 String?
+  staff                   StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum PunchInMethod {

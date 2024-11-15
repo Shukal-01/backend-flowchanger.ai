@@ -395,18 +395,32 @@ const OvertimePolicySchema = z.object({
   staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
+const weekOffShiftSchema = z.object({
+  weekOne: z.boolean().optional().default(false),
+  weekTwo: z.boolean().optional().default(false),
+  weekThree: z.boolean().optional().default(false),
+  weekFour: z.boolean().optional().default(false),
+  weekFive: z.boolean().optional().default(false),
+});
+
+
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().optional(),
-  shiftId: z.string().optional(),
+  staffId: z.string().uuid(1, { message: "Staff ID is required." }),
+  shifts: z.array(z.string()).default([]).optional(),
 });
 
 const FixedShiftSchema = z.object({
-  day: z.string().min(1, { message: "Day is required." }),
+  day: z
+    .string()
+    .refine((value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value), {
+      message: "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+    }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().optional(),
-  shiftId: z.string().optional(),
+  staffId: z.string().uuid(1, { message: "Staff ID is required." }),
+  shifts: z.array(z.string()).default([]).optional(),
+  weekId: z.string().optional(),
 });
 
 const ShiftSchema = z.object({
@@ -444,7 +458,6 @@ const PunchInSchema = z.object({
   photoUrl: z.string().optional(), // Required for photo click
   location: z.string().min(1, { message: "Location is required." }),
   fine: z.string().optional(),
-  // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const PunchOutSchema = z.object({
@@ -469,9 +482,6 @@ const PunchRecordsSchema = z.object({
   staffId: z.string().min(1, { message: "StaffId is required." }),
 });
 
-// const TaskTypeSchema = z.object({
-//   taskTypeName: z.string().min(1, "Task Type name is required"),
-// });
 
 const StartBreakSchema = z.object({
   breakMethod: z
@@ -575,6 +585,20 @@ const projectStatusSchema = z.object({
 
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
+<<<<<<< HEAD
+  project_name: z.string().min(1, " project name is required"),
+  customerId: z.string().min(1, "client is required"),
+  billing_type: z.string().min(1, "billing type is required"),
+  status: z.string().min(1, "status isrequired"),
+  total_rate: z.number().positive("Total rate must be a positive number").min(1, "total rate is required"),
+  estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "estimated hours is required"),
+  start_date: z.string().min(1, "start date is required"),
+  deadline: z.string().min(1, " deadline is required"),
+  tags: z.array(z.string().min(1, " tag is required")),
+  description: z.string().min(1, " description is required"),
+  send_mail: z.boolean().default(false),
+  staffId: z.array(z.string()).min(1, "Select at least one option for Staff"),
+=======
   project_name: z.string().min(1, "required"),
   customerId: z.string().min(1, "required"),
   billing_type: z.string().min(1, "required"),
@@ -595,6 +619,7 @@ const projectSchema = z.object({
   staffId: z
     .array(z.string())
     .min(1, "Select at least one option for Staff Id"),
+>>>>>>> eaf5de86b084b178507227c366f014643b9647fe
 });
 
 // project Priority Schema
@@ -688,5 +713,6 @@ module.exports = {
   projectSchema,
   pastEmploymentSchema,
   workEntrySchema,
+  weekOffShiftSchema,
   bulkLeavePolicySchema,
 };

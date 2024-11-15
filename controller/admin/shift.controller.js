@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const ShiftSchema = require('../../utils/validations').ShiftSchema;
 const { ZodError } = require('zod');
-const { FixedShiftSchema, FlexibleShiftSchema } = require('../../utils/validations');
+const { FixedShiftSchema, FlexibleShiftSchema, weekOffShiftSchema } = require('../../utils/validations');
 
 
 async function getShiftById(req, res) {
@@ -101,33 +101,102 @@ async function getFixedShifts(req, res) {
     }
 }
 
+// async function createFixedShift(req, res) {
+//     try {
+//         const { day, weekOff, staffId, shiftId } = req.body;
+//         // Check if the staff member exists
+//         const staffExists = await prisma.staff.findUnique({
+//             where: { id: staffId },
+//         });
+//         if (!staffExists) {
+//             return res.status(404).json({ error: 'Staff not found' });
+//         }
+//         const fixedShiftResult = FixedShiftSchema.parse({
+//             day,
+//             weekOff,
+//             staffId,
+//             shiftId
+//         })
+
+
+//         const fixedShift = await prisma.fixedShift.create({
+//             data: fixedShiftResult
+//         });
+//         res.status(201).json(fixedShift);
+//     } catch (error) {
+//         if (error instanceof ZodError) {
+//             res.status(400).json({ error: 'Invalid request data' });
+//         } else {
+//             console.log(error);
+//             res.status(500).json({ error: 'Failed to create new fixedShift' });
+//         }
+//     }
+// }
+
+
 async function createFixedShift(req, res) {
     try {
-        const { day, weekOff, staffId, shiftId } = req.body;
+        const { day, weekOff, staffId, shifts } = req.body;
+
         // Check if the staff member exists
-        const staffExists = await prisma.staff.findUnique({
+        const staffExists = await prisma.staffDetails.findUnique({
             where: { id: staffId },
         });
         if (!staffExists) {
             return res.status(404).json({ error: 'Staff not found' });
         }
+        // Parse and validate input
         const fixedShiftResult = FixedShiftSchema.parse({
             day,
             weekOff,
             staffId,
-            shiftId
-        })
-
-
-        const fixedShift = await prisma.fixedShift.create({
-            data: fixedShiftResult
+            shifts: shifts || [], // Default to an empty array if shiftId is undefined
         });
+
+        // Initialize the `weekId` as `null`, we will populate this if `weekOff` is true
+        let weekId = null;
+
+        // Create a WeekOff entry if weekOff is true
+        if (weekOff) {
+            // Validate the weekOffShift data
+            const weekOffShiftData = weekOffShiftSchema.parse({
+                weekOne: req.body.weekOne,
+                weekTwo: req.body.weekTwo,
+                weekThree: req.body.weekThree,
+                weekFour: req.body.weekFour,
+                weekFive: req.body.weekFive,
+            });
+
+            const weekOffEntry = await prisma.weekOffShift.create({
+                data: weekOffShiftData,
+            });
+            weekId = weekOffEntry.id;
+            console.log(weekOffEntry)
+        }
+
+
+        // Create the FixedShift entry, including the newly created weekId if applicable
+        const fixedShift = await prisma.fixedShift.create({
+            data: {
+                day: fixedShiftResult.day,
+                weekOff: fixedShiftResult.weekOff,
+                staffId: fixedShiftResult.staffId,
+                shifts: { connect: fixedShiftResult.shifts.map(id => ({ id })) }, // Link shift IDs if provided
+                weekId, // Link the WeekOff ID if created
+            },
+            include: {
+                week: true, // Include related WeekOff entry
+                shifts: true, // Include related shifts
+                staff: true, // Include related staff details
+            },
+        });
+        // console.log(fixedShift)
         res.status(201).json(fixedShift);
     } catch (error) {
         if (error instanceof ZodError) {
-            res.status(400).json({ error: 'Invalid request data' });
+            res.status(400).json({ error: 'Invalid request data', details: error.errors });
         } else {
-            console.log(error);
+            console.error(error);
             res.status(500).json({ error: 'Failed to create new fixedShift' });
         }
     }
@@ -146,7 +215,7 @@ async function getFlexibleShifts(req, res) {
 
 async function createFlexibleShift(req, res) {
     try {
-        const { dateTime, weekOff, staffId, shiftId } = req.body;
+        const { dateTime, weekOff, staffId, shifts } = req.body;
 
         // Check if the staff member exists
         const staffExists = await prisma.staff.findUnique({
@@ -159,7 +228,7 @@ async function createFlexibleShift(req, res) {
         const fexibleShiftResult = FlexibleShiftSchema.safeParse({
             weekOff,
             staffId,
-            shiftId,
+            shifts,
             dateTime
         })
 

@@ -9,22 +9,33 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
   const { company, vat_number } = req.query;
 
   try {
-    const whereDataArray = {};
+    const whereDataArray = {
+      User: {
+        role: "CLIENT",
+      },
+    };
+
     if (company) {
       whereDataArray.company = {
         contains: company,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
+
     if (vat_number) {
       whereDataArray.vat_number = {
         contains: vat_number,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
+
     const clients = await prisma.clientDetails.findMany({
       where: whereDataArray,
+      include: {
+        User: true,
+      },
     });
+
     return res.status(200).json(clients);
   } catch (error) {
     console.error("Error fetching client by name:", error);
@@ -34,6 +45,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
     });
   }
 };
+
 const createClient = async (req, res) => {
   const validation = clientSchema.safeParse(req.body);
 
