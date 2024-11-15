@@ -101,6 +101,34 @@ exports.updateLeavePolicy = async (req, res) => {
   }
 };
 
+exports.updateLeaveBalance = async (req, res) => {
+  try {
+    const { data } = req.body;
+
+    for (leave of data) {
+      const { id } = leave;
+      const updatedPolicy = await prisma.leavePolicy.update({
+        where: { id },
+        data: {
+          leaveBalance: {
+            update: {
+              balance: leave.balance,
+            },
+          },
+        },
+      });
+    }
+
+    res.status(200).json({ message: "Leave balance updated successfully" });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    console.error("Error updating leave policy:", error);
+    res.status(500).json({ error: "Failed to update leave policy" });
+  }
+};
+
 exports.deleteLeavePolicy = async (req, res) => {
   try {
     const { id } = req.params;

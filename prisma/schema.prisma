@@ -283,8 +283,8 @@ model LeaveBalance {
   id            String   @id @default(dbgenerated("gen_random_uuid()"))
   staffId       String
   leavePolicyId String   @unique
-  balance       Int      @default(0)
-  used          Int      @default(0)
+  balance       Float    @default(0)
+  used          Float    @default(0)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -513,8 +513,8 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  FixedShift           FixedShift[]
-  FlexibleShift        FlexibleShift[]
+  FixedShift           FixedShift[]    @relation("shiftIds")
+  FlexibleShift        FlexibleShift[] @relation("shiftsId")
   Fine                 Fine[]
 }
 
@@ -523,14 +523,35 @@ enum PunchTime {
   ADDLIMIT
 }
 
+enum Day {
+  Mon
+  Tue
+  Wed
+  Thu
+  Fri
+  Sat
+  Sun
+}
+
+model WeekOffShift {
+  id         String      @id @default(dbgenerated("gen_random_uuid()"))
+  weekOne    Boolean?    @default(false)
+  weekTwo    Boolean?    @default(false)
+  weekThree  Boolean?    @default(false)
+  weekFour   Boolean?    @default(false)
+  weekFive   Boolean?    @default(false)
+  FixedShift FixedShift?
+}
+
 model FixedShift {
   id        String        @id @default(dbgenerated("gen_random_uuid()"))
-  day       String
+  day       Day           @default(Mon)
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   String?
-  shift     Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  shiftId   Shifts[]      @relation("shiftIds")
+  weekId    String?       @unique
+  week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
 }
 
@@ -540,8 +561,7 @@ model FlexibleShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shiftId   String?
-  shift     Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  shiftId   Shifts[]      @relation("shiftsId")
   createdAt DateTime      @default(now())
 }
 

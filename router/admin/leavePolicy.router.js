@@ -11,6 +11,8 @@ leavePolicyRouter.get(
   leavePolicyController.getLeavePoliciesByStaff
 );
 
+leavePolicyRouter.put("/balance", leavePolicyController.updateLeaveBalance);
+
 leavePolicyRouter.put("/:id", leavePolicyController.updateLeavePolicy);
 
 leavePolicyRouter.delete("/:id", leavePolicyController.deleteLeavePolicy);
