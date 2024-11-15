@@ -11,14 +11,13 @@ async function getShiftById(req, res) {
         const shift = await prisma.shifts.findUnique({
             where: { id },
             include: {
-                fixedShifts: true,
-                flexibleShifts: true,
-                weekOffShifts: true,
+                FixedShifts: true,
+                flexibleShift: true,
                 Fine: true
             }
         });
         if (!shift) {
-            return res.status(404).json({ error: "Shift not found" });
+            return res.status(200).json({ error: "Shift not found" });
         }
         res.status(200).json(shift);
     } catch (error) {
@@ -87,9 +86,8 @@ async function getAllShift(req, res) {
     try {
         const shifts = await prisma.shifts.findMany({
             include: {
-                FixedShift: true,
+                FixedShifts: true,
                 FlexibleShift: true,
-                WeekOffShift: true,
                 Fine: true
             }
         });
@@ -166,8 +164,8 @@ async function createFixedShift(req, res) {
                 day: fixedShiftResult.day,
                 weekOff: fixedShiftResult.weekOff,
                 staffId: fixedShiftResult.staffId,
-                // shifts: { connect: fixedShiftResult.shifts.map(id => ({ id })) }, // Link shift IDs if provided
-                shifts: fixedShiftResult.shifts,
+                shifts: { connect: fixedShiftResult.shifts.map(id => ({ id })) }, // Link shift IDs if provided
+                // shifts: fixedShiftResult.shifts,
                 weekId, // Link the WeekOff ID if created
             },
             include: {
@@ -191,7 +189,12 @@ async function createFixedShift(req, res) {
 
 async function getFlexibleShifts(req, res) {
     try {
-        const flexibleShifts = await prisma.flexibleShift.findMany();
+        const flexibleShifts = await prisma.flexibleShift.findMany({
+            include: {
+                staff: true,
+                shifts: true,
+            },
+        });
         res.status(200).json(flexibleShifts);
     } catch (error) {
         console.log(error);
@@ -224,11 +227,11 @@ async function createFlexibleShift(req, res) {
                 dateTime: FlexibleShiftSchema.dateTime,
                 weekOff: FlexibleShiftSchema.weekOff,
                 staffId: FlexibleShiftSchema.staffId,
-                // shifts: { connect: FlexibleShiftSchema.shifts.map(id => ({ id })) }, // Link shift IDs if provided
-                shifts: FlexibleShiftSchema.shifts,
+                shifts: { connect: FlexibleShiftSchema.shifts.map(id => ({ id })) }, // Link shift IDs if provided
+                // shifts: FlexibleShiftSchema.shifts,
             },
             include: {
-                // shifts: true, // Include related shifts
+                shifts: true, // Include related shifts
                 staff: true, // Include related staff details
             },
         }

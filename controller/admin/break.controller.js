@@ -9,12 +9,19 @@ const {
 
 async function createStartBreak(req, res) {
     try {
-        const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
+        const { breakMethod, biometricData, qrCodeValue, location } = req.body;
         const photoUrl = req.imageUrl || "null";
 
+        const user = await prisma.user.findFirst({
+            where: { id: req.userId, role: "STAFF" },
+            include: { staffDetails: true },
+        });
+        if (!user) {
+            return res.status(404).send("user not found");
+        }
         // Validate input using zod schema
         StartBreakSchema.parse({
-            staffId,
+            staffId: user.staffDetails.id,
             breakMethod,
             biometricData,
             qrCodeValue,
@@ -90,12 +97,20 @@ async function getStartBreakByStaffId(req, res) {
 
 async function createEndBreak(req, res) {
     try {
-        const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
+        const { breakMethod, biometricData, qrCodeValue, location } = req.body;
         const photoUrl = req.imageUrl || "null";
+
+        const user = await prisma.user.findFirst({
+            where: { id: req.userId, role: "STAFF" },
+            include: { staffDetails: true },
+        });
+        if (!user) {
+            return res.status(404).send("user not found");
+        }
 
         // Validate input using zod schema
         EndBreakSchema.parse({
-            staffId,
+            staffId: user.staffDetails.id,
             breakMethod,
             biometricData,
             qrCodeValue,

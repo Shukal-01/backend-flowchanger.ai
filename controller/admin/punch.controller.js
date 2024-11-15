@@ -92,18 +92,44 @@ async function createPunchIn(req, res) {
       },
     });
 
-    const punchRecords = await prisma.punchRecords.create({
-      data: {
-        punchIn: {
-          connect: { id: punchIn.id },
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const existingPunchRecord = await prisma.punchRecords.findFirst({
+      where: {
+        staffId: user.staffDetails.id,
+        punchDate: {
+          gte: today,
+          lt: tomorrow,
         },
-        staff: {
-          connect: { id: user.staffDetails.id },
-        },
-        status: "PRESENT",
       },
     });
-    // console.log(punchRecords);
+
+    if (existingPunchRecord) {
+      const updatedPunchRecord = await prisma.punchRecords.update({
+        where: {
+          id: existingPunchRecord.id,
+        },
+        data: {
+          punchIn: {
+            connect: { id: punchIn.id },
+          },
+          status: "PRESENT",
+        },
+      });
+    } else {
+      const punchRecords = await prisma.punchRecords.create({
+        data: {
+          punchIn: {
+            connect: { id: punchIn.id },
+          },
+          staff: {
+            connect: { id: user.staffDetails.id },
+          },
+          status: "PRESENT",
+        },
+      });
+    }
 
     return res.status(201).json(punchIn);
   } catch (error) {
@@ -312,9 +338,10 @@ async function getPunchRecords(req, res) {
     // If no records are found, return a message
     if (punchRecords.length === 0) {
       return res.status(200).json({
-        message: month && year
-          ? `No punch records found for ${month}-${year}.`
-          : "No punch records found.",
+        message:
+          month && year
+            ? `No punch records found for ${month}-${year}.`
+            : "No punch records found.",
       });
     }
 
@@ -347,7 +374,7 @@ async function getPunchRecords(req, res) {
     // Return the calculated results along with the punch records
     return res.status(200).json({
       status: 200,
-      message: `Punch records${month && year ? ` for ${month}-${year}` : ''}`,
+      message: `Punch records${month && year ? ` for ${month}-${year}` : ""}`,
       data: punchRecords,
       totals: {
         totalLeave,
@@ -361,8 +388,6 @@ async function getPunchRecords(req, res) {
     res.status(500).json({ error: "Failed to fetch punch records" });
   }
 }
-
-
 
 module.exports = {
   createPunchIn,
