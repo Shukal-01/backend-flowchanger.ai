@@ -579,8 +579,8 @@ model PunchRecords {
   staffId    String?
   staff      StaffDetails?     @relation(fields: [staffId], references: [id], onDelete: Cascade)
   status     punchRecordStatus @default(ABSENT)
-  Fine       Fine[]
-  Overtime   Overtime[]
+  fine       Fine?
+  Overtime   Overtime?
 }
 
 enum punchRecordStatus {
@@ -599,9 +599,9 @@ model Fine {
   earlyOutFineAmount    Float?        @default(1)
   earlyOutAmount        Float?        @default(0)
   totalAmount           Float?        @default(0)
-  shiftId               String?
+  shiftIds              String?
   punchRecordId         String?       @unique
-  shiftDetails          Shifts?       @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  shiftDetails          Shifts?       @relation(fields: [shiftIds], references: [id], onDelete: Cascade)
   punchRecord           PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
   staffId               String?
   staff                 StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
@@ -615,7 +615,7 @@ model Overtime {
   lateOutAmount           Float?        @default(0)
   totalAmount             Float?        @default(0)
   shiftIds                String?
-  punchRecordId           String?
+  punchRecordId           String?       @unique
   shiftDetails            Shifts?       @relation(fields: [shiftIds], references: [id], onDelete: Cascade)
   punchRecord             PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
   staffId                 String?
