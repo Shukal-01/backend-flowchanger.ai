@@ -560,6 +560,7 @@ model FixedShift {
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
   // Define many-to-many relationship with Shifts
+  // 
   shifts    Shifts[]      @relation("FixedShiftShifts")
 }
 
