@@ -6,16 +6,25 @@ const pastEmploymentSchema = z.object({
   id: z.string().optional(), // UUID is generated, so it can be optional
   company_name: z.string().min(1, "Company name is required."),
   designation: z.string().optional(),
-  joining_date: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()),
-  leaving_date: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()),
+  joining_date: z.preprocess(
+    (val) => (val ? new Date(val) : new Date()),
+    z.date()
+  ),
+  leaving_date: z.preprocess(
+    (val) => (val ? new Date(val) : new Date()),
+    z.date()
+  ),
   currency: z.string().optional(),
   salary: z.number().optional(),
   company_gst: z.string().optional(),
   staffId: z.string().optional(), // UUID format is optional if not linked initially
-  createdAt: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()).optional(),
-  updatedAt: z.preprocess((val) => (val ? new Date(val) : new Date()), z.date()).optional()
+  createdAt: z
+    .preprocess((val) => (val ? new Date(val) : new Date()), z.date())
+    .optional(),
+  updatedAt: z
+    .preprocess((val) => (val ? new Date(val) : new Date()), z.date())
+    .optional(),
 });
-
 
 const allPermissionSchema = z.object({
   clients_permissions: z
@@ -278,11 +287,19 @@ const bankDetailsSchema = z.object({
     .optional(),
 });
 
+const bulkLeavePolicySchema = z.object({
+  name: z.string(),
+  allowed_leaves: z.number().min(0),
+  carry_forward_leaves: z.number().min(0),
+  policy_type: z.string(),
+});
+
 const leavePolicySchema = z.object({
   staffId: z.string().uuid(),
   name: z.string().min(1, "Name is required"),
   allowed_leaves: z.number().min(0).default(0),
   carry_forward_leaves: z.number().min(0).default(0),
+  policy_type: z.string().min(1, "Policy type is required"),
 });
 
 const leaveBalanceSchema = z.object({
@@ -333,9 +350,7 @@ const EarlyLeavePolicySchema = z.object({
     .number()
     .int({ message: "Waive Off Days must be an integer." })
     .optional(),
-  staffId: z
-    .string()
-    .min(1, { message: "Staff ID is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const LateComingPolicySchema = z.object({
@@ -357,9 +372,7 @@ const LateComingPolicySchema = z.object({
     .number()
     .int({ message: "Waive Off Days must be an integer." })
     .optional(),
-  staffId: z
-    .string()
-    .min(1, { message: "Staff ID is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const OvertimePolicySchema = z.object({
@@ -379,31 +392,41 @@ const OvertimePolicySchema = z.object({
     .number()
     .int({ message: "Week Off Pay must be an integer." })
     .optional(),
-  staffId: z
-    .string()
-    .min(1, { message: "Staff ID is required." }),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
+
+const weekOffShiftSchema = z.object({
+  weekOne: z.boolean().optional().default(false),
+  weekTwo: z.boolean().optional().default(false),
+  weekThree: z.boolean().optional().default(false),
+  weekFour: z.boolean().optional().default(false),
+  weekFive: z.boolean().optional().default(false),
+});
+
 
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().optional(),
-  shiftId: z.string().optional(),
+  staffId: z.string().min(1, { message: "Staff ID is required." }),
+  shiftId: z.array(z.string()).optional(),
 });
 
 const FixedShiftSchema = z.object({
-  day: z.string().min(1, { message: "Day is required." }),
+  day: z
+    .string()
+    .refine((value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value), {
+      message: "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+    }),
   weekOff: z.boolean().default(false), // Set default value to false
-  staffId: z.string().optional(),
-  shiftId: z.string().optional(),
+  staffId: z.string().uuid(1, { message: "Staff ID is required." }),
+  shiftId: z.array(z.string()).default([]).optional(),
+  weekId: z.string().optional(),
 });
 
 const ShiftSchema = z.object({
   shiftName: z.string().min(1, "Shift name is required"),
-  shiftStartTime: z
-    .string(),
-  shiftEndTime: z
-    .string(),
+  shiftStartTime: z.string(),
+  shiftEndTime: z.string(),
   punchInType: z
     .string()
     .refine((value) => ["ANYTIME", "ADDLIMIT"].includes(value), {
@@ -435,7 +458,6 @@ const PunchInSchema = z.object({
   photoUrl: z.string().optional(), // Required for photo click
   location: z.string().min(1, { message: "Location is required." }),
   fine: z.string().optional(),
-  // staffId: z.string().min(1, { message: "Staff ID is required." }),
 });
 
 const PunchOutSchema = z.object({
@@ -457,12 +479,9 @@ const PunchOutSchema = z.object({
 const PunchRecordsSchema = z.object({
   punchInId: z.string().min(1, { message: "PunchInId is required." }),
   punchOutId: z.string().min(1, { message: "PunchOutId is required." }),
-  staffId: z.string().min(1, { message: 'StaffId is required.' }),
+  staffId: z.string().min(1, { message: "StaffId is required." }),
 });
 
-// const TaskTypeSchema = z.object({
-//   taskTypeName: z.string().min(1, "Task Type name is required"),
-// });
 
 const StartBreakSchema = z.object({
   breakMethod: z
@@ -498,8 +517,8 @@ const TaskStatusSchema = z.object({
   taskStatusName: z.string().min(1, "Task Status name is required"),
   statusColor: z.string().optional(),
   statusOrder: z.number().min(1, "Status Order is required"),
-  isHiddenId: z.array(z.string()),  // Define as an array of numbers
-  canBeChangedId: z.array(z.string()).default([]).optional()
+  isHiddenId: z.array(z.string()), // Define as an array of numbers
+  canBeChangedId: z.array(z.string()).default([]).optional(),
 });
 
 const TaskPrioritySchema = z.object({
@@ -514,9 +533,15 @@ const TaskDetailSchema = z.object({
   startDate: z.string(),
   endDate: z.string().optional(),
   dueDate: z.string().optional(),
-  selectProjectId: z.array(z.string()).min(1, { message: "Project selection is required" }),
-  selectDepartmentId: z.array(z.string()).min(1, { message: "Department selection is required" }),
-  taskAssign: z.array(z.string()).min(1, { message: "Task assignee is required" }),
+  selectProjectId: z
+    .array(z.string())
+    .min(1, { message: "Project selection is required" }),
+  selectDepartmentId: z
+    .array(z.string())
+    .min(1, { message: "Department selection is required" }),
+  taskAssign: z
+    .array(z.string())
+    .min(1, { message: "Task assignee is required" }),
   taskDescription: z.string().optional(),
   taskTag: z.string().optional(),
   attachFile: z.string().optional(),
@@ -534,18 +559,12 @@ const ticketInformationSchema = z.object({
   email: z.string().email("Invalid email format").optional(),
 });
 
-// Admin Register 
-
-
+// Admin Register
 
 const adminSchema = z.object({
-  first_name: z
-    .string()
-    .min(1, "First Name is required"),
+  first_name: z.string().min(1, "First Name is required"),
 
-  last_name: z
-    .string()
-    .min(1, "Last Name is required"),
+  last_name: z.string().min(1, "Last Name is required"),
 
   mobile: z
     .string()
@@ -553,10 +572,7 @@ const adminSchema = z.object({
     .regex(/^\d+$/, "Mobile number must contain only digits")
     .optional(),
 
-  email: z
-    .string()
-    .email("Invalid email format")
-    .optional(),
+  email: z.string().email("Invalid email format").optional(),
 });
 
 const projectStatusSchema = z.object({
@@ -569,6 +585,7 @@ const projectStatusSchema = z.object({
 
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
+<<<<<<< HEAD
   project_name: z.string().min(1, " project name is required"),
   customerId: z.string().min(1, "client is required"),
   billing_type: z.string().min(1, "billing type is required"),
@@ -581,6 +598,28 @@ const projectSchema = z.object({
   description: z.string().min(1, " description is required"),
   send_mail: z.boolean().default(false),
   staffId: z.array(z.string()).min(1, "Select at least one option for Staff"),
+=======
+  project_name: z.string().min(1, "required"),
+  customerId: z.string().min(1, "required"),
+  billing_type: z.string().min(1, "required"),
+  status: z.string().min(1, "required"),
+  total_rate: z
+    .number()
+    .positive("Total rate must be a positive number")
+    .min(1, "required"),
+  estimated_hours: z
+    .number()
+    .positive("Estimated hours must be a positive number")
+    .min(1, "required"),
+  start_date: z.string().min(1, "required"),
+  deadline: z.string().min(1, "required"),
+  tags: z.array(z.string().min(1, "required")),
+  description: z.string().min(1, "required"),
+  send_mail: z.boolean().default(false),
+  staffId: z
+    .array(z.string())
+    .min(1, "Select at least one option for Staff Id"),
+>>>>>>> eaf5de86b084b178507227c366f014643b9647fe
 });
 
 // project Priority Schema
@@ -589,9 +628,11 @@ const projectPrioritySchema = z.object({
   priority_color: z.string().min(1, "Priority Color is required"),
   priority_order: z.string().min(1, "Priority Order is required"),
   default_filter: z.boolean().optional(),
-  is_hidden: z.array(z.string()).min(1, "Select at least one option for Is Hidden"),
+  is_hidden: z
+    .array(z.string())
+    .min(1, "Select at least one option for Is Hidden"),
   can_changed: z.array(z.string()).default([]).optional(),
-})
+});
 
 const salaryDetailsSchema = z.object({
   effective_date: z.coerce.date().refine((date) => !isNaN(date.getTime()), {
@@ -632,7 +673,6 @@ const workEntrySchema = z.object({
   staffDetailsId: z.string().uuid("Staff ID is required"),
 });
 
-
 module.exports = {
   clientSchema,
   idSchema,
@@ -672,6 +712,7 @@ module.exports = {
   deductionsEarningsSchema,
   projectSchema,
   pastEmploymentSchema,
-  workEntrySchema
+  workEntrySchema,
+  weekOffShiftSchema,
+  bulkLeavePolicySchema,
 };
-
