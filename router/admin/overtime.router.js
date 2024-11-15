@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { addOvertimeData } = require("../../controller/admin/staff/overtime.controller.js");
+const { addOvertimeData } = require("../../controller/admin/staff/attendence/overtime.controller.js");
 
 const overtimeRouter = Router();
 

@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { addFineData } = require("../../controller/admin/staff/fine.controller.js");
+const { addFineData } = require("../../controller/admin/staff/attendence/fine.controller.js");
 
 const staffAttendanceRouter = Router();
 
