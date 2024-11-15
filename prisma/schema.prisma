@@ -513,9 +513,11 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  fixedShifts          FixedShift[]    @relation("ShiftFixedShift")
+  // fixedShifts          FixedShift[]    @relation("ShiftFixedShift")
   flexibleShift        FlexibleShift[] @relation("ShiftFlexibleShift")
   Fine                 Fine[]
+  // Define many-to-many relationship with FixedShift
+  fixedShifts          FixedShift[]    @relation("FixedShiftShifts")
 }
 
 enum PunchTime {
@@ -549,10 +551,13 @@ model FixedShift {
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
-  shifts    Shifts[]      @relation("ShiftFixedShift")
+  // shifts    Shifts[]      @relation("ShiftFixedShift")
+  shiftsId  String
   weekId    String?       @unique
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
+  // Define many-to-many relationship with Shifts
+  shifts    Shifts[]      @relation("FixedShiftShifts")
 }
 
 model FlexibleShift {

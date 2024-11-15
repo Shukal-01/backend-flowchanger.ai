@@ -215,7 +215,7 @@ async function getFlexibleShifts(req, res) {
 
 async function createFlexibleShift(req, res) {
     try {
-        const { dateTime, weekOff, staffId, shiftId } = req.body;
+        const { dateTime, weekOff, staffId, shifts } = req.body;
 
         // Check if the staff member exists
         const staffExists = await prisma.staff.findUnique({
@@ -228,7 +228,7 @@ async function createFlexibleShift(req, res) {
         const fexibleShiftResult = FlexibleShiftSchema.safeParse({
             weekOff,
             staffId,
-            shiftId,
+            shifts,
             dateTime
         })
 
