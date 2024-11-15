@@ -555,7 +555,7 @@ model FixedShift {
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
   // shifts    Shifts[]      @relation("ShiftFixedShift")
-  shiftsId  String
+  // shiftsId  String
   weekId    String?       @unique
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
