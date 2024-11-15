@@ -585,7 +585,6 @@ const projectStatusSchema = z.object({
 
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
-<<<<<<< HEAD
   project_name: z.string().min(1, " project name is required"),
   customerId: z.string().min(1, "client is required"),
   billing_type: z.string().min(1, "billing type is required"),
@@ -598,28 +597,6 @@ const projectSchema = z.object({
   description: z.string().min(1, " description is required"),
   send_mail: z.boolean().default(false),
   staffId: z.array(z.string()).min(1, "Select at least one option for Staff"),
-=======
-  project_name: z.string().min(1, "required"),
-  customerId: z.string().min(1, "required"),
-  billing_type: z.string().min(1, "required"),
-  status: z.string().min(1, "required"),
-  total_rate: z
-    .number()
-    .positive("Total rate must be a positive number")
-    .min(1, "required"),
-  estimated_hours: z
-    .number()
-    .positive("Estimated hours must be a positive number")
-    .min(1, "required"),
-  start_date: z.string().min(1, "required"),
-  deadline: z.string().min(1, "required"),
-  tags: z.array(z.string().min(1, "required")),
-  description: z.string().min(1, "required"),
-  send_mail: z.boolean().default(false),
-  staffId: z
-    .array(z.string())
-    .min(1, "Select at least one option for Staff Id"),
->>>>>>> eaf5de86b084b178507227c366f014643b9647fe
 });
 
 // project Priority Schema
