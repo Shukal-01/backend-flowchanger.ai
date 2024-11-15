@@ -551,8 +551,8 @@ model FixedShift {
   id        String        @id @default(dbgenerated("gen_random_uuid()"))
   day       Day           @default(Mon)
   weekOff   Boolean       @default(false)
-  staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String?
+  staff     StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String
   weekId    String?       @unique
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
@@ -560,13 +560,13 @@ model FixedShift {
 }
 
 model FlexibleShift {
-  id        String        @id @default(dbgenerated("gen_random_uuid()"))
+  id        String       @id @default(dbgenerated("gen_random_uuid()"))
   dateTime  String
-  weekOff   Boolean       @default(false)
-  staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String?
+  weekOff   Boolean      @default(false)
+  staff     StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String
   shifts    Shifts[]
-  createdAt DateTime      @default(now())
+  createdAt DateTime     @default(now())
 }
 
 model PunchRecords {
