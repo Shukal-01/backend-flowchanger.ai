@@ -525,6 +525,7 @@ CREATE TABLE "FixedShift" (
     "day" "Day" NOT NULL DEFAULT 'Mon',
     "weekOff" BOOLEAN NOT NULL DEFAULT false,
     "staffId" TEXT,
+    "shiftsId" TEXT NOT NULL,
     "weekId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -831,7 +832,13 @@ CREATE TABLE "_departmentId" (
 );
 
 -- CreateTable
-CREATE TABLE "_shiftId" (
+CREATE TABLE "_FixedShiftShifts" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "_ShiftFlexibleShift" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
 );
@@ -951,10 +958,16 @@ CREATE UNIQUE INDEX "_departmentId_AB_unique" ON "_departmentId"("A", "B");
 CREATE INDEX "_departmentId_B_index" ON "_departmentId"("B");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_shiftId_AB_unique" ON "_shiftId"("A", "B");
+CREATE UNIQUE INDEX "_FixedShiftShifts_AB_unique" ON "_FixedShiftShifts"("A", "B");
 
 -- CreateIndex
-CREATE INDEX "_shiftId_B_index" ON "_shiftId"("B");
+CREATE INDEX "_FixedShiftShifts_B_index" ON "_FixedShiftShifts"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_ShiftFlexibleShift_AB_unique" ON "_ShiftFlexibleShift"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_ShiftFlexibleShift_B_index" ON "_ShiftFlexibleShift"("B");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_ProjectStaff_AB_unique" ON "_ProjectStaff"("A", "B");
@@ -1140,10 +1153,16 @@ ALTER TABLE "_departmentId" ADD CONSTRAINT "_departmentId_A_fkey" FOREIGN KEY ("
 ALTER TABLE "_departmentId" ADD CONSTRAINT "_departmentId_B_fkey" FOREIGN KEY ("B") REFERENCES "TaskDetail"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_shiftId" ADD CONSTRAINT "_shiftId_A_fkey" FOREIGN KEY ("A") REFERENCES "FlexibleShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_FixedShiftShifts" ADD CONSTRAINT "_FixedShiftShifts_A_fkey" FOREIGN KEY ("A") REFERENCES "FixedShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_shiftId" ADD CONSTRAINT "_shiftId_B_fkey" FOREIGN KEY ("B") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "_FixedShiftShifts" ADD CONSTRAINT "_FixedShiftShifts_B_fkey" FOREIGN KEY ("B") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_ShiftFlexibleShift" ADD CONSTRAINT "_ShiftFlexibleShift_A_fkey" FOREIGN KEY ("A") REFERENCES "FlexibleShift"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_ShiftFlexibleShift" ADD CONSTRAINT "_ShiftFlexibleShift_B_fkey" FOREIGN KEY ("B") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_ProjectStaff" ADD CONSTRAINT "_ProjectStaff_A_fkey" FOREIGN KEY ("A") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
