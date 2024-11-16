@@ -1,6 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { ZodError } = require("zod");
-const { FineSchema } = require("../../../utils/validations.js");
+const { FineSchema } = require("../../../../utils/validations.js");
 const prisma = new PrismaClient();
 
 const addFineData = async (req, res) => {
