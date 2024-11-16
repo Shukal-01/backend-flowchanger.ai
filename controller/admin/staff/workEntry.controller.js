@@ -28,7 +28,7 @@ const addWorkEntry = async (req, res) => {
       location,
       attachments,
     });
-    console.log(validation);
+    // console.log(validation);
     if (validation.error) {
       return res.status(400).json({
         status: 400,

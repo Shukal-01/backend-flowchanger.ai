@@ -567,6 +567,8 @@ model FlexibleShift {
   staffId   String
   shifts    Shifts[]
   createdAt DateTime     @default(now())
+
+  @@unique([staffId, dateTime])
 }
 
 model PunchRecords {

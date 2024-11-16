@@ -275,16 +275,16 @@ const staffSchema = z.object({
 });
 
 const bankDetailsSchema = z.object({
-  bank_name: z.string().min(1, "Bank name is required").optional(),
+  bank_name: z.string().min(1, "Bank name is required"),
   account_number: z
     .string()
     .regex(/^[0-9]+$/, "Account number must be numeric")
-    .optional(),
-  branch_name: z.string().min(1, "Branch name is required").optional(),
+  ,
+  branch_name: z.string().min(1, "Branch name is required"),
   ifsc_code: z
     .string()
     .regex(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC code")
-    .optional(),
+  ,
 });
 
 const bulkLeavePolicySchema = z.object({
