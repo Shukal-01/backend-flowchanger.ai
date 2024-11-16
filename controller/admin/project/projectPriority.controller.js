@@ -25,10 +25,10 @@ const createProjectPriority = async (req, res) => {
                 can_changed: isArrayChangedValue,
             }
         });
-        return res.status(201).json({ status: true, message: "Project Priority Added Successfully!", data: addProjectPriority });
+        return res.status(201).json({ message: "Project Priority Added Successfully!", data: addProjectPriority });
     } catch (error) {
-        console.error("Error adding project Priority:", error); // Log the error for debugging
-        return res.status(500).json({ status: false, message: "Something went wrong!" });
+        console.error("Failed adding project Priority:", error.message);
+        return res.status(500).json({ message: "Project priority failed to created" + error.message });
     }
 }
 
@@ -39,13 +39,13 @@ const getProjectPriority = async (req, res) => {
 
         // Check if any records were found
         if (projectPriority.length === 0) {
-            return res.status(404).json({ status: false, message: "No project priorities found!" });
+            return res.status(404).json({ message: "No project priority found!" + error.message });
         }
 
-        return res.status(201).json({ status: true, message: "Project Priority retrieved successfully!", data: projectPriority });
+        return res.status(201).json({ message: "Project Priority fetched successfully!", data: projectPriority });
     } catch (error) {
-        console.error("Error retrieving project Priority:", error); // Log the error for debugging
-        return res.status(500).json({ status: false, message: "Something went wrong!" });
+        console.error("Failed fetching project Priority:", error.message);
+        return res.status(500).json({ message: "Failed to fetch project priority!" + error.message });
     }
 };
 
@@ -69,10 +69,10 @@ const updateProjectPriority = async (req, res) => {
                 can_changed: isArrayChangedValue,
             }
         });
-        return res.status(201).json({ status: true, message: "Project Priority Updated Successfully!", data: updateProjectPriority });
+        return res.status(201).json({ message: "Project Priority Updated Successfully!", data: updateProjectPriority });
     } catch (error) {
-        console.error("Error updating project Priority:", error); // Log the error for debugging
-        return res.status(500).json({ status: false, message: "Something went wrong!" });
+        console.error("Failed updating project Priority:", error.message);
+        return res.status(500).json({ message: "Failed to update project priority" + error.message });
     }
 }
 
@@ -88,8 +88,8 @@ const searchProjectPriorityByName = async (req, res) => {
         });
         return res.status(200).json(projectPriority);
     } catch (error) {
-        console.error('Error fetching projects:', error);
-        return res.status(500).json({ status: false, message: "Internal Server Error!" });
+        console.error('Failed searching project priority:', error);
+        return res.status(500).json({ message: "Failed to search project priority" + error.message });
     }
 };
 module.exports = {

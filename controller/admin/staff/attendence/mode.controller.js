@@ -6,16 +6,13 @@ const { attendanceModeSchema } = require("../../../../utils/validations.js");
 const fetchAttendenceModeForAllStaff = async (req, res) => {
     try {
         const allAttendenceModeOfStaff = await prisma.attendanceMode.findMany({
-
         });
         res.status(200).json({
-            success: true,
             message: "Fetch all attendence mode for staff successfully",
             data: allAttendenceModeOfStaff
         });
     } catch (error) {
         res.status(500).json({
-            success: false,
             error: "Failed to fetch all attendence mode for staff",
         });
     }
@@ -38,7 +35,6 @@ const addAndUpdateAttendenceModeForStaffs = async (req, res) => {
         const validateAttendenceMode = attendanceModeSchema.safeParse(req.body);
         if (!validateAttendenceMode.success) {
             return res.status(400).json({
-                success: false,
                 error: "Invalid attendence mode format or length provided of staffIds",
             })
         }
@@ -73,15 +69,12 @@ const addAndUpdateAttendenceModeForStaffs = async (req, res) => {
 
         // Send a success response
         res.status(200).json({
-            success: true,
             message: "Attendance automation rules created or updated for staffIds successfully.",
             data: updatedAutomationRules,
         });
     } catch (error) {
         console.error("Error in creating or updating automation rules for staffIds:", error);
-
         res.status(500).json({
-            success: false,
             error: "Failed to create or update automation rules for staffIds: " + error.message,
         });
     }

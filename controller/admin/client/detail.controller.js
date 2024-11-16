@@ -38,10 +38,10 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
 
     return res.status(200).json(clients);
   } catch (error) {
-    console.error("Error fetching client by name:", error);
+    console.error("Failed Searching client:", error.message);
     return res.status(500).json({
       status: false,
-      message: "Internal Server Error!",
+      message: "Failed Searching client!",
     });
   }
 };
@@ -105,8 +105,7 @@ const createClient = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: "Failed to create client",
-      details: error.message,
+      error: "Failed to create client" + error.message,
     });
   }
 };
@@ -124,10 +123,10 @@ const fetchAllClients = async (req, res) => {
 
     return res.status(200).json(clients);
   } catch (error) {
-    console.error("Error fetching all clients:", error);
+    console.error("Failed fetching all clients:", error);
     return res.status(500).json({
       status: false,
-      message: "An error occurred while fetching all clients: " + error.message,
+      message: "Failed fetching all clients: " + error.message,
     });
   }
 };
@@ -152,11 +151,11 @@ const updateSpecificClient = async (req, res) => {
   try {
     // Check if the clientDetails with the provided id exists
     const client = await prisma.clientDetails.findUnique({
-      where: { id: id }, // Ensure you're using the correct ID type (e.g., int or string)
+      where: { id: id },
     });
 
     if (!client) {
-      return res.status(404).json({
+      return res.json({
         status: false,
         message: "Client not found.",
       });
@@ -195,10 +194,10 @@ const updateSpecificClient = async (req, res) => {
       message: "Client updated successfully",
     });
   } catch (error) {
-    console.error("Error updating client:", error);
+    console.error("Failed updating client:", error.message);
     return res.status(500).json({
       status: false,
-      message: "An error occurred while updating the client: " + error.message,
+      message: "Failed updating the client: " + error.message,
     });
   }
 };
@@ -219,10 +218,10 @@ const changeStatus = async (req, res) => {
       message: "Client status updated successfully",
     });
   } catch (error) {
-    console.error("Error updating client status:", error);
+    console.error("Failed updating client status:", error.message);
     return res.status(500).json({
       status: false,
-      message: "An error occurred while updating the client status",
+      message: "Failed the client status" + error.message,
     });
   }
 };
@@ -238,7 +237,6 @@ const deleteSpecificClient = async (req, res) => {
       const validateId = idSchema.safeParse(id);
       if (!validateId.success) {
         return res.status(400).json({
-          success: false,
           message: "Invalid id provided",
         });
       }
@@ -250,7 +248,6 @@ const deleteSpecificClient = async (req, res) => {
 
       if (!client) {
         return res.status(404).json({
-          status: false,
           message: "Client not found",
         });
       }
@@ -263,10 +260,9 @@ const deleteSpecificClient = async (req, res) => {
         message: `Client with id ${id} and associated user deleted successfully`,
       });
     } catch (error) {
-      console.error("Error deleting client:", error);
+      console.error("Failed deleting client:", error.message);
       return res.status(500).json({
-        status: false,
-        message: "An error occurred while deleting the client",
+        message: "Failed while deleting the client" + error.message,
       });
     }
   }
@@ -278,8 +274,7 @@ const deleteBulkClient = async (req, res) => {
     // Validate the array of IDs
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({
-        success: false,
-        message: "Invalid or empty IDs provided",
+        message: "Invalid Id provided",
       });
     }
 
@@ -288,7 +283,6 @@ const deleteBulkClient = async (req, res) => {
       const validateId = idSchema.safeParse(id);
       if (!validateId.success) {
         return res.status(400).json({
-          success: false,
           message: `Invalid ID provided: ${id}`,
         });
       }
@@ -302,8 +296,7 @@ const deleteBulkClient = async (req, res) => {
 
     if (clients.length === 0) {
       return res.status(404).json({
-        success: false,
-        message: "No clients found with the provided IDs",
+        message: "Client not found",
       });
     }
 
@@ -324,10 +317,10 @@ const deleteBulkClient = async (req, res) => {
       message: "Clients and associated users deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting clients:", error);
+    console.error("Failed deleting clients:", error.message);
     return res.status(500).json({
       success: false,
-      message: "An error occurred while deleting the clients: " + error.message,
+      message: "Failed while deleting the clients: " + error.message,
     });
   }
 };
@@ -340,7 +333,6 @@ const fetchClientInfoSpecificID = async (req, res) => {
     const validateId = idSchema.safeParse(id);
     if (!validateId.success) {
       return res.status(400).json({
-        success: false,
         message: "Invalid id provided",
       });
     }
@@ -359,21 +351,18 @@ const fetchClientInfoSpecificID = async (req, res) => {
 
     if (!client) {
       return res.status(404).json({
-        status: false,
         message: "Client not found",
       });
     }
 
     return res.status(200).json({
-      status: true,
       data: client,
       message: `Client details for id ${id} fetched successfully`,
     });
   } catch (error) {
-    console.error("Error fetching client by ID:", error);
+    console.error("Failed fetching client :", error.message);
     return res.status(500).json({
-      status: false,
-      message: "An error occurred while fetching the client details",
+      message: "Failed while fetching the client details" + error.message,
     });
   }
 };
@@ -395,29 +384,25 @@ const loginClient = (req, res) => {
     .then((user) => {
       if (!user) {
         return res.status(404).json({
-          status: false,
-          message: "User not found",
+          message: "Client not found",
         });
       }
       const isPasswordMatch = bcrypt.compareSync(password, user.password);
       if (!isPasswordMatch) {
         return res.status(401).json({
-          status: false,
-          message: "Invalid password",
+          message: "Invalid password" + error.message,
         });
       }
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
       return res.status(200).json({
-        status: true,
         message: "Login successful",
         token,
       });
     })
     .catch((error) => {
-      console.error("Error during login:", error);
+      console.error("Error during login:", error.message);
       return res.status(500).json({
-        status: false,
-        message: "An error occurred during login",
+        message: "Error during login",
       });
     });
 };

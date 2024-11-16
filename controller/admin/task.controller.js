@@ -47,13 +47,13 @@ async function createTaskStatus(req, res) {
       },
     });
 
-    res.status(201).json(taskStatus);
+    res.status(201).json({ message: "Task status successfully created!", taskStatus });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ error: "Invalid request data" });
     } else {
       console.log(error);
-      res.status(500).json({ error: "Failed to create new task status" });
+      res.status(500).json({ error: "Failed to create new task status" + error.message });
     }
   }
 }
@@ -65,10 +65,10 @@ async function getAllTaskStatus(req, res) {
         isHiddenId: true, // Include the isHiddenId relation in the response
       },
     });
-    res.status(200).json(taskStatus);
+    res.status(200).json({ message: "takstatus fetch successfully", taskStatus });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Failed to fetch task status" });
+    res.status(500).json({ error: "Failed to fetch task status" + error.message });
   }
 }
 
@@ -104,13 +104,13 @@ async function updateTaskStatus(req, res) {
       data: TaskStatusResult.data,
     });
 
-    res.status(200).json(updatedTaskStatus);
+    res.status(200).json({ message: "Task status successfully updated!", updatedTaskStatus });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ error: "Invalid request data" });
     } else {
       console.log(error);
-      res.status(500).json({ error: "Failed to update task status" });
+      res.status(500).json({ error: "Failed to update task status" + error.message });
     }
   }
 }
@@ -133,13 +133,13 @@ async function createTaskPriority(req, res) {
     const taskPriority = await prisma.taskPriority.create({
       data: taskPriorityResult.data,
     });
-    res.status(201).json(taskPriority);
+    res.status(201).json({ taskPriority, message: "Task priority successfully created!" });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ error: "Invalid request data" });
     } else {
       console.log(error);
-      res.status(500).json({ error: "Failed to create new task priority" });
+      res.status(500).json({ error: "Failed to create new task priority" + error.message });
     }
   }
 }
@@ -151,10 +151,10 @@ async function getAllTaskPriority(req, res) {
       //    TaskDetail: true,
       // },
     });
-    res.status(200).json(taskPriority);
+    res.status(200).json({ taskPriority, message: "Task priority fetch successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Failed to fetch task priority" });
+    res.status(500).json({ error: "Failed to fetch task priority" + error.message });
   }
 }
 
@@ -180,13 +180,13 @@ async function updateTaskPriority(req, res) {
       data: taskPriorityResult.data,
     });
 
-    res.status(200).json(updatedTaskPriority);
+    res.status(200).json({ updatedTaskPriority, message: "Task priority successfully updated!" });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ error: "Invalid request data" });
     } else {
       console.log(error);
-      res.status(500).json({ error: "Failed to update task priority" });
+      res.status(500).json({ error: "Failed to update task priority" + error.message });
     }
   }
 }
@@ -250,13 +250,13 @@ async function createTaskDetail(req, res) {
       },
     });
 
-    res.status(201).json(taskDetail);
+    res.status(201).json({ taskDetail, message: "Task detail successfully created!" });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ error: "Invalid request data" });
     } else {
       console.log(error);
-      res.status(500).json({ error: "Failed to create new task detail" });
+      res.status(500).json({ error: "Failed to create new task detail" + error.message });
     }
   }
 }
@@ -271,10 +271,10 @@ async function getAllTaskDetail(req, res) {
         selectProjectId: true
       },
     });
-    res.status(200).json(taskDetail);
+    res.status(200).json({ taskDetail, message: "Task details successfully retrieved!" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Failed to fetch task detail" });
+    res.status(500).json({ error: "Failed to fetch task detail" + error.message });
   }
 }
 //added
@@ -296,10 +296,10 @@ async function deleteTaskDetail(req, res) {
       where: { id },
     });
 
-    res.status(200).json(taskDetail);
+    res.status(200).json({ taskDetail, message: "Task detail successfully deleted!" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Failed to delete task detail" });
+    res.status(500).json({ error: "Failed to delete task detail" + error.message });
   }
 }
 
@@ -363,13 +363,13 @@ async function updateTaskDetail(req, res) {
       },
     });
 
-    res.status(200).json(updatedTaskDetail);
+    res.status(200).json({ updatedTaskDetail, message: "Task detail successfully updated!" });
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(400).json({ error: "Invalid request data" });
     } else {
       console.log(error);
-      res.status(500).json({ error: "Failed to update task detail" });
+      res.status(500).json({ error: "Failed to update task detail" + error.message });
     }
   }
 }
@@ -389,10 +389,10 @@ async function getTaskDetailById(req, res) {
     }
 
     // If task detail is found, return it
-    res.status(200).json(taskDetail);
+    res.status(200).json({ taskDetail, message: "Task detail successfully retrieved!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Failed to fetch task detail" });
+    res.status(500).json({ message: "Failed to fetch task detail" + error.message });
   }
 }
 
@@ -409,10 +409,10 @@ const searchTaskDetailByName = async (req, res) => {
         },
       },
     });
-    res.status(200).json(taskDetail);
+    res.status(200).json({ taskDetail, message: "Task detail successfully retrieved!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: false, message: "Internal Server Error!" });
+    res.status(500).json({ status: false, message: "Internal Server Error!" + error.message });
   }
 };
 
@@ -429,10 +429,10 @@ const searchTaskStatusByName = async (req, res) => {
         },
       },
     });
-    res.status(200).json(taskStatus);
+    res.status(200).json({ taskStatus, message: "Task status successfully retrieved!" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: false, message: "Internal Server Error!" });
+    res.status(500).json({ status: false, message: "Internal Server Error!" + error.message });
   }
 };
 

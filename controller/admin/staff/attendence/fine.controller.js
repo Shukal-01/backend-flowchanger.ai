@@ -1,4 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
+const { ZodError } = require("zod");
+const { FineSchema } = require("../../../utils/validations.js");
 const prisma = new PrismaClient();
 
 const addFineData = async (req, res) => {
@@ -13,7 +15,20 @@ const addFineData = async (req, res) => {
         totalAmount,
         shiftIds,
     } = req.body;
-
+    const validationResult = FineSchema.safeParse({
+        staffId,
+        lateEntryFineAmount,
+        lateEntryAmount,
+        excessBreakFineAmount,
+        excessBreakAmount,
+        earlyOutFineAmount,
+        earlyOutAmount,
+        totalAmount,
+        shiftIds,
+    });
+    if (!validationResult.success) {
+        return res.status(400).json({ error: validationResult.error });
+    }
     try {
         // Ensure 'today' is set to 00:00:00 for comparison purposes
         const today = new Date();
@@ -73,23 +88,23 @@ const addFineData = async (req, res) => {
             // If no fine record exists, create a new fine record
             const fine = await prisma.fine.create({
                 data: {
-                    staffId,
-                    lateEntryFineAmount,
-                    lateEntryAmount,
-                    excessBreakFineAmount,
-                    excessBreakAmount,
-                    earlyOutFineAmount,
-                    earlyOutAmount,
-                    totalAmount,
-                    shiftIds,
+                    staffId: validationResult.data.staffId,
+                    lateEntryFineAmount: validationResult.data.lateEntryFineAmount,
+                    lateEntryAmount: validationResult.data.lateEntryAmount,
+                    excessBreakFineAmount: validationResult.data.excessBreakFineAmount,
+                    excessBreakAmount: validationResult.data.excessBreakAmount,
+                    earlyOutFineAmount: validationResult.data.earlyOutFineAmount,
+                    earlyOutAmount: validationResult.data.earlyOutAmount,
+                    totalAmount: validationResult.data.totalAmount,
+                    shiftIds: validationResult.data.shiftIds,
                     punchRecordId: existingPunchRecord.id,
                 },
             });
             res.status(200).json(fine);
         }
     } catch (error) {
-        console.error("Error adding or updating fine:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Failed adding or updating fine:", error);
+        res.status(500).json({ message: "Failed to add or update fine" + error.message });
     }
 };
 

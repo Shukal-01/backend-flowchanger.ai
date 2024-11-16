@@ -593,7 +593,7 @@ const searchRoleByName = async (req, res) => {
     res.status(200).json(roleData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ status: false, message: "Internal Server Error!" });
+    res.status(500).json({ status: false, message: "Failed to search role name" + error.message });
   }
 };
 
