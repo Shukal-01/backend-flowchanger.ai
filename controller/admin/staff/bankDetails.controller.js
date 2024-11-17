@@ -56,7 +56,7 @@ exports.createOrUpdateBankDetails = async (req, res) => {
     }
   } catch (error) {
     console.error("Error processing bank details:", error);
-    res.status(500).json({ error: "Failed to process bank details" });
+    res.status(500).json({ error: "Failed to process bank details" + error.message });
   }
 };
 

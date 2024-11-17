@@ -66,7 +66,7 @@ const createStaff = async (req, res) => {
       },
     });
 
-    res.status(201).json(user);
+    res.status(201).json({ message: "Staff created successfully!", user });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -261,12 +261,12 @@ const deleteStaff = async (req, res) => {
 
   try {
     await prisma.staffDetails.delete({
-      where: { userId: id }, // Adjusted to use userId
+      where: { userId: id },
     });
-    res.status(204).json({ message: "Staff member disabled" });
+    res.status(201).json({ message: "Staff member deleted successfully" });
   } catch (error) {
     res.status(500).json({
-      error: "Failed to disable staff member",
+      error: "Failed to delete staff member",
       details: error.message,
     });
   }
@@ -311,8 +311,8 @@ const searchStaffByName = async (req, res) => {
 
     return res.status(200).json(searchStaff);
   } catch (error) {
-    console.error("Error fetching staff:", error);
-    return res.status(500).json({ status: false, message: "Internal Server Error!" });
+    console.error("Error fetching staff members:", error);
+    return res.status(500).json({ message: "Failed to search staff members" + error.message });
   }
 };
 
@@ -354,7 +354,7 @@ const searchStaffByStatus = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: false,
-      message: "Internal server error",
+      message: "Failed to search staff members" + error.message,
     });
   }
 };

@@ -22,11 +22,10 @@ const matchStaffLoginOTP = async (req, res) => {
       const token = jwt.sign({ userId: staff.id }, process.env.JWT_SECRET);
       return res.status(200).json({ message: "OTP matched", token: token });
     } else {
-      return res.status(400).json({ message: "OTP not matched" });
+      return res.status(400).json({ message: "OTP not matched" + error.message });
     }
-    /// send token,
   } catch (error) {
-    res.status(500).json({ message: "Failed", error: error.message });
+    res.status(500).json({ message: "Failed to login and match OTP", error: error.message });
   }
 };
 

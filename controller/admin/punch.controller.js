@@ -138,7 +138,7 @@ async function createPunchIn(req, res) {
       return res.status(400).json({ errors: error.errors });
     }
 
-    return res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Failed to create punch-in" + error.message });
   }
 }
 
@@ -282,7 +282,7 @@ async function createPunchOut(req, res) {
       return res.status(400).json({ errors: error.errors });
     }
 
-    return res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Failed to create punch-out" + error.message });
   }
 }
 

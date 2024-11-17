@@ -18,8 +18,7 @@ const customFieldDetails = async (req, res) => {
   } catch (error) {
     console.error("Error processing custom field:", error);
     res.status(500).json({
-      message: "Failed to process custom details!",
-      error: error.message,
+      message: "Failed to process custom details!" + error.message,
     });
   }
 };
@@ -32,8 +31,7 @@ const getAllCustomFields = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      error: "Failed to fetch custom details",
-      details: error.message,
+      error: "Failed to fetch custom details" + error.message,
     });
   }
 };
@@ -53,12 +51,12 @@ const updateCustomFields = async (req, res) => {
     });
     return res
       .status(200)
-      .json({ status: 200, message: "custom fields Successfully Updated!" });
+      .json({ message: "custom fields Successfully Updated!", update });
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "custom fields Not Found (" + id + ")" });
+      .json({ message: "Custome field updated failed" + error.message });
   }
 };
 
@@ -74,15 +72,14 @@ const getCustomFieldById = async (req, res) => {
       return res.status(200).json({ status: 200, data: newCustomFieldsId });
     } else {
       return res.status(400).json({
-        status: 400,
-        message: "custom fields not found for this id (" + id + ")",
+        message: "custom fields not found" + error.message,
       });
     }
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "failed to load custom details by id!" });
+      .json({ message: "failed get custom fields data!" + error.message });
   }
 };
 
@@ -97,18 +94,18 @@ const deleteCustomFields = async (req, res) => {
     if (deleteCustomFields) {
       return res.status(200).json({
         status: 200,
-        message: "delete custom fields this id (" + id + ")",
+        message: "delete custom fields this id ",
       });
     } else {
       return res
         .status(400)
-        .json({ status: 400, message: "not found this (" + id + ") id!" });
+        .json({ message: "not found this custom fiels id" });
     }
   } catch (error) {
     console.log(error);
     return res.status(500).json({
       status: 500,
-      message: "failed to delete this (" + id + ") custom id!",
+      message: "failed to delete custom fields id!" + error.message,
     });
   }
 };

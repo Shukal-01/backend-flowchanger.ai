@@ -238,7 +238,7 @@ const getAllSalaryData = async (req, res) => {
     console.log("Error:", error);
     return res.status(500).json({
       status: 500,
-      message: "An error occurred while fetching salary data.",
+      message: "Failed to retrieve all salary data with related earnings and deductions.",
       error: error.message,
     });
   }
@@ -369,7 +369,7 @@ const updateSalaryData = async (req, res) => {
     console.error("Error updating salary data:", error);
     return res.status(500).json({
       status: 500,
-      message: "Error updating salary data",
+      message: "Failed to updating salary data",
       error: error.message,
     });
   }
@@ -420,7 +420,7 @@ const deleteSalaryRecord = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Error deleting record: " + error.message });
+      .json({ status: 500, message: "Failed to deleting record: " + error.message });
   }
 };
 
@@ -458,7 +458,7 @@ const deductions = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: "Error creating deductions.",
+      message: "Failed to creating deductions.",
       error: error.message,
     });
   }
@@ -501,7 +501,7 @@ const updateDeductions = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: "Error updating head.",
+      message: "Failed to updating head.",
       error: error.message,
     });
   }
@@ -545,7 +545,7 @@ const createEarningHead = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: "Error creating head.",
+      message: "Failed to creating head.",
       error: error.message,
     });
   }
@@ -625,7 +625,7 @@ const updateEarningHead = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: "Error updating head.",
+      message: "Failed to updating head.",
       error: error.message,
     });
   }
@@ -645,7 +645,7 @@ const getDeductionById = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Inernal Server Error" });
+      .json({ status: 500, message: "Failed To get Deduction Data By ID!" + error.message });
   }
 };
 
@@ -660,7 +660,7 @@ const getAllDeductions = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+      .json({ status: 500, message: "Failed To get All Deductions Data!" + error.message });
   }
 };
 
@@ -681,7 +681,7 @@ const deleteEarningsByID = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       status: 500,
-      message: "Internal Server Error.",
+      message: "Failed to deleting head.",
       error: error.message,
     });
   }
