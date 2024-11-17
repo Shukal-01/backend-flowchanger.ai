@@ -519,16 +519,6 @@ enum Day {
   Sun
 }
 
-model WeekOffShift {
-  id         String      @id @default(dbgenerated("gen_random_uuid()"))
-  weekOne    Boolean?    @default(false)
-  weekTwo    Boolean?    @default(false)
-  weekThree  Boolean?    @default(false)
-  weekFour   Boolean?    @default(false)
-  weekFive   Boolean?    @default(false)
-  FixedShift FixedShift?
-}
-
 model Shifts {
   id                   String          @id @default(dbgenerated("gen_random_uuid()"))
   shiftName            String
@@ -540,11 +530,21 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  FlexibleShift        FlexibleShift[]
   Fine                 Fine[]
   // Updated one-to-many relation with FixedShift
   FixedShifts          FixedShift[] // A Shift can be associated with multiple FixedShift entries
   Overtime             Overtime[]
+  FlexibleShift        FlexibleShift[]
+}
+
+model WeekOffShift {
+  id         String      @id @default(dbgenerated("gen_random_uuid()"))
+  weekOne    Boolean?    @default(false)
+  weekTwo    Boolean?    @default(false)
+  weekThree  Boolean?    @default(false)
+  weekFour   Boolean?    @default(false)
+  weekFive   Boolean?    @default(false)
+  FixedShift FixedShift?
 }
 
 model FixedShift {
