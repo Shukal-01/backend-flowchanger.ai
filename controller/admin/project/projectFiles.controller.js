@@ -9,9 +9,6 @@ const app = express();
 // Add Project Files Query
 const addProjectFiles = async (req, res) => {
     const { projectId, last_activity, total_comments, visible_to_customer, uploaded_by } = req.body;
-    if (!req.file) {
-        return res.status(400).json({ status: 400, msg: "No file uploaded" });
-    }
     const file_name = req.imageUrl;
     const file_type = req.file.mimetype;
     const date_uploaded = new Date();
@@ -32,10 +29,10 @@ const addProjectFiles = async (req, res) => {
             },
         });
 
-        return res.status(201).json({ status: 201, msg: "File uploaded successfully", file: newFilesData, });
+        return res.status(201).json({ msg: "File uploaded successfully", file: newFilesData, });
     } catch (error) {
-        console.error("Error creating project file:", error);
-        return res.status(500).json({ status: 500, msg: "Error creating project file", error: error.message });
+        console.error("Failed to creating project file:", error);
+        return res.status(500).json({ msg: "Failed to creating project file", error: error.message });
     }
 };
 
@@ -43,12 +40,9 @@ const addProjectFiles = async (req, res) => {
 const getAllProjectFiles = async (req, res) => {
     const ProjectsFiles = await prisma.projectFiles.findMany({});
     try {
-        if (ProjectsFiles.length === 0) {
-            return res.status(400).json({ status: 400, message: "project files not found!" });
-        }
-        return res.json({ status: 200, data: ProjectsFiles });
+        return res.status(200).json({ message: "Project files fetched successfully", data: ProjectsFiles });
     } catch (error) {
-        return res.status(500).json({ status: 500, message: "failed to get project files" });
+        return res.status(500).json({ message: "failed to get project files" + error.message });
     }
 }
 
@@ -76,10 +70,10 @@ const updateProjectFiles = async (req, res) => {
                 date_uploaded: date_uploaded
             }
         });
-        return res.json({ status: 200, message: "Project files updated successfully!", data: updatedProjects });
+        return res.status(200).json({ message: "Project files updated successfully!", data: updatedProjects });
     } catch (error) {
-        console.error("Error updating project:", error);
-        return res.status(400).json({ status: 400, message: "Project files not found or update failed!" });
+        console.error("Failed updating project:", error.message);
+        return res.status(400).json({ message: "Project update failed!" });
     }
 };
 
@@ -92,10 +86,10 @@ const deleteProjectFiles = async (req, res) => {
                 id: id,
             },
         });
-        return res.json({ status: 200, message: "Project files deleted successfully! (" + id + ")" });
+        return res.status(200).json({ message: "Project files deleted successfully!", data: deletedProjectFiles });
     } catch (error) {
         if (error.code) {
-            return res.status(404).json({ status: 404, message: "Project files not found!" });
+            return res.status(404).json({ message: "Project files not found!" + error.message });
         }
     }
 }

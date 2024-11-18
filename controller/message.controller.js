@@ -37,7 +37,7 @@ const sendMessage = async (req, res) => {
     res.status(201).json({ message: message, room: room, users: room.users });
   } catch (error) {
     console.error("Error sending message:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Failed to send message" + error.message });
   }
 };
 

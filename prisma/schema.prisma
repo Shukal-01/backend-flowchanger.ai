@@ -504,23 +504,6 @@ model SalaryDetails {
   Staff            StaffDetails @relation(fields: [staffId], references: [id])
 }
 
-model Shifts {
-  id                   String          @id @default(dbgenerated("gen_random_uuid()"))
-  shiftName            String
-  shiftStartTime       String
-  shiftEndTime         String
-  punchInType          PunchTime       @default(ANYTIME)
-  punchOutType         PunchTime       @default(ANYTIME)
-  allowPunchInHours    Int?
-  allowPunchInMinutes  Int?
-  allowPunchOutMinutes Int?
-  allowPunchOutHours   Int?
-  flexibleShift        FlexibleShift[] @relation("ShiftFlexibleShift")
-  Fine                 Fine[]
-  Overtime             Overtime[]
-  fixedShifts          FixedShift[]    @relation("FixedShiftShifts")
-}
-
 enum PunchTime {
   ANYTIME
   ADDLIMIT
@@ -534,6 +517,24 @@ enum Day {
   Fri
   Sat
   Sun
+}
+
+model Shifts {
+  id                   String          @id @default(dbgenerated("gen_random_uuid()"))
+  shiftName            String
+  shiftStartTime       String
+  shiftEndTime         String
+  punchInType          PunchTime       @default(ANYTIME)
+  punchOutType         PunchTime       @default(ANYTIME)
+  allowPunchInHours    Int?
+  allowPunchInMinutes  Int?
+  allowPunchOutMinutes Int?
+  allowPunchOutHours   Int?
+  Fine                 Fine[]
+  // Updated one-to-many relation with FixedShift
+  FixedShifts          FixedShift[] // A Shift can be associated with multiple FixedShift entries
+  Overtime             Overtime[]
+  FlexibleShift        FlexibleShift[]
 }
 
 model WeekOffShift {
@@ -550,31 +551,30 @@ model FixedShift {
   id        String        @id @default(dbgenerated("gen_random_uuid()"))
   day       Day           @default(Mon)
   weekOff   Boolean       @default(false)
-  staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String?
-  // shifts    Shifts[]      @relation("ShiftFixedShift")
-  // shiftsId  String
+  staff     StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String
   weekId    String?       @unique
   week      WeekOffShift? @relation(fields: [weekId], references: [id], onDelete: Cascade)
   createdAt DateTime      @default(now())
-  // Define many-to-many relationship with Shifts
-  // 
-  shifts    Shifts[]      @relation("FixedShiftShifts")
+  shifts    Shifts[]
 }
 
 model FlexibleShift {
-  id        String        @id @default(dbgenerated("gen_random_uuid()"))
-  dateTime  DateTime
-  weekOff   Boolean       @default(false)
-  staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  staffId   String?
-  shifts    Shifts[]      @relation("ShiftFlexibleShift")
-  createdAt DateTime      @default(now())
+  id        String       @id @default(dbgenerated("gen_random_uuid()"))
+  dateTime  String
+  weekOff   Boolean      @default(false)
+  staff     StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId   String
+  shifts    Shifts[]
+  createdAt DateTime     @default(now())
+
+  @@unique([staffId, dateTime])
 }
 
 model PunchRecords {
   id         String            @id @default(dbgenerated("gen_random_uuid()"))
   punchDate  DateTime          @default(now())
+  isApproved Boolean           @default(false)
   punchInId  String?           @unique
   punchIn    PunchIn?          @relation(fields: [punchInId], references: [id], onDelete: Cascade)
   punchOutId String?           @unique

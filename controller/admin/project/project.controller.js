@@ -6,7 +6,6 @@ const { projectSchema } = require("../../../utils/validations.js");
 const app = express();
 const prisma = new PrismaClient();
 
-
 const addProject = async (req, res) => {
   const {
     staffId,
@@ -43,7 +42,6 @@ const addProject = async (req, res) => {
   if (!validationResult.success) {
     console.log(validationResult.error)
     return res.status(400).json({
-      status: 400,
       msg: "Invalid request data",
       errors: validationResult.error.issues.map(issue => issue.message)
     });
@@ -61,7 +59,7 @@ const addProject = async (req, res) => {
 
     console.log(client, customerId)
     if (!client) {
-      return res.status(404).json({ status: 404, msg: "Client not found" });
+      return res.status(404).json({ msg: "Client not found" });
     }
     const createdProject = await prisma.project.create({
       data: {
@@ -88,25 +86,20 @@ const addProject = async (req, res) => {
     console.log(client);
     await sendProjectCreatedMail(client.user.email, project_name);
 
-    return res.json({
-      status: 201,
-      data: createdProject,
+    return res.status(201).json({
       msg: "Project Created Successfully",
+      data: createdProject,
     });
 
   } catch (error) {
-    console.error("Error creating project:", error);
+    console.error("FAiled creating project:", error.message);
 
     if (error.code === "P2002") {
-      return res.status(400).json({ status: 400, msg: "Duplicate entry", error: error.meta.target });
+      return res.status(400).json({ msg: "Duplicate entry", error: error.meta.target });
     }
-
-    return res.status(500).json({ status: 500, msg: "Error creating project", error: error.message });
+    return res.status(500).json({ msg: "Error creating project", error: error.message });
   }
 };
-
-
-
 
 // Fetch All Project Query............................
 
@@ -118,12 +111,9 @@ const getProject = async (req, res) => {
         TaskDetail: true,
       }
     });
-    // if (Projects.length === 0) {
-    //     return res.status(400).json({ status: 400, message: "users not found!" });
-    // }
-    return res.json({ status: 200, data: Projects });
+    return res.status(200).json({ message: "Project fetched successfully", data: Projects });
   } catch (error) {
-    return res.status(500).json({ status: 500, message: "failed to get projects, server error" });
+    return res.status(500).json({ message: "failed to get projects" + error.message });
   }
 }
 
@@ -141,9 +131,9 @@ const showProject = async (req, res) => {
         id: ProjectID,
       },
     });
-    return res.json({ status: 200, data: Projects });
+    return res.status(200).json({ message: "Project fetched ById successfully", data: Projects });
   } catch (error) {
-    return res.status(500).json({ status: 500, message: "failed to get projects, server error" });
+    return res.status(500).json({ message: "failed to get projects" + error.message });
   }
 }
 
@@ -158,10 +148,10 @@ const deleteProject = async (req, res) => {
         id: projectID,
       },
     });
-    return res.json({ status: 200, message: "Project deleted successfully!", deletedProject });
+    return res.status(200).json({ message: "Project deleted successfully!", deletedProject });
   } catch (error) {
     if (error.code) {
-      return res.status(404).json({ status: 404, message: "Delete Project not found!" });
+      return res.status(500).json({ message: "Failed to delete project" + error.message });
     }
   }
 }
@@ -235,10 +225,10 @@ const updateProject = async (req, res) => {
         staffId: true
       },
     })
-    return res.json({ status: 200, message: "Project updated successfully!" });
+    return res.status(200).json({ message: "Project updated successfully!" });
   } catch (error) {
     if (error.code) {
-      return res.status(400).json({ status: 400, message: "Update Project not found!" });
+      return res.status(400).json({ message: "Failed to update project!" + error.message });
     }
   }
 
@@ -260,8 +250,8 @@ const SearchingProjectsByName = async (req, res) => {
     });
     res.status(200).json(projects);
   } catch (error) {
-    console.error('Error fetching projects:', error);
-    res.status(500).json({ status: false, message: 'Internal server error' });
+    console.error('Failed to fetch projects', error.message);
+    res.status(500).json({ message: 'Failed to search projects' + error.message });
   }
 };
 

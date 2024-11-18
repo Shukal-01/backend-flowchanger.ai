@@ -275,16 +275,12 @@ const staffSchema = z.object({
 });
 
 const bankDetailsSchema = z.object({
-  bank_name: z.string().min(1, "Bank name is required").optional(),
+  bank_name: z.string().min(1, "Bank name is required"),
   account_number: z
     .string()
-    .regex(/^[0-9]+$/, "Account number must be numeric")
-    .optional(),
-  branch_name: z.string().min(1, "Branch name is required").optional(),
-  ifsc_code: z
-    .string()
-    .regex(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC code")
-    .optional(),
+    .regex(/^[0-9]+$/, "Account number must be numeric"),
+  branch_name: z.string().min(1, "Branch name is required"),
+  ifsc_code: z.string().regex(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC code"),
 });
 
 const bulkLeavePolicySchema = z.object({
@@ -403,11 +399,35 @@ const weekOffShiftSchema = z.object({
   weekFive: z.boolean().optional().default(false),
 });
 
+const MultipleFlexibleShiftSchema = z.object({
+  dateTime: z.string().min(1, { message: "Day is required." }),
+  weekOff: z.boolean().default(false), // Set default value to false
+  staffId: z.array(z.string()).min(1, { message: "Staff ID is required." }),
+  shifts: z.array(z.string()).optional(),
+});
+
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().uuid(1, { message: "Staff ID is required." }),
-  shifts: z.array(z.string()).default([]).optional(),
+  shifts: z.array(z.string()).optional(),
+});
+
+const MultipleFixedShiftSchema = z.object({
+  day: z
+    .string()
+    .refine(
+      (value) =>
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value),
+      {
+        message:
+          "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+      }
+    ),
+  weekOff: z.boolean().default(false), // Set default value to false
+  staffId: z.array(z.string()).min(1, { message: "Staff ID is required." }),
+  shifts: z.array(z.string()).optional(),
+  weekId: z.string().optional(),
 });
 
 const FixedShiftSchema = z.object({
@@ -423,7 +443,7 @@ const FixedShiftSchema = z.object({
     ),
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().uuid(1, { message: "Staff ID is required." }),
-  shifts: z.array(z.string()).default([]).optional(),
+  shifts: z.array(z.string()).optional(),
   weekId: z.string().optional(),
 });
 
@@ -659,6 +679,34 @@ const workEntrySchema = z.object({
   staffDetailsId: z.string().uuid("Staff ID is required"),
 });
 
+const DepartmentSchema = z.object({
+  departmentName: z.string().min(1, "Department Name is required"),
+});
+
+const FineSchema = z
+  .object({
+    staffId: z.string().uuid("Invalid staff ID"), // UUID format check
+    lateEntryFineAmount: z
+      .string()
+      .min(1, "Late Entry Fine Amount is required"),
+    lateEntryAmount: z
+      .number()
+      .min(0, "Late Entry Amount must be a positive number"),
+    excessBreakFineAmount: z.string().optional(),
+    excessBreakAmount: z
+      .number()
+      .min(0, "Excess Break Amount must be a positive number")
+      .optional(),
+    earlyOutFineAmount: z.string().optional(),
+    earlyOutAmount: z
+      .number()
+      .min(0, "Early Out Amount must be a positive number")
+      .optional(),
+    totalAmount: z.number().min(0, "Total Amount must be a positive number"),
+    shiftIds: z.array(z.string()).optional(), // Array of strings for shift IDs
+  })
+  .strict(); // Ensures no extra fields are allowed
+
 module.exports = {
   clientSchema,
   idSchema,
@@ -701,4 +749,8 @@ module.exports = {
   workEntrySchema,
   weekOffShiftSchema,
   bulkLeavePolicySchema,
+  DepartmentSchema,
+  FineSchema,
+  MultipleFixedShiftSchema,
+  MultipleFlexibleShiftSchema,
 };

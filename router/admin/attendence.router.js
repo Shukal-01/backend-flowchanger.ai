@@ -9,8 +9,9 @@ const {
 } = require("../../controller/admin/staff/attendence/mode.controller.js");
 
 const {
-  attendanceRecords,
+  allStaffAttendanceByDate,
   updatePunchRecordStatus,
+  getSingleStaffAttendance,
 } = require("../../controller/admin/staff/attendence/attendance.controller.js");
 
 const attendanceRouter = Router();
@@ -23,8 +24,9 @@ attendanceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
 // attendance overview routes here :-
 
 attendanceRouter.patch("/status/:id", updatePunchRecordStatus);
-// attendance records
 
-attendanceRouter.get("/summary/:date", attendanceRecords);
+attendanceRouter.get("/summary", allStaffAttendanceByDate);
+
+attendanceRouter.get("/single/:id", getSingleStaffAttendance);
 
 module.exports = attendanceRouter;

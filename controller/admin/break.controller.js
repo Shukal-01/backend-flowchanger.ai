@@ -9,22 +9,31 @@ const {
 
 async function createStartBreak(req, res) {
     try {
-        const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
+        const { breakMethod, biometricData, qrCodeValue, location } = req.body;
         const photoUrl = req.imageUrl || "null";
 
+        const user = await prisma.user.findFirst({
+            where: { id: req.userId, role: "STAFF" },
+            include: { staffDetails: true },
+        });
+        if (!user) {
+            return res.status(404).send("user not found");
+        }
+        // console.log(user)
         // Validate input using zod schema
-        StartBreakSchema.parse({
-            staffId,
+        const start = StartBreakSchema.parse({
+            staffId: user.staffDetails.id,
             breakMethod,
             biometricData,
             qrCodeValue,
             photoUrl,
             location
         });
+        console.log(start, "start")
         // Check if there’s an existing startBreak without an endBreak for the same staffId
         const existingStartBreak = await prisma.startBreak.findFirst({
             where: {
-                staffId,
+                staffId: start.staffId,
                 // endBreak: null  // Ensure no endBreak is associated
             }
         });
@@ -33,7 +42,7 @@ async function createStartBreak(req, res) {
             return res.status(400).json({ error: "A startBreak already exists without a corresponding endBreak. Complete the current break before starting a new one." });
         }
 
-        let breakData = { breakMethod, location, staffId };
+        let breakData = { breakMethod, location };
 
         if (breakMethod === "PHOTOCLICK") {
             breakData = { ...breakData, photoUrl };
@@ -48,7 +57,7 @@ async function createStartBreak(req, res) {
                 breakMethod: breakMethod || "PHOTOCLICK", // default to PHOTOCLICK if not provided
                 ...breakData,
                 location,
-                staffId
+                staffId: start.staffId
             },
         });
 
@@ -90,12 +99,20 @@ async function getStartBreakByStaffId(req, res) {
 
 async function createEndBreak(req, res) {
     try {
-        const { breakMethod, biometricData, qrCodeValue, location, staffId } = req.body;
+        const { breakMethod, biometricData, qrCodeValue, location } = req.body;
         const photoUrl = req.imageUrl || "null";
 
+        const user = await prisma.user.findFirst({
+            where: { id: req.userId, role: "STAFF" },
+            include: { staffDetails: true },
+        });
+        if (!user) {
+            return res.status(404).send("user not found");
+        }
+
         // Validate input using zod schema
-        EndBreakSchema.parse({
-            staffId,
+        const end = EndBreakSchema.parse({
+            staffId: user.staffDetails.id,
             breakMethod,
             biometricData,
             qrCodeValue,
@@ -105,7 +122,7 @@ async function createEndBreak(req, res) {
 
         // Check if a startBreak exists for this staffId
         const existingStartBreak = await prisma.startBreak.findFirst({
-            where: { staffId },
+            where: { staffId: end.staffId },
             orderBy: { startBreakTime: 'desc' } // Order by the most recent startBreak
         });
 
@@ -114,7 +131,7 @@ async function createEndBreak(req, res) {
         }
 
 
-        let breakData = { breakMethod, location, staffId };
+        let breakData = { breakMethod, location };
 
         // console.log(location);
         // Determine the method of punch-in and set the appropriate data
@@ -133,7 +150,7 @@ async function createEndBreak(req, res) {
                 breakMethod: breakMethod || "PHOTOCLICK", // default to PHOTOCLICK if not provided
                 ...breakData,
                 location,
-                staffId
+                staffId: end.staffId
             },
         });
 

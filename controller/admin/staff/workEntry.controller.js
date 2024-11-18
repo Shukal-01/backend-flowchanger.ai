@@ -28,7 +28,7 @@ const addWorkEntry = async (req, res) => {
       location,
       attachments,
     });
-    console.log(validation);
+    // console.log(validation);
     if (validation.error) {
       return res.status(400).json({
         status: 400,
@@ -72,7 +72,7 @@ const addWorkEntry = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Internal Server Error!" });
+      .json({ status: 500, message: "Failed to create work entry" + error.message });
   }
 };
 
@@ -107,11 +107,11 @@ const getAllWorkEntry = async (req, res) => {
       (workEntry) => workEntry.staffDetailsId
     );
 
-    if (filteredWorkEntries.length === 0) {
-      return res
-        .status(200)
-        .json({ message: "No work entry found for this month!" });
-    }
+    // if (filteredWorkEntries.length === 0) {
+    //   return res
+    //     .status(200)
+    //     .json({ message: "No work entry found for this month!" });
+    // }
 
     // Calculate the count of entries for the specific month and year
     const entryCount = filteredWorkEntries.length;
@@ -126,7 +126,7 @@ const getAllWorkEntry = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+      .json({ status: 500, message: "failed to get all work entries" + error.message });
   }
 };
 
@@ -154,7 +154,7 @@ const updateWorkEntry = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+      .json({ status: 500, message: "Failed to update work entry" + error.message });
   }
 };
 
@@ -171,7 +171,7 @@ const deleteWorkEntry = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+      .json({ status: 500, message: "Failed to delete work entry" + error.message });
   }
 };
 
@@ -190,7 +190,7 @@ const getWorkEntryById = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Internal Server Error" });
+      .json({ status: 500, message: "Failed to get work entry ById!" + error.message });
   }
 };
 

@@ -38,9 +38,8 @@ const addAndUpdateAutomationRuleForStaffs = async (req, res) => {
         const validateAutomationRule = attendenceAutomationRuleSchema.safeParse(req.body);
         if (!validateAutomationRule.success) {
             return res.status(400).json({
-                success: false,
                 error: "Invalid automation rule format or length provided of staffIds",
-            })
+            });
         }
 
         // Prepare the promises for updating or creating automation rules
@@ -70,12 +69,11 @@ const addAndUpdateAutomationRuleForStaffs = async (req, res) => {
 
         // Send a success response
         res.status(200).json({
-            success: true,
             message: "Attendance automation rules created or updated for staffIds successfully.",
             data: updatedAutomationRules,
         });
     } catch (error) {
-        console.error("Error in creating or updating automation rules for staffIds:", error);
+        console.error("Failed in creating or updating automation rules for staffIds:", error);
         res.status(500).json({
             success: false,
             error: "Failed to create or update automation rules for staffIds: " + error.message,

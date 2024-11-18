@@ -1,13 +1,19 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const { ZodError } = require("zod");
+const { DepartmentSchema } = require("../../utils/validations");
 const prisma = new PrismaClient();
 
 const addDepartment = async (req, res) => {
   try {
     const { departmentName } = req.body;
+    // Validate the taskTypeName using TaskTypeSchema
+    const validationResult = DepartmentSchema.safeParse({
+      departmentName,
+    });
     const addNewDepartment = await prisma.department.create({
       data: {
-        department_name: departmentName,
+        department_name: validationResult.data.departmentName,
       },
     });
     res.status(200).json({
@@ -19,7 +25,7 @@ const addDepartment = async (req, res) => {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: "Error Adding Department",
+      message: "Failed to adding department",
       error: error.message,
     });
   }
@@ -31,12 +37,16 @@ const updateDepartment = async (req, res) => {
   const { id } = req.params;
   try {
     const { departmentName } = req.body;
+    const validationResult = DepartmentSchema.safeParse({
+      departmentName,
+    });
+
     await prisma.department.update({
       where: {
         id,
       },
       data: {
-        department_name: departmentName,
+        department_name: validationResult.data.departmentName,
       },
     });
     return res.status(200).json({
@@ -47,7 +57,7 @@ const updateDepartment = async (req, res) => {
     console.log(error);
     return res.status(500).json({
       status: false,
-      message: "Something Went Wrong!",
+      message: "Failed to update department",
       error: error.code,
     });
   }
@@ -61,9 +71,9 @@ const fetchDepartment = async (req, res) => {
     if (department.length === 0) {
       return res
         .status(400)
-        .json({ status: 400, message: "Department not found!" });
+        .json({ message: "Department not found!" });
     }
-    return res.json({ status: 200, data: department });
+    return res.json({ status: 200, message: "Fetch Department Successfully!", data: department });
   } catch { }
 };
 
@@ -84,7 +94,7 @@ const deleteDepartment = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: "Something Went Wrong!",
+      message: "Failed to delete department",
       error: error.code,
     });
   }
@@ -113,7 +123,7 @@ const showDepartment = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       status: false,
-      message: "Something went wrong!",
+      message: "Failed to show department",
       error: error.message,
     });
   }
@@ -134,7 +144,7 @@ const searchDepartmentByName = async (req, res) => {
     return res.status(201).json(SearchDepartment);
   } catch (error) {
     console.error("Error adding department:", error);
-    return res.status(500).json({ status: false, message: "Internal Server Error!" });
+    return res.status(500).json({ status: false, message: "Failed to search department by name!" + error.message });
   }
 };
 

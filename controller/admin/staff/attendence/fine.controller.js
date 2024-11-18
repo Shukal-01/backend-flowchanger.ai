@@ -1,4 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
+const { ZodError } = require("zod");
+const { FineSchema } = require("../../../../utils/validations.js");
 const prisma = new PrismaClient();
 
 const addFineData = async (req, res) => {
@@ -14,12 +16,31 @@ const addFineData = async (req, res) => {
     shiftIds,
   } = req.body;
 
+  // Validate input data
+  const validationResult = FineSchema.safeParse({
+    staffId,
+    lateEntryFineAmount,
+    lateEntryAmount,
+    excessBreakFineAmount,
+    excessBreakAmount,
+    earlyOutFineAmount,
+    earlyOutAmount,
+    totalAmount,
+    shiftIds,
+  });
+
+  if (!validationResult.success) {
+    return res.status(400).json({ error: validationResult.error });
+  }
+
   try {
+    // Set 'today' and 'tomorrow' for date range
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    // Find or create punch record for today
     let existingPunchRecord = await prisma.punchRecords.findFirst({
       where: {
         staffId: staffId,
@@ -39,14 +60,17 @@ const addFineData = async (req, res) => {
       });
     }
 
+    // Find existing fine record for the punch record
     let existingFine = await prisma.fine.findFirst({
       where: {
         punchRecordId: existingPunchRecord.id,
       },
     });
 
+    let fine;
     if (existingFine) {
-      const fine = await prisma.fine.update({
+      // Update the existing fine record
+      fine = await prisma.fine.update({
         where: {
           id: existingFine.id,
         },
@@ -62,28 +86,28 @@ const addFineData = async (req, res) => {
           punchRecordId: existingPunchRecord.id,
         },
       });
-
-      res.status(200).json(fine);
     } else {
-      const fine = await prisma.fine.create({
+      // Create a new fine record
+      fine = await prisma.fine.create({
         data: {
-          staffId,
-          lateEntryFineAmount,
-          lateEntryAmount,
-          excessBreakFineAmount,
-          excessBreakAmount,
-          earlyOutFineAmount,
-          earlyOutAmount,
-          totalAmount,
-          shiftIds,
+          staffId: validationResult.data.staffId,
+          lateEntryFineAmount: validationResult.data.lateEntryFineAmount,
+          lateEntryAmount: validationResult.data.lateEntryAmount,
+          excessBreakFineAmount: validationResult.data.excessBreakFineAmount,
+          excessBreakAmount: validationResult.data.excessBreakAmount,
+          earlyOutFineAmount: validationResult.data.earlyOutFineAmount,
+          earlyOutAmount: validationResult.data.earlyOutAmount,
+          totalAmount: validationResult.data.totalAmount,
+          shiftIds: validationResult.data.shiftIds,
           punchRecordId: existingPunchRecord.id,
         },
       });
-      res.status(200).json(fine);
     }
+
+    res.status(200).json(fine);
   } catch (error) {
     console.error("Error adding or updating fine:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error: " + error.message });
   }
 };
 

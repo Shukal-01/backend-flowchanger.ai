@@ -83,7 +83,7 @@ const addOvertimeData = async (req, res) => {
         }
     } catch (error) {
         console.error("Error adding or updating overtime:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ message: "Failed to add or update overtime" + error.message });
     }
 };
 

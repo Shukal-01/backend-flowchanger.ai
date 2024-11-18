@@ -24,7 +24,7 @@ const projectStatus = async (req, res) => {
         return res.status(400).json({
             status: false,
             message: "Invalid request data",
-            error: validationResult.error.issues.map(issue => issue.message) // Map to get user-friendly messages
+            error: validationResult.error.issues.map(issue => issue.message)
         });
     }
 
@@ -45,15 +45,13 @@ const projectStatus = async (req, res) => {
         });
 
         return res.status(201).json({
-            status: true,
             message: "Project Status Added Successfully!",
             data: addProjectStatus
         });
     } catch (error) {
-        console.error("Error adding project status:", error); // Log the error for debugging
+        console.error("Failed to adding project status:", error.message); // Log the error for debugging
         return res.status(500).json({
-            status: false,
-            message: "Something went wrong!"
+            message: "Failed to adding project status!" + error.message
         });
     }
 };
@@ -63,10 +61,10 @@ const projectStatus = async (req, res) => {
 const getProjectStatus = async (req, res) => {
     try {
         const projectStatus = await prisma.projectStatus.findMany({});
-        return res.status(201).json({ status: true, message: "Project Status Get Successfully!", data: projectStatus });
+        return res.status(201).json({ message: "Project Status Get Successfully!", data: projectStatus });
     } catch (error) {
-        console.error("Error adding project status:", error); // Log the error for debugging
-        return res.status(500).json({ status: false, message: "Something went wrong!" });
+        console.error("Failed to adding project status:", error.message); // Log the error for debugging
+        return res.status(500).json({ message: "Failed to adding project status:" + error.message });
     }
 };
 
@@ -113,15 +111,13 @@ const updateProjectStatus = async (req, res) => {
         });
 
         return res.status(201).json({
-            status: true,
             message: "Project Status Updated Successfully!",
             data: updateProjectStatus
         });
     } catch (error) {
-        console.error("Error adding project status:", error); // Log the error for debugging
+        console.error("Failed to update project status:", error); // Log the error for debugging
         return res.status(500).json({
-            status: false,
-            message: "Something went wrong!"
+            message: "Failed to update project status" + error.message,
         });
     }
 };
@@ -137,10 +133,10 @@ const searchProjectStatusByName = async (req, res) => {
                 },
             },
         });
-        res.status(200).json(projects);
+        res.status(200).json({ message: "Successfully searching project status", projects });
     } catch (error) {
-        console.error('Error fetching projects:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('Failed to search project status:', error.message);
+        res.status(500).json({ message: 'Failed to search project status' + error.message });
     }
 };
 

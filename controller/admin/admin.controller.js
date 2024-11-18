@@ -118,7 +118,7 @@ const googleSignup = async (req, res) => {
       .json({ message: "OTP sent to your email for verification." });
   } catch (error) {
     console.error("Error in adminSignup:", error);
-    res.status(500).json({ message: "Internal server error." });
+    res.status(500).json({ message: "Failed to create user." + error.message });
   }
 };
 
@@ -220,7 +220,7 @@ const getAllAdmins = async (req, res) => {
     });
     res.status(200).json(admins);
   } catch (error) {
-    console.error("Error in getAllAdmins:", error);
+    console.error("Error getAllAdmins:", error);
     res.status(500).json({ message: "Failed to get admins." });
   }
 };
@@ -239,7 +239,7 @@ const adminLogin = async (req, res) => {
     res.status(200).json({ message: "Login successful!", token });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Internal server error." });
+    res.status(500).json({ message: "Failed to login." + error.message });
   }
 };
 
