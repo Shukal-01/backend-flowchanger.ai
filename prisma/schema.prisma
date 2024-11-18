@@ -113,7 +113,7 @@ model StaffDetails {
   LeaveBalance             LeaveBalance[]
   LeaveRequest             LeaveRequest[]
   FixedShift               FixedShift[]
-  FlexibleShift            FlexibleShift[]
+  FlexibleShift            FlexibleShift[]``
   OverLeavePolicy          OvertimePolicy[]
   EarlyLeavePolicy         EarlyLeavePolicy[]
   LateComingPolicy         LateComingPolicy[]
