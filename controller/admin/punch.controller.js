@@ -136,15 +136,13 @@ async function createPunchIn(req, res) {
 
     let shiftEndTime = new Date(currTime);
     shiftEndTime.setHours(end.hours, end.minutes, 0);
-
     console.log(
-      "start time",
-      shiftStartTime,
-      "currTime",
-      currTime,
-      "end time",
-      shiftEndTime,
-      currTime > shiftStartTime
+      "start time:",
+      shiftStartTime.toLocaleString(), // Logs in local time
+      "current time:",
+      currTime.toLocaleString(), // Logs in local time
+      "end time:",
+      shiftEndTime.toLocaleString()
     );
 
     if (currTime > shiftStartTime) {
