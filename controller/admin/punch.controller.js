@@ -7,6 +7,7 @@ const {
   PunchRecordsSchema,
 } = require("../../utils/validations");
 const { connect } = require("../../router/chat.router");
+const { parseTime } = require("../../utils/helper");
 
 async function createPunchIn(req, res) {
   try {
@@ -14,15 +15,90 @@ async function createPunchIn(req, res) {
 
     const photoUrl = req.imageUrl ?? "null";
 
-    console.log(photoUrl);
-
     const user = await prisma.user.findFirst({
       where: { id: req.userId, role: "STAFF" },
-      include: { staffDetails: true },
+      include: {
+        staffDetails: {
+          include: {
+            FixedShift: { include: { shifts: true } },
+            FlexibleShift: { include: { shifts: true } },
+            SalaryDetails: true,
+          },
+        },
+      },
     });
 
     if (!user) {
-      return res.status(404).send("user not found");
+      return res.status(404).send("User not found");
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tom = new Date(today);
+    tom.setDate(today.getDate() + 1);
+
+    const existingPunchRecord = await prisma.punchRecords.findFirst({
+      where: {
+        staffId: user.staffDetails.id,
+        punchDate: {
+          gte: today,
+          lt: tom,
+        },
+      },
+    });
+
+    if (existingPunchRecord && existingPunchRecord.punchInId) {
+      return res.status(400).send("Punch in already created");
+    }
+
+    if (
+      !user.staffDetails.FlexibleShift.length &&
+      !user.staffDetails.FixedShift.length
+    ) {
+      return res.status(404).send("No shift found");
+    }
+
+    const currentDay = today
+      .toLocaleString("en-US", { weekday: "short" })
+      .toUpperCase();
+
+    const shiftType = user.staffDetails.FixedShift.length
+      ? "FIXED"
+      : "FLEXIBLE";
+
+    let shift;
+    let start;
+    let end;
+
+    if (shiftType === "FIXED") {
+      shift = user.staffDetails.FixedShift.find(
+        (sh) => sh.day.toUpperCase() === currentDay
+      );
+
+      if (!shift[0]) {
+        return res.status(404).send("No shift found");
+      }
+
+      start = parseTime(shift.shifts[0].shiftStartTime);
+      end = parseTime(shift.shifts[shift.shifts.length - 1].shiftEndTime);
+    }
+
+    if (shiftType === "FLEXIBLE") {
+      shift = await prisma.flexibleShift.findFirst({
+        where: {
+          staffId: user.staffDetails.id,
+          dateTime: { gt: today, lte: tom },
+        },
+        include: { shifts: true },
+      });
+
+      if (shift === null || shift.weekOff === true) {
+        return res.status(400).json({ error: "Today is a week off." });
+      }
+      start = parseTime(shift.shifts[0].shiftStartTime);
+      end = parseTime(shift.shifts[shift.shifts.length - 1].shiftEndTime);
+
+      shift = shift.shifts[0];
     }
 
     PunchInSchema.parse({
@@ -36,102 +112,126 @@ async function createPunchIn(req, res) {
     let punchInData = { punchInMethod, location };
 
     if (punchInMethod === "PHOTOCLICK") {
-      punchInData = { ...punchInData, photoUrl };
+      punchInData.photoUrl = photoUrl;
     } else if (punchInMethod === "QRSCAN") {
-      punchInData = { ...punchInData, qrCodeValue };
+      punchInData.qrCodeValue = qrCodeValue;
     } else if (punchInMethod === "BIOMETRIC") {
-      punchInData = { ...punchInData, biometricData };
+      punchInData.biometricData = biometricData;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const salary =
+      user.staffDetails.SalaryDetails[
+        user.staffDetails.SalaryDetails.length - 1
+      ].ctc_amount;
 
-    const existingPunchIn = await prisma.punchIn.findFirst({
-      where: {
-        punchInDate: {
-          gte: today,
-          lt: new Date(today.getTime() + 86400000),
+    const currTime = new Date();
+    let shiftStartTime = new Date(currTime);
+    shiftStartTime.setHours(start.hours, start.minutes, 0);
+
+    let shiftEndTime = new Date(currTime);
+    shiftEndTime.setHours(end.hours, end.minutes, 0);
+
+    if (currTime > shiftStartTime) {
+      const lateMinutes = Math.max(
+        0,
+        Math.floor((currTime - shiftStartTime) / (1000 * 60))
+      );
+      console.log(
+        "start time",
+        shiftStartTime,
+        "currTime",
+        currTime,
+        "end time",
+        shiftEndTime,
+        "---",
+        shiftEndTime - shiftStartTime / (1000 * 60)
+      );
+      const totalWorkingMinutes = Math.floor(
+        (shiftEndTime - shiftStartTime) / (1000 * 60)
+      );
+
+      const daysInMonth = new Date(
+        currTime.getFullYear(),
+        currTime.getMonth() + 1,
+        0
+      ).getDate();
+
+      const dailySalary = salary / daysInMonth;
+      const salaryPerMinute = dailySalary / totalWorkingMinutes;
+      const fine = lateMinutes * salaryPerMinute;
+
+      const punchIn = await prisma.punchIn.create({
+        data: {
+          punchInMethod,
+          ...punchInData,
+          location,
         },
-      },
-    });
+      });
 
-    if (existingPunchIn) {
-      return res
-        .status(400)
-        .json({ error: "Punch-in record already exists for today." });
-    }
-
-    const standardStartTime = new Date();
-    standardStartTime.setHours(10, 0, 0, 0);
-
-    const currentPunchInTime = new Date();
-
-    const latenessMinutes = Math.max(
-      0,
-      Math.floor((currentPunchInTime - standardStartTime) / (1000 * 60))
-    );
-
-    const hoursLate = Math.floor(latenessMinutes / 60);
-    const minutesLate = latenessMinutes % 60;
-
-    let fine;
-    if (latenessMinutes > 0) {
-      fine = `${hoursLate > 0 ? hoursLate : ""} hours : ${minutesLate} minutes`;
-    } else {
-      fine = "On time";
-    }
-
-    punchInData = { ...punchInData, punchInTime: currentPunchInTime };
-
-    const punchIn = await prisma.punchIn.create({
-      data: {
-        punchInMethod: punchInMethod || "PHOTOCLICK",
-        ...punchInData,
-        location,
-        fine: fine,
-      },
-    });
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
-    const existingPunchRecord = await prisma.punchRecords.findFirst({
-      where: {
-        staffId: user.staffDetails.id,
-        punchDate: {
-          gte: today,
-          lt: tomorrow,
-        },
-      },
-    });
-
-    if (existingPunchRecord) {
-      const updatedPunchRecord = await prisma.punchRecords.update({
+      const punchRecord = await prisma.punchRecords.upsert({
         where: {
-          id: existingPunchRecord.id,
-        },
-        data: {
-          punchIn: {
-            connect: { id: punchIn.id },
+          staffId_punchDate: {
+            staffId: user.staffDetails.id,
+            punchDate: today,
           },
+        },
+        create: {
+          punchIn: { connect: { id: punchIn.id } },
+          staff: { connect: { id: user.staffDetails.id } },
           status: "PRESENT",
         },
+        update: {
+          punchIn: { connect: { id: punchIn.id } },
+          staff: { connect: { id: user.staffDetails.id } },
+          status: "PRESENT",
+        },
+      });
+
+      if (fine > 0) {
+        const fineRecord = await prisma.fine.create({
+          data: {
+            lateEntryAmount: parseFloat(fine.toFixed(2)),
+            punchRecord: { connect: { id: punchRecord.id } },
+            staff: { connect: { id: user.staffDetails.id } },
+          },
+        });
+      }
+
+      return res.status(201).json({
+        punchIn,
+        punchRecord,
+        fineRecord,
       });
     } else {
-      const punchRecords = await prisma.punchRecords.create({
+      const punchIn = await prisma.punchIn.create({
         data: {
-          punchIn: {
-            connect: { id: punchIn.id },
+          punchInMethod,
+          ...punchInData,
+          location,
+        },
+      });
+
+      const punchRecord = await prisma.punchRecords.upsert({
+        where: {
+          staffId_punchDate: {
+            staffId: user.staffDetails.id,
+            punchDate: today,
           },
-          staff: {
-            connect: { id: user.staffDetails.id },
-          },
+        },
+        create: {
+          punchIn: { connect: { id: punchIn.id } },
+          staff: { connect: { id: user.staffDetails.id } },
+          status: "PRESENT",
+        },
+        update: {
+          punchIn: { connect: { id: punchIn.id } },
+          staff: { connect: { id: user.staffDetails.id } },
           status: "PRESENT",
         },
       });
-    }
 
-    return res.status(201).json(punchIn);
+      return res.status(201).json(punchIn, punchRecord);
+    }
   } catch (error) {
     console.log(error);
     if (error instanceof ZodError) {
@@ -161,15 +261,94 @@ async function getAllPunchIn(req, res) {
 async function createPunchOut(req, res) {
   try {
     const { punchOutMethod, biometricData, qrCodeValue, location } = req.body;
+
+    const photoUrl = req.imageUrl ?? "null";
+
     const user = await prisma.user.findFirst({
       where: { id: req.userId, role: "STAFF" },
-      include: { staffDetails: true },
+      include: {
+        staffDetails: {
+          include: {
+            FixedShift: { include: { shifts: true } },
+            FlexibleShift: { include: { shifts: true } },
+            SalaryDetails: true,
+          },
+        },
+      },
     });
 
     if (!user) {
       return res.status(404).send("User not found");
     }
-    const photoUrl = req.imageUrl ? req.imageUrl : "null";
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tom = new Date(today);
+    tom.setDate(today.getDate() + 1);
+
+    const existingPunchRecord = await prisma.punchRecords.findFirst({
+      where: {
+        staffId: user.staffDetails.id,
+        punchDate: {
+          gte: today,
+          lt: tom,
+        },
+      },
+    });
+
+    if (!existingPunchRecord || !existingPunchRecord.punchInId) {
+      return res.status(400).send("No punch-in found for today");
+    }
+
+    if (existingPunchRecord.punchOutId) {
+      return res.status(400).send("Punch-out already exists");
+    }
+    if (
+      !user.staffDetails.FlexibleShift.length &&
+      !user.staffDetails.FixedShift.length
+    ) {
+      return res.status(404).send("No shift found");
+    }
+
+    const currentDay = today
+      .toLocaleString("en-US", { weekday: "short" })
+      .toUpperCase();
+
+    const shiftType = user.staffDetails.FixedShift.length
+      ? "FIXED"
+      : "FLEXIBLE";
+
+    let shift;
+    let start;
+    let end;
+
+    if (shiftType === "FIXED") {
+      shift = user.staffDetails.FixedShift.find(
+        (sh) => sh.day.toUpperCase() === currentDay
+      ).shifts[0];
+
+      if (!shift) {
+        return res.status(404).send("No shift found");
+      }
+    }
+
+    if (shiftType === "FLEXIBLE") {
+      shift = await prisma.flexibleShift.findFirst({
+        where: {
+          staffId: user.staffDetails.id,
+          dateTime: { gt: today, lte: tom },
+        },
+        include: { shifts: true },
+      });
+
+      if (shift === null || shift.weekOff === true) {
+        return res.status(400).json({ error: "Today is a week off." });
+      }
+      start = parseTime(shift.shifts[0].shiftStartTime);
+      end = parseTime(shift.shifts[shift.shifts.length - 1].shiftEndTime);
+
+      shift = shift.shifts[0];
+    }
 
     PunchOutSchema.parse({
       punchOutMethod,
@@ -182,102 +361,117 @@ async function createPunchOut(req, res) {
     let punchOutData = { punchOutMethod, location };
 
     if (punchOutMethod === "PHOTOCLICK") {
-      punchOutData = { ...punchOutData, photoUrl };
+      punchOutData.photoUrl = photoUrl;
     } else if (punchOutMethod === "QRSCAN") {
-      punchOutData = { ...punchOutData, qrCodeValue };
+      punchOutData.qrCodeValue = qrCodeValue;
     } else if (punchOutMethod === "BIOMETRIC") {
-      punchOutData = { ...punchOutData, biometricData };
+      punchOutData.biometricData = biometricData;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    const salary =
+      user.staffDetails.SalaryDetails[
+        user.staffDetails.SalaryDetails.length - 1
+      ].ctc_amount;
 
-    const punchRecord = await prisma.punchRecords.findFirst({
-      where: {
-        staffId: user.staffDetails.id,
-        punchDate: {
-          gte: today,
-          lt: tomorrow,
-        },
-      },
-    });
+    const currTime = new Date();
+    let shiftStartTime = new Date(currTime);
+    shiftStartTime.setHours(start.hours, start.minutes, 0);
+    let shiftEndTime = new Date(currTime);
+    shiftEndTime.setHours(end.hours, end.minutes, 0);
 
-    if (!punchRecord || !punchRecord.punchInId) {
-      return res
-        .status(400)
-        .json({ error: "No punch-in record found for today." });
-    }
-
-    if (punchRecord.punchOutId) {
-      return res
-        .status(400)
-        .json({ error: "Punch-out record already exists for today." });
-    }
-
-    const standardStartTime = new Date();
-    standardStartTime.setHours(10, 0, 0, 0);
-
-    const standardEndTime = new Date();
-    standardEndTime.setHours(18, 30, 0, 0);
-
-    const currentPunchOutTime = new Date();
-    const punchInTime = new Date(punchRecord.punchInId.punchInTime);
-
-    let overtimeBefore = 0;
-    if (punchInTime < standardStartTime) {
-      overtimeBefore = Math.floor(
-        (standardStartTime - punchInTime) / (1000 * 60)
+    if (currTime < shiftEndTime) {
+      const earlyMinutes = Math.max(
+        0,
+        Math.floor((shiftEndTime - currTime) / (1000 * 60))
       );
-    }
-
-    let overtimeAfter = 0;
-    if (currentPunchOutTime > standardEndTime) {
-      overtimeAfter = Math.floor(
-        (currentPunchOutTime - standardEndTime) / (1000 * 60)
+      console.log(
+        "scheduled end time",
+        shiftEndTime,
+        "currTime",
+        currTime,
+        "---",
+        shiftEndTime - currTime / (1000 * 60)
       );
-    }
 
-    const totalOvertimeMinutes = overtimeBefore + overtimeAfter;
+      const totalWorkingMinutes = Math.floor(
+        (shiftEndTime - shiftStartTime) / (1000 * 60)
+      );
 
-    const hoursOvertime = Math.floor(totalOvertimeMinutes / 60);
-    const minutesOvertime = totalOvertimeMinutes % 60;
-    const overtime =
-      totalOvertimeMinutes > 0
-        ? `${hoursOvertime} : ${minutesOvertime}`
-        : "No overtime";
+      const daysInMonth = new Date(
+        currTime.getFullYear(),
+        currTime.getMonth() + 1,
+        0
+      ).getDate();
 
-    punchOutData = {
-      ...punchOutData,
-      punchOutTime: currentPunchOutTime,
-      overtime,
-    };
+      const dailySalary = salary / daysInMonth;
+      const salaryPerMinute = dailySalary / totalWorkingMinutes;
+      const fine = earlyMinutes * salaryPerMinute;
 
-    const punchOut = await prisma.punchOut.create({
-      data: {
-        punchOutMethod: punchOutMethod || "PHOTOCLICK",
-        ...punchOutData,
-        location,
-        overtime,
-        photoUrl,
-      },
-    });
-
-    const updatedPunchRecord = await prisma.punchRecords.update({
-      where: {
-        id: punchRecord.id,
-      },
-      data: {
-        punchOut: {
-          connect: { id: punchOut.id },
+      const punchOut = await prisma.punchOut.create({
+        data: {
+          punchOutMethod,
+          ...punchOutData,
+          location,
         },
-      },
-    });
+      });
 
-    return res.status(201).json({ updatedPunchRecord, punchOut });
+      const punchRecord = await prisma.punchRecords.update({
+        where: { id: existingPunchRecord.id },
+        data: {
+          punchOut: { connect: { id: punchOut.id } },
+        },
+      });
+
+      if (fine > 0) {
+        const fineRecord = await prisma.fine.findFirst({
+          where: {
+            punchRecordId: existingPunchRecord.id,
+          },
+        });
+        if (!fineRecord) {
+          await prisma.fine.create({
+            data: {
+              earlyOutFineAmount: parseFloat(fine.toFixed(2)),
+              punchRecord: { connect: { id: punchRecord.id } },
+              staff: { connect: { id: user.id } },
+            },
+          });
+        } else {
+          await prisma.fine.update({
+            where: { id: fineRecord.id },
+            data: {
+              earlyOutFineAmount: parseFloat(fine.toFixed(2)),
+            },
+          });
+        }
+      }
+
+      return res.status(201).json({
+        punchOut,
+        punchRecord,
+        fineRecord,
+      });
+    } else {
+      const punchOut = await prisma.punchOut.create({
+        data: {
+          punchOutMethod,
+          ...punchOutData,
+          location,
+        },
+      });
+
+      const punchRecord = await prisma.punchRecords.update({
+        where: { id: existingPunchRecord.id },
+        data: {
+          punchOut: { connect: { id: punchOut.id } },
+          status: "PRESENT",
+        },
+      });
+
+      return res.status(201).json(punchOut, punchRecord);
+    }
   } catch (error) {
-    console.error(error);
+    console.log(error);
     if (error instanceof ZodError) {
       return res.status(400).json({ errors: error.errors });
     }

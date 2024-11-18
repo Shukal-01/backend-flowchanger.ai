@@ -25,6 +25,6 @@ attendanceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
 attendanceRouter.patch("/status/:id", updatePunchRecordStatus);
 // attendance records
 
-attendanceRouter.get("/summary", attendanceRecords);
+attendanceRouter.get("/summary/:date", attendanceRecords);
 
 module.exports = attendanceRouter;

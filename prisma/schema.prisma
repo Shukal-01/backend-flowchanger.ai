@@ -515,11 +515,9 @@ model Shifts {
   allowPunchInMinutes  Int?
   allowPunchOutMinutes Int?
   allowPunchOutHours   Int?
-  // fixedShifts          FixedShift[]    @relation("ShiftFixedShift")
   flexibleShift        FlexibleShift[] @relation("ShiftFlexibleShift")
   Fine                 Fine[]
   Overtime             Overtime[]
-  // Define many-to-many relationship with FixedShift
   fixedShifts          FixedShift[]    @relation("FixedShiftShifts")
 }
 
@@ -566,7 +564,7 @@ model FixedShift {
 
 model FlexibleShift {
   id        String        @id @default(dbgenerated("gen_random_uuid()"))
-  dateTime  String
+  dateTime  DateTime
   weekOff   Boolean       @default(false)
   staff     StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String?
@@ -586,6 +584,8 @@ model PunchRecords {
   status     punchRecordStatus @default(ABSENT)
   fine       Fine?
   Overtime   Overtime?
+
+  @@unique([staffId, punchDate])
 }
 
 enum punchRecordStatus {
@@ -605,11 +605,12 @@ model Fine {
   earlyOutAmount        Float?        @default(0)
   totalAmount           Float?        @default(0)
   shiftIds              String?
-  punchRecordId         String?       @unique
+  punchRecordId         String        @unique
   shiftDetails          Shifts?       @relation(fields: [shiftIds], references: [id], onDelete: Cascade)
-  punchRecord           PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  punchRecord           PunchRecords  @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
   staffId               String?
   staff                 StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  createdAt             DateTime      @default(now())
 }
 
 model Overtime {
@@ -642,7 +643,6 @@ model PunchIn {
   qrCodeValue   String?
   photoUrl      String?
   location      String
-  fine          String?
   PunchRecords  PunchRecords?
   approve       String?       @default("Pending")
 }

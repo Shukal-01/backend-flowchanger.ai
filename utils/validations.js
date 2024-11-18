@@ -403,7 +403,6 @@ const weekOffShiftSchema = z.object({
   weekFive: z.boolean().optional().default(false),
 });
 
-
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
   weekOff: z.boolean().default(false), // Set default value to false
@@ -414,9 +413,14 @@ const FlexibleShiftSchema = z.object({
 const FixedShiftSchema = z.object({
   day: z
     .string()
-    .refine((value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value), {
-      message: "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
-    }),
+    .refine(
+      (value) =>
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value),
+      {
+        message:
+          "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+      }
+    ),
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().uuid(1, { message: "Staff ID is required." }),
   shifts: z.array(z.string()).default([]).optional(),
@@ -481,7 +485,6 @@ const PunchRecordsSchema = z.object({
   punchOutId: z.string().min(1, { message: "PunchOutId is required." }),
   staffId: z.string().min(1, { message: "StaffId is required." }),
 });
-
 
 const StartBreakSchema = z.object({
   breakMethod: z
@@ -589,8 +592,14 @@ const projectSchema = z.object({
   customerId: z.string().min(1, "client is required"),
   billing_type: z.string().min(1, "billing type is required"),
   status: z.string().min(1, "status isrequired"),
-  total_rate: z.number().positive("Total rate must be a positive number").min(1, "total rate is required"),
-  estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "estimated hours is required"),
+  total_rate: z
+    .number()
+    .positive("Total rate must be a positive number")
+    .min(1, "total rate is required"),
+  estimated_hours: z
+    .number()
+    .positive("Estimated hours must be a positive number")
+    .min(1, "estimated hours is required"),
   start_date: z.string().min(1, "start date is required"),
   deadline: z.string().min(1, " deadline is required"),
   tags: z.array(z.string().min(1, " tag is required")),

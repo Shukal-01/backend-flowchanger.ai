@@ -1,8 +1,12 @@
 const { Router } = require("express");
-const { addFineData } = require("../../controller/admin/staff/attendence/fine.controller.js");
+const {
+  addFineData,
+  getFinesByDate,
+} = require("../../controller/admin/staff/attendence/fine.controller.js");
 
-const staffAttendanceRouter = Router();
+const FineRouter = Router();
 
-staffAttendanceRouter.post("/create", addFineData);
+FineRouter.post("/create", addFineData);
+FineRouter.get("/", getFinesByDate);
 
-module.exports = staffAttendanceRouter;
+module.exports = FineRouter;
