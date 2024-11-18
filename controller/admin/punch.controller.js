@@ -263,7 +263,7 @@ async function getAllPunchIn(req, res) {
   try {
     const records = await prisma.punchIn.findMany({
       include: {
-        punchRecords: true,
+        PunchRecords: true,
       },
     });
     return res.status(200).json(records);
