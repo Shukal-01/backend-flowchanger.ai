@@ -574,6 +574,7 @@ model FlexibleShift {
 model PunchRecords {
   id         String            @id @default(dbgenerated("gen_random_uuid()"))
   punchDate  DateTime          @default(now())
+  isApproved Boolean           @default(false)
   punchInId  String?           @unique
   punchIn    PunchIn?          @relation(fields: [punchInId], references: [id], onDelete: Cascade)
   punchOutId String?           @unique
@@ -583,7 +584,6 @@ model PunchRecords {
   status     punchRecordStatus @default(ABSENT)
   fine       Fine?
   Overtime   Overtime?
-  entryDate  String?
 
   @@unique([staffId, punchDate])
 }
@@ -605,11 +605,12 @@ model Fine {
   earlyOutAmount        Float?        @default(0)
   totalAmount           Float?        @default(0)
   shiftIds              String?
-  punchRecordId         String?       @unique
+  punchRecordId         String        @unique
   shiftDetails          Shifts?       @relation(fields: [shiftIds], references: [id], onDelete: Cascade)
-  punchRecord           PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  punchRecord           PunchRecords  @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
   staffId               String?
   staff                 StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  createdAt             DateTime      @default(now())
 }
 
 model Overtime {
@@ -642,7 +643,6 @@ model PunchIn {
   qrCodeValue   String?
   photoUrl      String?
   location      String
-  fine          String?
   PunchRecords  PunchRecords?
   approve       String?       @default("Pending")
 }

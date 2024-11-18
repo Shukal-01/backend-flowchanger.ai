@@ -153,10 +153,10 @@ const updateAdmin = async (req, res) => {
         mobile,
         company_name,
         package_id,
-        time_format, // Added new fields
-        time_zone, // Added new fields
-        date_format, // Added new fields
-        week_format, // Added new fields
+        time_format,
+        time_zone,
+        date_format,
+        week_format,
       } = req.body;
 
       const user = await prisma.user.findUnique({
@@ -186,7 +186,6 @@ const updateAdmin = async (req, res) => {
                 time_zone: time_zone,
                 date_format: date_format,
                 week_format: week_format,
-                userId: user.id,
               },
               update: {
                 company_name: company_name,

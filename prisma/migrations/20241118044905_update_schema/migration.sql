@@ -946,6 +946,9 @@ CREATE UNIQUE INDEX "PunchRecords_punchInId_key" ON "PunchRecords"("punchInId");
 CREATE UNIQUE INDEX "PunchRecords_punchOutId_key" ON "PunchRecords"("punchOutId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "PunchRecords_staffId_punchDate_key" ON "PunchRecords"("staffId", "punchDate");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Fine_punchRecordId_key" ON "Fine"("punchRecordId");
 
 -- CreateIndex

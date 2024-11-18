@@ -278,13 +278,9 @@ const bankDetailsSchema = z.object({
   bank_name: z.string().min(1, "Bank name is required"),
   account_number: z
     .string()
-    .regex(/^[0-9]+$/, "Account number must be numeric")
-  ,
+    .regex(/^[0-9]+$/, "Account number must be numeric"),
   branch_name: z.string().min(1, "Branch name is required"),
-  ifsc_code: z
-    .string()
-    .regex(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC code")
-  ,
+  ifsc_code: z.string().regex(/^[A-Za-z]{4}\d{7}$/, "Invalid IFSC code"),
 });
 
 const bulkLeavePolicySchema = z.object({
@@ -408,7 +404,7 @@ const MultipleFlexibleShiftSchema = z.object({
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.array(z.string()).min(1, { message: "Staff ID is required." }),
   shifts: z.array(z.string()).optional(),
-})
+});
 
 const FlexibleShiftSchema = z.object({
   dateTime: z.string().min(1, { message: "Day is required." }),
@@ -420,9 +416,14 @@ const FlexibleShiftSchema = z.object({
 const MultipleFixedShiftSchema = z.object({
   day: z
     .string()
-    .refine((value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value), {
-      message: "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
-    }),
+    .refine(
+      (value) =>
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value),
+      {
+        message:
+          "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+      }
+    ),
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.array(z.string()).min(1, { message: "Staff ID is required." }),
   shifts: z.array(z.string()).optional(),
@@ -432,9 +433,14 @@ const MultipleFixedShiftSchema = z.object({
 const FixedShiftSchema = z.object({
   day: z
     .string()
-    .refine((value) => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value), {
-      message: "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
-    }),
+    .refine(
+      (value) =>
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].includes(value),
+      {
+        message:
+          "Day Type must be either 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'.",
+      }
+    ),
   weekOff: z.boolean().default(false), // Set default value to false
   staffId: z.string().uuid(1, { message: "Staff ID is required." }),
   shifts: z.array(z.string()).optional(),
@@ -499,7 +505,6 @@ const PunchRecordsSchema = z.object({
   punchOutId: z.string().min(1, { message: "PunchOutId is required." }),
   staffId: z.string().min(1, { message: "StaffId is required." }),
 });
-
 
 const StartBreakSchema = z.object({
   breakMethod: z
@@ -607,8 +612,14 @@ const projectSchema = z.object({
   customerId: z.string().min(1, "client is required"),
   billing_type: z.string().min(1, "billing type is required"),
   status: z.string().min(1, "status isrequired"),
-  total_rate: z.number().positive("Total rate must be a positive number").min(1, "total rate is required"),
-  estimated_hours: z.number().positive("Estimated hours must be a positive number").min(1, "estimated hours is required"),
+  total_rate: z
+    .number()
+    .positive("Total rate must be a positive number")
+    .min(1, "total rate is required"),
+  estimated_hours: z
+    .number()
+    .positive("Estimated hours must be a positive number")
+    .min(1, "estimated hours is required"),
   start_date: z.string().min(1, "start date is required"),
   deadline: z.string().min(1, " deadline is required"),
   tags: z.array(z.string().min(1, " tag is required")),
@@ -672,19 +683,29 @@ const DepartmentSchema = z.object({
   departmentName: z.string().min(1, "Department Name is required"),
 });
 
-const FineSchema = z.object({
-  staffId: z.string().uuid("Invalid staff ID"), // UUID format check
-  lateEntryFineAmount: z.string().min(1, "Late Entry Fine Amount is required"),
-  lateEntryAmount: z.number().min(0, "Late Entry Amount must be a positive number"),
-  excessBreakFineAmount: z.string().optional(),
-  excessBreakAmount: z.number().min(0, "Excess Break Amount must be a positive number").optional(),
-  earlyOutFineAmount: z.string().optional(),
-  earlyOutAmount: z.number().min(0, "Early Out Amount must be a positive number").optional(),
-  totalAmount: z.number().min(0, "Total Amount must be a positive number"),
-  shiftIds: z.array(z.string()).optional(), // Array of strings for shift IDs
-}).strict(); // Ensures no extra fields are allowed
-
-
+const FineSchema = z
+  .object({
+    staffId: z.string().uuid("Invalid staff ID"), // UUID format check
+    lateEntryFineAmount: z
+      .string()
+      .min(1, "Late Entry Fine Amount is required"),
+    lateEntryAmount: z
+      .number()
+      .min(0, "Late Entry Amount must be a positive number"),
+    excessBreakFineAmount: z.string().optional(),
+    excessBreakAmount: z
+      .number()
+      .min(0, "Excess Break Amount must be a positive number")
+      .optional(),
+    earlyOutFineAmount: z.string().optional(),
+    earlyOutAmount: z
+      .number()
+      .min(0, "Early Out Amount must be a positive number")
+      .optional(),
+    totalAmount: z.number().min(0, "Total Amount must be a positive number"),
+    shiftIds: z.array(z.string()).optional(), // Array of strings for shift IDs
+  })
+  .strict(); // Ensures no extra fields are allowed
 
 module.exports = {
   clientSchema,
@@ -731,5 +752,5 @@ module.exports = {
   DepartmentSchema,
   FineSchema,
   MultipleFixedShiftSchema,
-  MultipleFlexibleShiftSchema
+  MultipleFlexibleShiftSchema,
 };
