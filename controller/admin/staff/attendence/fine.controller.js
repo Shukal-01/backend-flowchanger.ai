@@ -156,4 +156,41 @@ const getFinesByDate = async (req, res) => {
   }
 };
 
-module.exports = { addFineData, getFinesByDate };
+const updateFine = async (req, res) => {
+  const { id } = req.params;
+  const {
+    lateEntryFineAmount,
+    lateEntryAmount,
+    excessBreakFineAmount,
+    excessBreakAmount,
+    earlyOutFineAmount,
+    earlyOutAmount,
+    totalAmount,
+    shiftIds,
+  } = req.body;
+
+  try {
+    const fine = await prisma.fine.update({
+      where: {
+        id: id,
+      },
+      data: {
+        lateEntryFineAmount,
+        lateEntryAmount,
+        excessBreakFineAmount,
+        excessBreakAmount,
+        earlyOutFineAmount,
+        earlyOutAmount,
+        totalAmount,
+        shiftIds,
+      },
+    });
+
+    res.status(200).json(fine);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update fine" });
+  }
+};
+
+module.exports = { addFineData, getFinesByDate, updateFine };
