@@ -234,7 +234,7 @@ async function createPunchIn(req, res) {
         },
       });
 
-      return res.status(201).json(punchIn, punchRecord);
+      return res.status(201).json({ punchIn, punchRecord });
     }
   } catch (error) {
     console.log(error);
