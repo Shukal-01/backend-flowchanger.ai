@@ -10,7 +10,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
 
   try {
     const whereDataArray = {
-      User: {
+      user: {
         role: "CLIENT",
       },
     };
