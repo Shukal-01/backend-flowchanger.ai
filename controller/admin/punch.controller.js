@@ -5,6 +5,7 @@ const { ZodError } = require("zod");
 const {
   PunchOutSchema,
   PunchRecordsSchema,
+  salaryDetailsSchema,
 } = require("../../utils/validations");
 const { connect } = require("../../router/chat.router");
 const { parseTime } = require("../../utils/helper");
@@ -55,6 +56,7 @@ async function createPunchIn(req, res) {
       !user.staffDetails.FlexibleShift.length &&
       !user.staffDetails.FixedShift.length
     ) {
+      console.log("No shift found");
       return res.status(404).send("No shift found");
     }
 
@@ -74,8 +76,9 @@ async function createPunchIn(req, res) {
       shift = user.staffDetails.FixedShift.find(
         (sh) => sh.day.toUpperCase() === currentDay
       );
+      console.log(shift);
 
-      if (!shift[0]) {
+      if (shift.length == 0) {
         return res.status(404).send("No shift found");
       }
 
@@ -122,7 +125,9 @@ async function createPunchIn(req, res) {
     const salary =
       user.staffDetails.SalaryDetails[
         user.staffDetails.SalaryDetails.length - 1
-      ].ctc_amount;
+      ]?.ctc_amount ?? 10000;
+
+    console.log(salary);
 
     const currTime = new Date();
     let shiftStartTime = new Date(currTime);
@@ -200,7 +205,6 @@ async function createPunchIn(req, res) {
       return res.status(201).json({
         punchIn,
         punchRecord,
-        fineRecord,
       });
     } else {
       const punchIn = await prisma.punchIn.create({
@@ -238,7 +242,9 @@ async function createPunchIn(req, res) {
       return res.status(400).json({ errors: error.errors });
     }
 
-    return res.status(500).json({ error: "Failed to create punch-in" + error.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to create punch-in" + error.message });
   }
 }
 
@@ -325,9 +331,9 @@ async function createPunchOut(req, res) {
     if (shiftType === "FIXED") {
       shift = user.staffDetails.FixedShift.find(
         (sh) => sh.day.toUpperCase() === currentDay
-      ).shifts[0];
+      )?.shifts[0];
 
-      if (!shift) {
+      if (shift.length === 0) {
         return res.status(404).send("No shift found");
       }
     }
@@ -371,7 +377,7 @@ async function createPunchOut(req, res) {
     const salary =
       user.staffDetails.SalaryDetails[
         user.staffDetails.SalaryDetails.length - 1
-      ].ctc_amount;
+      ]?.ctc_amount ?? 10000;
 
     const currTime = new Date();
     let shiftStartTime = new Date(currTime);
@@ -476,7 +482,9 @@ async function createPunchOut(req, res) {
       return res.status(400).json({ errors: error.errors });
     }
 
-    return res.status(500).json({ error: "Failed to create punch-out" + error.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to create punch-out" + error.message });
   }
 }
 
