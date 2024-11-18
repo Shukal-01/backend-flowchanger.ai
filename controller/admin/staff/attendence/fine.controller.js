@@ -52,10 +52,10 @@ const addFineData = async (req, res) => {
             return res.status(200).json(fine);
         }
 
-        // Check if a fine record exists for the given punchRecordId
+        // Find existing fine record for the punch record
         const existingFine = await prisma.fine.findFirst({
             where: {
-                punchRecordId: existingPunchRecord.id,
+                punchRecordId: existingPunchRecord.id,,
             },
         });
 
@@ -139,4 +139,4 @@ const updateMultipleFineData = async (req, res) => {
         res.status(500).json({ message: " please enter a valid fine id" });
     }
 };
-module.exports = { addFineData, updateMultipleFineData };
+module.exports = { addFineData, updateMultipleFineData, getFinesByDate, updateFine };

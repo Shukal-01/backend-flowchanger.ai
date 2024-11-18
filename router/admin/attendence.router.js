@@ -14,8 +14,6 @@ const {
   getSingleStaffAttendance,
 } = require("../../controller/admin/staff/attendence/attendance.controller.js");
 
-
-
 const attendanceRouter = Router();
 
 attendanceRouter.get("/automation", fetchAllStaftAutomationAttendence);
@@ -26,12 +24,9 @@ attendanceRouter.put("/mode", addAndUpdateAttendenceModeForStaffs);
 // attendance overview routes here :-
 
 attendanceRouter.patch("/status/:id", updatePunchRecordStatus);
-// attendance records
 
 attendanceRouter.get("/summary", allStaffAttendanceByDate);
 
-// single staff attendance records
-attendanceRouter.get('/single/:id', getSingleStaffAttendance);
-
+attendanceRouter.get("/single/:id", getSingleStaffAttendance);
 
 module.exports = attendanceRouter;

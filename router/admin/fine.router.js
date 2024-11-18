@@ -1,9 +1,15 @@
 const { Router } = require("express");
-const { addFineData, updateMultipleFineData } = require("../../controller/admin/staff/attendence/fine.controller.js");
+const {
+    addFineData, updateMultipleFineData,
+    getFinesByDate,
+    updateFine,
+} = require("../../controller/admin/staff/attendence/fine.controller.js");
 
-const staffAttendanceRouter = Router();
+const FineRouter = Router();
 
-staffAttendanceRouter.post("/create", addFineData);
+FineRouter.post("/create", addFineData);
 staffAttendanceRouter.put("/", updateMultipleFineData)
+FineRouter.get("/", getFinesByDate);
+FineRouter.put("/:id", updateFine);
 
-module.exports = staffAttendanceRouter;
+module.exports = FineRouter;
