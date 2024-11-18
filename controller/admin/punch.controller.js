@@ -76,14 +76,16 @@ async function createPunchIn(req, res) {
       shift = user.staffDetails.FixedShift.find(
         (sh) => sh.day.toUpperCase() === currentDay
       );
-      console.log(shift);
+      console.log("shift", shift);
+      console.log("shifts", shift.shifts);
 
-      if (shift.length == 0) {
+      if (!shift || shift.shifts.length == 0) {
         return res.status(404).send("No shift found");
       }
 
       start = parseTime(shift.shifts[0].shiftStartTime);
       end = parseTime(shift.shifts[shift.shifts.length - 1].shiftEndTime);
+      console.log(start, end);
     }
 
     if (shiftType === "FLEXIBLE") {
@@ -127,14 +129,21 @@ async function createPunchIn(req, res) {
         user.staffDetails.SalaryDetails.length - 1
       ]?.ctc_amount ?? 10000;
 
-    console.log(salary);
-
+    console.log("start-end", start, end);
     const currTime = new Date();
     let shiftStartTime = new Date(currTime);
     shiftStartTime.setHours(start.hours, start.minutes, 0);
 
     let shiftEndTime = new Date(currTime);
     shiftEndTime.setHours(end.hours, end.minutes, 0);
+    console.log(
+      "start time:",
+      shiftStartTime.toLocaleString(), // Logs in local time
+      "current time:",
+      currTime.toLocaleString(), // Logs in local time
+      "end time:",
+      shiftEndTime.toLocaleString()
+    );
 
     if (currTime > shiftStartTime) {
       const lateMinutes = Math.max(
@@ -191,7 +200,7 @@ async function createPunchIn(req, res) {
           status: "PRESENT",
         },
       });
-
+      console.log(fine);
       if (fine > 0) {
         const fineRecord = await prisma.fine.create({
           data: {
@@ -427,6 +436,8 @@ async function createPunchOut(req, res) {
           punchOut: { connect: { id: punchOut.id } },
         },
       });
+
+      console.log(fine);
 
       if (fine > 0) {
         const fineRecord = await prisma.fine.findFirst({

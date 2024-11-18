@@ -14,7 +14,6 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
         role: "CLIENT",
       },
     };
-
     if (company) {
       whereDataArray.company = {
         contains: company,
@@ -42,6 +41,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
     return res.status(500).json({
       status: false,
       message: "Failed Searching client!",
+      error: error.message,
     });
   }
 };
