@@ -8,7 +8,7 @@ const {
 const FineRouter = Router();
 
 FineRouter.post("/create", addFineData);
-staffAttendanceRouter.put("/", updateMultipleFineData)
+FineRouter.put("/", updateMultipleFineData)
 FineRouter.get("/", getFinesByDate);
 FineRouter.put("/:id", updateFine);
 
