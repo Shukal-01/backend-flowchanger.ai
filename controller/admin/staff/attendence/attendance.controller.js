@@ -65,9 +65,9 @@ const allStaffAttendanceByDate = async (req, res) => {
                         },
                     },
                     include: {
-                        punchIn: true,   // Include punchIn details
-                        punchOut: true,  // Include punchOut details
-                    },
+                        punchIn: true,
+                        punchOut: true,
+                    }
                 });
 
                 // If no record exists, create one
@@ -80,19 +80,11 @@ const allStaffAttendanceByDate = async (req, res) => {
                                 },
                             },
                             punchDate: startOfDay,
+                            // entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
                             status: 'ABSENT',
                         },
                     });
-                } else {
-                    // Ensure punchIn and punchOut match punchRecord's punchId
-                    if (punchRecord.punchIn && punchRecord.punchIn.punchId !== punchRecord.id) {
-                        punchRecord.punchIn = null; // If mismatch, set punchIn to null
-                    }
-                    if (punchRecord.punchOut && punchRecord.punchOut.punchId !== punchRecord.id) {
-                        punchRecord.punchOut = null; // If mismatch, set punchOut to null
-                    }
                 }
-
                 records.push({
                     staffId: id,
                     punchRecord,
@@ -111,35 +103,6 @@ const allStaffAttendanceByDate = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch staff punch records." });
     }
 };
-const updatePunchRecordStatus = async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const validStatuses = ["ABSENT", "PRESENT", "HALFDAY", "PAIDLEAVE"];
-
-    if (!validStatuses.includes(status)) {
-        return res.status(400).json({
-            error:
-                "Invalid status. Valid statuses are ABSENT, PRESENT, HALFDAY, PAIDLEAVE.",
-        });
-    }
-
-    try {
-        const updatedPunchRecord = await prisma.punchRecords.update({
-            where: { id },
-            data: { status: status, isApproved: true },
-        });
-
-        res.status(200).json({
-            message: "Punch record status updated successfully",
-            updatedPunchRecord,
-        });
-    } catch (error) {
-        console.error("Error updating punch record:", error);
-        res.status(500).json({ error: "Failed to update punch record status" });
-    }
-};
-
 // single staff Attendance get
 
 const getSingleStaffAttendance = async (req, res) => {
@@ -185,7 +148,7 @@ const getSingleStaffAttendance = async (req, res) => {
             const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0)); // Start of requested date
             const endOfDay = new Date(startOfDay.getTime() + 86400000); // End of requested date
 
-            // Find punch record for the requested date
+            // Find punch record for the requested date along with punchIn and punchOut details
             let punchRecord = await prisma.punchRecords.findFirst({
                 where: {
                     staffId: id,
@@ -219,14 +182,6 @@ const getSingleStaffAttendance = async (req, res) => {
                     attendanceRecord: punchRecord,
                 });
             } else {
-                // Ensure that the punchIn and punchOut records match the punchRecord's punchId
-                if (punchRecord.punchIn && punchRecord.punchIn.punchId !== punchRecord.id) {
-                    punchRecord.punchIn = null; // If punchIn doesn't match, set it to null
-                }
-                if (punchRecord.punchOut && punchRecord.punchOut.punchId !== punchRecord.id) {
-                    punchRecord.punchOut = null; // If punchOut doesn't match, set it to null
-                }
-
                 return res.status(200).json({
                     message: 'Attendance record fetched successfully for the requested date.',
                     attendanceRecord: punchRecord,
@@ -297,15 +252,6 @@ const getSingleStaffAttendance = async (req, res) => {
                     });
                     createdCount++;
                 }
-
-                // Ensure punchIn and punchOut match punchRecord
-                if (punchRecord.punchIn && punchRecord.punchIn.punchId !== punchRecord.id) {
-                    punchRecord.punchIn = null; // Set to null if mismatch
-                }
-                if (punchRecord.punchOut && punchRecord.punchOut.punchId !== punchRecord.id) {
-                    punchRecord.punchOut = null; // Set to null if mismatch
-                }
-
                 records.push(punchRecord); // Add record to the records array
             }
 
@@ -322,6 +268,37 @@ const getSingleStaffAttendance = async (req, res) => {
         return res.status(500).json({ message: 'Attendance not fetched' });
     }
 };
+
+
+const updatePunchRecordStatus = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["ABSENT", "PRESENT", "HALFDAY", "PAIDLEAVE"];
+
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+            error:
+                "Invalid status. Valid statuses are ABSENT, PRESENT, HALFDAY, PAIDLEAVE.",
+        });
+    }
+
+    try {
+        const updatedPunchRecord = await prisma.punchRecords.update({
+            where: { id },
+            data: { status: status, isApproved: true },
+        });
+
+        res.status(200).json({
+            message: "Punch record status updated successfully",
+            updatedPunchRecord,
+        });
+    } catch (error) {
+        console.error("Error updating punch record:", error);
+        res.status(500).json({ error: "Failed to update punch record status" });
+    }
+};
+
 
 module.exports = {
     allStaffAttendanceByDate,
