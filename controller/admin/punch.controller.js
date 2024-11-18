@@ -76,9 +76,10 @@ async function createPunchIn(req, res) {
       shift = user.staffDetails.FixedShift.find(
         (sh) => sh.day.toUpperCase() === currentDay
       );
-      console.log(shift);
+      console.log("shift", shift);
+      console.log("shifts", shift.shifts);
 
-      if (shift || shift.shifts.length == 0) {
+      if (!shift || shift.shifts.length == 0) {
         return res.status(404).send("No shift found");
       }
 
