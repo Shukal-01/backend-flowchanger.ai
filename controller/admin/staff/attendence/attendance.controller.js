@@ -77,7 +77,7 @@ const allStaffAttendanceByDate = async (req, res) => {
                                 },
                             },
                             punchDate: startOfDay,
-                            entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
+                            // entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
                             status: 'ABSENT',
                         },
                     });
@@ -199,7 +199,7 @@ const getSingleStaffAttendance = async (req, res) => {
                             },
                         },
                         punchDate: startOfDay,
-                        entryDate: `${day}/${month}/${year}`, // Storing the date as a string
+                        // entryDate: `${day}/${month}/${year}`, // Storing the date as a string
                         status: 'ABSENT',
                     },
                 });
@@ -270,7 +270,7 @@ const getSingleStaffAttendance = async (req, res) => {
                                 },
                             },
                             punchDate: currentDate,
-                            entryDate: `${day}/${month}/${year}`, // Storing the date as a string
+                            // entryDate: `${day}/${month}/${year}`, // Storing the date as a string
                             status: 'ABSENT',
                         },
                     });

@@ -492,18 +492,6 @@ CREATE TABLE "SalaryDetails" (
 );
 
 -- CreateTable
-CREATE TABLE "WeekOffShift" (
-    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
-    "weekOne" BOOLEAN DEFAULT false,
-    "weekTwo" BOOLEAN DEFAULT false,
-    "weekThree" BOOLEAN DEFAULT false,
-    "weekFour" BOOLEAN DEFAULT false,
-    "weekFive" BOOLEAN DEFAULT false,
-
-    CONSTRAINT "WeekOffShift_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Shifts" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "shiftName" TEXT NOT NULL,
@@ -517,6 +505,18 @@ CREATE TABLE "Shifts" (
     "allowPunchOutHours" INTEGER,
 
     CONSTRAINT "Shifts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WeekOffShift" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "weekOne" BOOLEAN DEFAULT false,
+    "weekTwo" BOOLEAN DEFAULT false,
+    "weekThree" BOOLEAN DEFAULT false,
+    "weekFour" BOOLEAN DEFAULT false,
+    "weekFive" BOOLEAN DEFAULT false,
+
+    CONSTRAINT "WeekOffShift_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -550,7 +550,6 @@ CREATE TABLE "PunchRecords" (
     "punchOutId" TEXT,
     "staffId" TEXT,
     "status" "punchRecordStatus" NOT NULL DEFAULT 'ABSENT',
-    "entryDate" TEXT,
 
     CONSTRAINT "PunchRecords_pkey" PRIMARY KEY ("id")
 );

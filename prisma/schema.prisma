@@ -583,7 +583,6 @@ model PunchRecords {
   status     punchRecordStatus @default(ABSENT)
   fine       Fine?
   Overtime   Overtime?
-  entryDate  String?
 
   @@unique([staffId, punchDate])
 }
