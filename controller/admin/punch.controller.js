@@ -78,12 +78,13 @@ async function createPunchIn(req, res) {
       );
       console.log(shift);
 
-      if (shift.shifts.length == 0) {
+      if (shift || shift.shifts.length == 0) {
         return res.status(404).send("No shift found");
       }
 
       start = parseTime(shift.shifts[0].shiftStartTime);
       end = parseTime(shift.shifts[shift.shifts.length - 1].shiftEndTime);
+      console.log(start, end);
     }
 
     if (shiftType === "FLEXIBLE") {
@@ -127,6 +128,7 @@ async function createPunchIn(req, res) {
         user.staffDetails.SalaryDetails.length - 1
       ]?.ctc_amount ?? 10000;
 
+    console.log("start-end", start, end);
     const currTime = new Date();
     let shiftStartTime = new Date(currTime);
     shiftStartTime.setHours(start.hours, start.minutes, 0);
