@@ -69,7 +69,7 @@ const allStaffAttendanceByDate = async (req, res) => {
                         punchOut: true,
                         staff: {
                             include: {
-                                user: true,
+                                User: true,
                             },
                         },
                     },
