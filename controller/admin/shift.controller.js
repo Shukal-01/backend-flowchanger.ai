@@ -370,7 +370,7 @@ async function updateFixedShifts(req, res) {
 
         // Delete all `FlexibleShift` entries for the current staff member
         await prisma.flexibleShift.deleteMany({
-            where: { staffId: staffExists.id }
+            where: { staffId }
         })
 
         // Process each staff member’s shifts (for all days from Mon to Sun)
