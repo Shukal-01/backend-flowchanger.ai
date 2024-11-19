@@ -130,8 +130,10 @@ async function createPunchIn(req, res) {
       ]?.ctc_amount ?? 10000;
 
     console.log("start-end", start, end);
-    const currTime = new Date();
-    let shiftStartTime = new Date(currTime);
+    const indiaTime = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Kolkata",
+    });
+    const currTime = new Date(indiaTime);
     shiftStartTime.setHours(start.hours, start.minutes, 0);
 
     let shiftEndTime = new Date(currTime);
@@ -388,7 +390,10 @@ async function createPunchOut(req, res) {
         user.staffDetails.SalaryDetails.length - 1
       ]?.ctc_amount ?? 10000;
 
-    const currTime = new Date();
+    const indiaTime = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Kolkata",
+    });
+    const currTime = new Date(indiaTime);
     let shiftStartTime = new Date(currTime);
     shiftStartTime.setHours(start.hours, start.minutes, 0);
     let shiftEndTime = new Date(currTime);

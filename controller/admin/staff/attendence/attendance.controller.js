@@ -67,7 +67,13 @@ const allStaffAttendanceByDate = async (req, res) => {
                     include: {
                         punchIn: true,
                         punchOut: true,
-                    }
+                        staff: {
+                            include: {
+                                User: true,
+                            },
+                        },
+                    },
+
                 });
 
                 // If no record exists, create one
@@ -82,7 +88,12 @@ const allStaffAttendanceByDate = async (req, res) => {
                             punchDate: startOfDay,
                             // entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
                             status: 'ABSENT',
-                        },
+                        },                        
+                            staff: {
+                                include: {
+                                    User: true,
+                                },
+                            }                        
                     });
                 }
                 records.push({
@@ -159,7 +170,13 @@ const getSingleStaffAttendance = async (req, res) => {
                 },
                 include: {
                     punchIn: true,   // Include punchIn details
-                    punchOut: true,  // Include punchOut details
+                    punchOut: true,  // Include punchOut details                    
+                        staff: {
+                            include: {
+                                User: true,
+                            },
+                        }
+                    
                 },
             });
 
@@ -174,7 +191,12 @@ const getSingleStaffAttendance = async (req, res) => {
                         },
                         punchDate: startOfDay,
                         status: 'ABSENT',
-                    },
+                    },                    
+                        staff: {
+                            include: {
+                                User: true,
+                            },                        
+                    }
                 });
                 createdCount++;
                 return res.status(200).json({
@@ -233,7 +255,12 @@ const getSingleStaffAttendance = async (req, res) => {
                     },
                     include: {
                         punchIn: true,   // Include punchIn details
-                        punchOut: true,  // Include punchOut details
+                        punchOut: true,  // Include punchOut details                        
+                            staff: {
+                                include: {
+                                    User: true,
+                                },
+                            }                        
                     },
                 });
 
@@ -248,7 +275,12 @@ const getSingleStaffAttendance = async (req, res) => {
                             },
                             punchDate: currentDate,
                             status: 'ABSENT',
-                        },
+                        },                        
+                            staff: {
+                                include: {
+                                    User: true,
+                                },
+                            }                        
                     });
                     createdCount++;
                 }

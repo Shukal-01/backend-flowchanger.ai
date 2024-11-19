@@ -368,6 +368,10 @@ async function updateFixedShifts(req, res) {
             })
         );
 
+        await prisma.flexibleShift.deleteMany({
+            where: { staffId }
+        })
+
         // Process each staff member’s shifts (for all days from Mon to Sun)
         const updatedFixedShifts = await Promise.all(
             staffId.map(async (id) => {
@@ -542,6 +546,10 @@ async function updateFlexibleShift(req, res) {
             if (!staffExists) {
                 throw new Error(`Staff with ID ${id} not found`);
             }
+
+            await prisma.fixedShift.deleteMany({
+                where: { staffId }
+            })
 
             // Process each shift for the staff member
             for (const shiftData of shifts) {
