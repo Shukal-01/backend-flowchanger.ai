@@ -10,7 +10,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
 
   try {
     const whereDataArray = {
-      user: {
+      User: {
         role: "CLIENT",
       },
     };
@@ -31,7 +31,7 @@ const searchClientByCompanyOrVatNumber = async (req, res) => {
     const clients = await prisma.clientDetails.findMany({
       where: whereDataArray,
       include: {
-        User: true,
+        user: true,
       },
     });
 
