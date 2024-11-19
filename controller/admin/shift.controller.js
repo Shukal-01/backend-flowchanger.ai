@@ -409,7 +409,7 @@ async function updateFixedShifts(req, res) {
                                     day,
                                     weekOff,
                                     shifts: {
-                                        set: shiftIds.map((shiftId) => ({ id: shiftId })),
+                                        set: (shiftIds || []).map((shiftId) => ({ id: shiftId })),
                                     },
                                     weekId,
                                 },
@@ -427,7 +427,7 @@ async function updateFixedShifts(req, res) {
                                     weekOff,
                                     staffId: id,
                                     shifts: {
-                                        connect: shiftIds.map((shiftId) => ({ id: shiftId })),
+                                        connect: (shiftIds || []).map((shiftId) => ({ id: shiftId })),
                                     },
                                     weekId,
                                 },
@@ -525,96 +525,6 @@ async function createFlexibleShift(req, res) {
         }
     }
 }
-
-// async function updateFlexibleShift(req, res) {
-//     try {
-//         const { staffId, shifts } = req.body;
-
-//         // Process updates for each staff member
-//         const updatedFlexibleShifts = [];
-
-//         // Loop through each staffId in the array
-//         for (const id of staffId) {
-//             // Check if the staff member exists
-//             const staffExists = await prisma.staffDetails.findUnique({
-//                 where: { id },
-//             });
-//             if (!staffExists) {
-//                 throw new Error(`Staff with ID ${id} not found`);
-//             }
-
-//             // Process each shift for the staff member
-//             for (const shiftData of shifts) {
-//                 const { dateTime, weekOff, shifts } = shiftData;
-
-//                 // Ensure that all shift IDs are valid before trying to connect them
-//                 const shiftRecords = await prisma.shifts.findMany({
-//                     where: {
-//                         id: {
-//                             in: shifts, // Use the shift IDs you are trying to connect
-//                         },
-//                     },
-//                 });
-
-//                 // If the number of records returned doesn't match the number of shift IDs, throw an error
-//                 if (shiftRecords.length !== shifts.length) {
-//                     throw new Error('Some shift IDs are invalid or not found in the database');
-//                 }
-
-//                 // Check if a FlexibleShift entry already exists for this dateTime
-//                 const existingFlexibleShift = await prisma.flexibleShift.findFirst({
-//                     where: { staffId: id, dateTime },
-//                 });
-
-//                 if (existingFlexibleShift) {
-//                     // Update the existing FlexibleShift entry
-//                     const updatedShift = await prisma.flexibleShift.update({
-//                         where: { id: existingFlexibleShift.id },
-//                         data: {
-//                             dateTime,
-//                             weekOff,
-//                             shifts: {
-//                                 set: (shiftRecords || []).map((shift) => ({ id: shift.id })),
-//                             },
-//                         },
-//                         include: {
-//                             shifts: true,
-//                             staff: true,
-//                         },
-//                     });
-//                     updatedFlexibleShifts.push(updatedShift);
-//                 } else {
-//                     // Create a new FlexibleShift entry if none exists
-//                     const createdShift = await prisma.flexibleShift.create({
-//                         data: {
-//                             dateTime,
-//                             weekOff,
-//                             staffId: id,  // Set staffId for each individual staff member
-//                             shifts: {
-//                                 connect: (shiftRecords || []).map((shift) => ({ id: shift.id })),
-//                             },
-//                         },
-//                         include: {
-//                             shifts: true,
-//                             staff: true,
-//                         },
-//                     });
-//                     updatedFlexibleShifts.push(createdShift);
-//                 }
-//             }
-//         }
-
-//         res.status(200).json({
-//             data: updatedFlexibleShifts,
-//             message: "Flexible shifts updated successfully.",
-//         });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({
-//             error: "Failed to update flexible shifts",
-//         });
-//     }
-// }
 
 async function updateFlexibleShift(req, res) {
     try {
