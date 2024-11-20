@@ -185,7 +185,7 @@ const getSalaryDetailsById = async (req, res) => {
         deductions: true,
       },
     });
-    return res.status(200).json({ status: 200, message: "Get Salaary Data By ID!", data: getById });
+    return res.status(200).json({ status: 200, message: "Get Salary Data By ID!", data: getById });
   } catch (error) {
     console.log(error);
     return res
