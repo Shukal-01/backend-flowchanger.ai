@@ -90,11 +90,6 @@ const allStaffAttendanceByDate = async (req, res) => {
                             // entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
                             status: 'ABSENT',
                         },
-                        staff: {
-                            include: {
-                                User: true,
-                            },
-                        }
                     });
                 }
                 records.push({
@@ -193,11 +188,6 @@ const getSingleStaffAttendance = async (req, res) => {
                         punchDate: startOfDay,
                         status: 'ABSENT',
                     },
-                    staff: {
-                        include: {
-                            User: true,
-                        },
-                    }
                 });
                 createdCount++;
                 return res.status(200).json({
@@ -277,11 +267,6 @@ const getSingleStaffAttendance = async (req, res) => {
                             punchDate: currentDate,
                             status: 'ABSENT',
                         },
-                        staff: {
-                            include: {
-                                User: true,
-                            },
-                        }
                     });
                     createdCount++;
                 }
@@ -298,7 +283,7 @@ const getSingleStaffAttendance = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Attendance not fetched' });
+        return res.status(500).json({ message: 'Attendance not fetched', error: error.message });
     }
 };
 

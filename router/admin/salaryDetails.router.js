@@ -1,6 +1,7 @@
 const express = require('express');
 const salaryController = express.Router();
 const salaryDetailsController = require("../../controller/admin/salaryDetails.controller");
+const authorizationMiddleware = require('../../middleware/auth');
 
 // salary
 salaryController.post('/', salaryDetailsController.addOrUpdateSalaryDetails)
