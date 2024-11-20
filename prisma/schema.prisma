@@ -561,7 +561,7 @@ model FixedShift {
 
 model FlexibleShift {
   id        String       @id @default(dbgenerated("gen_random_uuid()"))
-  dateTime  String
+  dateTime  DateTime
   weekOff   Boolean      @default(false)
   staff     StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
   staffId   String
