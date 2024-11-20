@@ -8,7 +8,7 @@ salaryController.post('/', salaryDetailsController.addOrUpdateSalaryDetails)
 salaryController.get('/', salaryDetailsController.getAllSalaryData)
 salaryController.put('/:id', salaryDetailsController.updateSalaryData)
 salaryController.delete('/:id', salaryDetailsController.deleteSalaryRecord)
-salaryController.get('/:id', authorizationMiddleware, salaryDetailsController.getSalaryDetailsById)
+salaryController.get('/:staffId', salaryDetailsController.getSalaryDetailsById)
 
 
 

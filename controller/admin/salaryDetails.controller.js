@@ -176,46 +176,23 @@ const addOrUpdateSalaryDetails = async (req, res) => {
 // Salary Data Fetch By Id:
 
 const getSalaryDetailsById = async (req, res) => {
+  const { staffId } = req.params;
   try {
-    // Get staffId from req.user set by authorizationMiddleware
-    const { staffId } = req.user;
-
-    if (!staffId) {
-      return res
-        .status(400)
-        .json({ message: "Invalid token: staffId not found" });
-    }
-
-    // Fetch salary details for the logged-in staff
-    const salaryDetails = await prisma.salaryDetails.findMany({
-      where: { staffId: staffId }, // Filter by staffId
+    const getById = await prisma.salaryDetails.findFirst({
+      where: { staffId },
       include: {
-        earnings: true, // Include related earnings data
-        deductions: true, // Include related deductions data
+        earnings: true,
+        deductions: true,
       },
     });
-
-    if (!salaryDetails || salaryDetails.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No salary details found for the logged-in staff" });
-    }
-
-    // Return the fetched salary details
-    return res.status(200).json({
-      status: 200,
-      message: "Salary details fetched successfully",
-      data: salaryDetails,
-    });
+    return res.status(200).json({ status: 200, message: "Get Salaary Data By ID!", data: getById });
   } catch (error) {
-    console.error("Error fetching salary details:", error.message);
-    return res.status(500).json({
-      message: "Failed to fetch salary details",
-      error: error.message,
-    });
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Failed To get Salary Data By ID!" });
   }
 };
-
 
 // Salary Details Fetch All Data:
 
