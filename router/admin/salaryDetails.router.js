@@ -7,7 +7,7 @@ salaryController.post('/', salaryDetailsController.addOrUpdateSalaryDetails)
 salaryController.get('/', salaryDetailsController.getAllSalaryData)
 salaryController.put('/:id', salaryDetailsController.updateSalaryData)
 salaryController.delete('/:id', salaryDetailsController.deleteSalaryRecord)
-salaryController.get('/:id', salaryDetailsController.getSalaryDetailsById)
+salaryController.get('/:staffId', salaryDetailsController.getSalaryDetailsById)
 
 
 
