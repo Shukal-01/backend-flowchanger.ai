@@ -32,7 +32,6 @@ const addFineData = async (req, res) => {
           status: "ABSENT",
         },
       });
-
       // Create a new fine record with the new punchRecordId
       const fine = await prisma.fine.create({
         data: {
