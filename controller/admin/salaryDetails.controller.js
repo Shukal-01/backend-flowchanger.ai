@@ -178,16 +178,14 @@ const addOrUpdateSalaryDetails = async (req, res) => {
 const getSalaryDetailsById = async (req, res) => {
   const { id } = req.params;
   try {
-    const getById = await prisma.salaryDetails.findUnique({
+    const getById = await prisma.salaryDetails.findFirst({
       where: { id },
       include: {
         earnings: true,
         deductions: true,
       },
     });
-    return res
-      .status(200)
-      .json({ status: 200, message: "Get Salaary Data By ID!", data: getById });
+    return res.status(200).json({ status: 200, message: "Get Salaary Data By ID!", data: getById });
   } catch (error) {
     console.log(error);
     return res

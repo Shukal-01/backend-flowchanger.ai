@@ -13,58 +13,23 @@ const addOvertimeData = async (req, res) => {
     } = req.body;
 
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-
-        let existingPunchRecord = await prisma.punchRecords.findFirst({
+        // Check if the staffId exists in punchRecords
+        const existingPunchRecord = await prisma.punchRecords.findFirst({
             where: {
-                punchDate: {
-                    gte: today,
-                    lt: tomorrow,
-                },
+                staffId: staffId,
             },
         });
 
         if (!existingPunchRecord) {
-            // If no punch record exists, create a new one with the formattedDate and set status as ABSENT
-            existingPunchRecord = await prisma.punchRecords.create({
+            // If staffId is not found in punchRecords, create a new record with status 'ABSENT'
+            const newPunchRecord = await prisma.punchRecords.create({
                 data: {
                     staffId: staffId,
                     status: "ABSENT",
                 },
             });
-        }
 
-        // Check if an overtime record exists for the given punchRecordId
-        let existingOvertime = await prisma.overtime.findFirst({
-            where: {
-                punchRecordId: existingPunchRecord.id,  // Match by punchRecordId
-            },
-        });
-
-        if (existingOvertime) {
-            // If overtime record exists, update it with new data
-            const overtime = await prisma.overtime.update({
-                where: {
-                    id: existingOvertime.id,  // Use the existing overtime's ID to update
-                },
-                data: {
-                    earlyCommingEntryAmount,
-                    earlyEntryAmount,
-                    lateOutOvertimeAmount,
-                    lateOutAmount,
-                    totalAmount,
-                    shiftIds,
-                    punchRecordId: existingPunchRecord.id,  // Link overtime to the punch record
-                },
-            });
-
-            // Respond with the updated overtime record
-            res.status(200).json(overtime);
-        } else {
-            // If no overtime record exists, create one
+            // Create a new overtime record with the new punchRecordId
             const overtime = await prisma.overtime.create({
                 data: {
                     staffId,
@@ -74,17 +39,117 @@ const addOvertimeData = async (req, res) => {
                     lateOutAmount,
                     totalAmount,
                     shiftIds,
-                    punchRecordId: existingPunchRecord.id,  // Link overtime to the punch record
+                    punchRecordId: newPunchRecord.id,
                 },
             });
 
-            // Respond with the created overtime record
-            res.status(201).json(overtime);
+            return res.status(200).json({ message: "Overtime created successfully ", overtime });
         }
+
+        // Check if an overtime record exists for the given punchRecordId
+        const existingOvertime = await prisma.overtime.findFirst({
+            where: {
+                punchRecordId: existingPunchRecord.id,
+            },
+        });
+
+        if (existingOvertime) {
+            // If overtime record exists, update it with new data
+            const overtime = await prisma.overtime.update({
+                where: {
+                    id: existingOvertime.id, // Use the existing overtime's ID to update
+                },
+                data: {
+                    earlyCommingEntryAmount,
+                    earlyEntryAmount,
+                    lateOutOvertimeAmount,
+                    lateOutAmount,
+                    totalAmount,
+                    shiftIds,
+                },
+            });
+
+            // Respond with the updated overtime record
+            return res.status(200).json({ message: "Overtime Updated Successfully", overtime });
+        }
+
+        // If no overtime record exists, create a new overtime record
+        const overtime = await prisma.overtime.create({
+            data: {
+                staffId,
+                earlyCommingEntryAmount,
+                earlyEntryAmount,
+                lateOutOvertimeAmount,
+                lateOutAmount,
+                totalAmount,
+                shiftIds,
+                punchRecordId: existingPunchRecord.id,
+            },
+        });
+
+        return res.status(200).json(overtime);
     } catch (error) {
         console.error("Error adding or updating overtime:", error);
-        res.status(500).json({ message: "Failed to add or update overtime" + error.message });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
-module.exports = { addOvertimeData };
+
+const updateMultipleOvertimeData = async (req, res) => {
+    try {
+        const { OvertimeUpdates } = req.body;
+
+        // Validate input
+        if (!Array.isArray(OvertimeUpdates) || OvertimeUpdates.length === 0) {
+            return res
+                .status(400)
+                .json({ error: "Please provide valid overtime updates" });
+        }
+
+        // Prepare update promises for each overtime record
+        const updatePromises = OvertimeUpdates.map((overtime) => {
+            if (!overtime.id) {
+                throw new Error("Each overtime update must include a valid ID.");
+            }
+
+            return prisma.overtime.update({
+                where: { id: overtime.id },
+                data: {
+                    earlyCommingEntryAmount: overtime.earlyCommingEntryAmount,
+                    earlyEntryAmount: overtime.earlyEntryAmount,
+                    lateOutOvertimeAmount: overtime.lateOutOvertimeAmount,
+                    lateOutAmount: overtime.lateOutAmount,
+                    totalAmount: overtime.totalAmount,
+                    shiftIds: overtime.shiftIds,
+                },
+            });
+        });
+
+        // Execute all updates
+        const updatedOvertimes = await Promise.all(updatePromises);
+
+        // Respond with updated records
+        res
+            .status(200)
+            .json({ message: "Overtime records updated successfully", data: updatedOvertimes });
+    } catch (error) {
+        console.error("Error updating overtime data:", error);
+        res
+            .status(500)
+            .json({ message: "Error updating overtime records: " + error.message });
+    }
+};
+
+// get all overtime data
+
+const getOvertimeAll = async (req, res) => {
+    try {
+        const overtimeData = await prisma.overtime.findMany();
+        res.status(200).json({ message: "Overtime data retrieved successfully", data: overtimeData });
+    } catch (error) {
+        console.error("Error retrieving overtime data:", error);
+        res.status(500).json({ message: "Error retrieving overtime records: " + error.message })
+    }
+};
+
+module.exports = { addOvertimeData, updateMultipleOvertimeData, getOvertimeAll };
