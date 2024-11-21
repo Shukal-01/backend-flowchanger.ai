@@ -12,11 +12,12 @@ const allStaffAttendanceByDate = async (req, res) => {
             const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0));
             const endOfDay = new Date(startOfDay.getTime() + 86400000);
             // Get the current date to ensure no future dates are handled
-            const indianTimeZone = "Asia/Kolkata";
-            const now = new Date();
-            const indianTime = utcToZonedTime(now, indianTimeZone);
+            // const indianTimeZone = "Asia/Kolkata";
+            // const now = new Date();
+            // const indianTime = utcToZonedTime(now, indianTimeZone);
 
-            const currentDate = new Date(indianTime);
+            // const currentDate = new Date(indianTime);
+            const currentDate = new Date();
             // console.log(currentDate)
             currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
 
@@ -135,11 +136,12 @@ const getSingleStaffAttendance = async (req, res) => {
         let createdCount = 0;
 
         // Get the current date to check for future date
-        const indianTimeZone = "Asia/Kolkata";
-        const now = new Date();
-        const indianTime = utcToZonedTime(now, indianTimeZone);
+        // const indianTimeZone = "Asia/Kolkata";
+        // const now = new Date();
+        // const indianTime = utcToZonedTime(now, indianTimeZone);
 
-        const currentDate = new Date(indianTime);
+        // const currentDate = new Date(indianTime);
+        const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
 
         if (type === "day") {
