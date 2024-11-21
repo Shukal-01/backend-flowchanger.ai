@@ -535,7 +535,10 @@ async function getPunchRecordById(req, res) {
       },
       include: {
         fine: true,
-        overtime: true,
+        Overtime: true,
+        punchIn: true,
+        punchOut: true,
+        staff: true,
       },
     });
     res.status(200).json(punchRecords);
@@ -570,6 +573,8 @@ async function getPunchRecords(req, res) {
         punchIn: true,
         punchOut: true,
         staff: true, // Include staff details
+        fine: true,
+        Overtime: true,
       },
     });
 
