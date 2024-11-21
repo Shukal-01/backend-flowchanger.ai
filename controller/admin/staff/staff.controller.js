@@ -186,6 +186,8 @@ async function getAllStaff(req, res) {
             TaskDetail: true,
             TaskStatus: true,
             past_Employment: true,
+            Fine: true,
+            Overtime: true,
           },
         },
       },

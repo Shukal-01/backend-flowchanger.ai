@@ -11,8 +11,12 @@ const allStaffAttendanceByDate = async (req, res) => {
             const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0));
             const endOfDay = new Date(startOfDay.getTime() + 86400000);
             // Get the current date to ensure no future dates are handled
-            const currentDate = new Date();
-            console.log(currentDate)
+            const indianTimeZone = "Asia/Kolkata";
+            const now = new Date();
+            const indianTime = utcToZonedTime(now, indianTimeZone);
+
+            const currentDate = new Date(indianTime);
+            // console.log(currentDate)
             currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
 
             // Check if requested date is in the future
@@ -130,7 +134,11 @@ const getSingleStaffAttendance = async (req, res) => {
         let createdCount = 0;
 
         // Get the current date to check for future date
-        const currentDate = new Date();
+        const indianTimeZone = "Asia/Kolkata";
+        const now = new Date();
+        const indianTime = utcToZonedTime(now, indianTimeZone);
+
+        const currentDate = new Date(indianTime);
         currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
 
         if (type === "day") {
@@ -150,6 +158,7 @@ const getSingleStaffAttendance = async (req, res) => {
                     message: `The requested date is before the joining date of staff ID. No entry will be created.`,
                 });
             }
+
 
             const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0)); // Start of requested date
             const endOfDay = new Date(startOfDay.getTime() + 86400000); // End of requested date
@@ -223,6 +232,10 @@ const getSingleStaffAttendance = async (req, res) => {
             }
 
             const records = [];
+
+            // const indianTimeZone = "Asia/Kolkata";
+            // const now = new Date();
+            // const indianTime = utcToZonedTime(now, indianTimeZone);
 
             // Loop through punchRecords for the given month
             for (let day = 1; day <= endMonth.getDate(); day++) {
