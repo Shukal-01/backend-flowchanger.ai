@@ -172,16 +172,15 @@ const getSingleStaffAttendance = async (req, res) => {
                     },
                 },
                 include: {
-                    staff: {
-                        include: {
-                            User: true,
-                            // Fine: true,
-                        },
-                    },
                     fine: true,
                     Overtime: true,
                     punchIn: true,
                     punchOut: true,
+                    staff: {
+                        include: {
+                            User: true,
+                        },
+                    },
                 },
             });
 
