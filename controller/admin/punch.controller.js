@@ -133,7 +133,13 @@ async function createPunchIn(req, res) {
     const indiaTime = new Date().toLocaleString("en-US", {
       timeZone: "Asia/Kolkata",
     });
+    // const currTime = new Date(indiaTime);
+    // shiftStartTime.setHours(start.hours, start.minutes, 0);
+
+    // let shiftEndTime = new Date(currTime);
+    // shiftEndTime.setHours(end.hours, end.minutes, 0);
     const currTime = new Date(indiaTime);
+    const shiftStartTime = new Date(indiaTime);
     shiftStartTime.setHours(start.hours, start.minutes, 0);
 
     let shiftEndTime = new Date(currTime);

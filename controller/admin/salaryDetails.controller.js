@@ -169,10 +169,6 @@ const addOrUpdateSalaryDetails = async (req, res) => {
   }
 };
 
-
-
-
-
 // Salary Data Fetch By Id:
 
 const getSalaryDetailsById = async (req, res) => {
@@ -190,7 +186,7 @@ const getSalaryDetailsById = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Failed To get Salary Data By ID!" });
+      .json({ status: 500, message: "Failed To get Salary Data By ID!" });
   }
 };
 
