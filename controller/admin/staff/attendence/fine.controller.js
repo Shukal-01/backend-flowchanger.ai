@@ -227,9 +227,20 @@ const updateMultipleFineData = async (req, res) => {
   }
 };
 
+const getAllFine = async (req, res) => {
+  try {
+    const fine = await prisma.fine.findMany();
+    return res.status(200).json({ fine });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error fetching fines' });
+  }
+}
+
 module.exports = {
   addFineData,
   getFinesByDate,
+  getAllFine,
   updateFine,
   updateMultipleFineData,
 };

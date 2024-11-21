@@ -235,6 +235,9 @@ const adminLogin = async (req, res) => {
     if (!isPasswordMatch)
       return res.status(401).json({ message: "Invalid password." });
 
+    if (!user && !isPasswordMatch)
+      return res.status(401).json({ message: "Invalid email or password." });
+
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
     res.status(200).json({ message: "Login successful!", token });
   } catch (error) {
