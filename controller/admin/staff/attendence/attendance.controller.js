@@ -129,9 +129,17 @@ const getSingleStaffAttendance = async (req, res) => {
         let entryCount = 0;
         let createdCount = 0;
 
+        const indiaTime = new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Kolkata",
+        });
+        let indianTime = new Date(indiaTime);
+
+        const currentDate = new Date(indianTime);
+
         // Get the current date to check for future date
-        const currentDate = new Date();
+        // const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
+
 
         if (type === "day") {
             const [day, month, year] = date.split('/').map(Number);
@@ -140,14 +148,14 @@ const getSingleStaffAttendance = async (req, res) => {
             // Check if requested date is in the future
             if (requestedDate > currentDate) {
                 return res.status(400).json({
-                    message: `The requested date (${day}/${month}/${year}) is a future date. No entries are available for future dates.`,
+                    message: `The requested date is a future date. No entries are available for future dates.`,
                 });
             }
 
             const startDate = new Date(date_of_joining); // Staff's date of joining
             if (requestedDate < startDate) {
                 return res.status(400).json({
-                    message: `The requested date (${day}/${month}/${year}) is before the joining date of staff ID ${id}. No entry will be created.`,
+                    message: `The requested date is before the joining date of staff ID. No entry will be created.`,
                 });
             }
 
@@ -164,16 +172,16 @@ const getSingleStaffAttendance = async (req, res) => {
                     },
                 },
                 include: {
-                    punchIn: true,   // Include punchIn details
-                    punchOut: true,  // Include punchOut details                    
                     staff: {
                         include: {
                             User: true,
-                            Fine: true,
-                            Overtime: true,
+                            // Fine: true,
                         },
-                    }
-
+                    },
+                    fine: true,
+                    Overtime: true,
+                    punchIn: true,
+                    punchOut: true,
                 },
             });
 
@@ -211,7 +219,7 @@ const getSingleStaffAttendance = async (req, res) => {
             // Check if the requested month is in the future
             if (startMonth > currentDate) {
                 return res.status(400).json({
-                    message: `The requested month (${month}/${year}) is in the future. No entries are available for future months.`,
+                    message: `The requested month is in the future. No entries are available for future months.`,
                 });
             }
 
@@ -222,67 +230,75 @@ const getSingleStaffAttendance = async (req, res) => {
                 });
             }
 
+            const records = [];
+
+            // Loop through each day in the requested month
             for (let day = 1; day <= endMonth.getDate(); day++) {
-                const currentDate = new Date(year, month - 1, day);
+                const currentDay = new Date(year, month - 1, day);
 
-                // Skip days before the joining date
-                if (currentDate < startDate) {
-                    continue;
-                }
+                // Skip dates before the joining date
+                if (currentDay < startDate) continue;
 
-                // Check if the current date is in the future
-                if (currentDate > currentDate) {
-                    return res.status(400).json({
-                        message: `The requested date (${day}/${month}/${year}) is in the future. No entries are available for future dates.`,
-                    });
-                }
+                // Skip future dates
+                if (currentDay > currentDate) continue;
 
-                let punchRecord = await prisma.punchRecords.findFirst({
+                // Fetch punch record for the current day
+                const punchRecord = await prisma.punchRecords.findFirst({
                     where: {
                         staffId: id,
                         punchDate: {
-                            gte: currentDate,
-                            lt: new Date(currentDate.getTime() + 86400000),
+                            gte: currentDay,
+                            lt: new Date(currentDay.getTime() + 86400000),
                         },
                     },
                     include: {
-                        punchIn: true,   // Include punchIn details
-                        punchOut: true,  // Include punchOut details    
                         fine: true,
                         Overtime: true,
+                        punchIn: true,
+                        punchOut: true,
                         staff: {
                             include: {
                                 User: true,
                             },
-                        }
+                        },
                     },
                 });
 
-                if (!punchRecord) {
-                    // If no record exists, create it
-                    punchRecord = await prisma.punchRecords.create({
+                if (punchRecord) {
+                    // Add existing record with all relational data
+                    records.push(punchRecord);
+                } else {
+                    // Create a new record if none exists
+                    const newPunchRecord = await prisma.punchRecords.create({
                         data: {
-                            staff: {
-                                connect: {
-                                    id: id,
-                                },
-                            },
-                            punchDate: currentDate,
+                            staff: { connect: { id } },
+                            punchDate: currentDay,
                             status: 'ABSENT',
                         },
+                        include: {
+                            fine: true,
+                            Overtime: true,
+                            punchIn: true,
+                            punchOut: true,
+                            staff: {
+                                include: {
+                                    User: true,
+                                },
+                            },
+                        },
                     });
-                    createdCount++;
+                    records.push(newPunchRecord);
                 }
-                records.push(punchRecord); // Add record to the records array
             }
 
-            entryCount = records.length;
-
+            // Send the response with all relational data included
             return res.status(200).json({
-                message: `Attendance records for this month fetched successfully.`,
+                message: `Attendance records for the month fetched successfully.`,
                 attendanceRecords: records,
             });
         }
+
+
 
     } catch (error) {
         console.error(error);
