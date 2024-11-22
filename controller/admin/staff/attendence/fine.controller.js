@@ -25,7 +25,7 @@ const addFineData = async (req, res) => {
   try {
     // Check or create punchRecord
     let punchRecord = await prisma.punchRecords.findFirst({
-      where: { staffId, id },
+      where: { staffId, id: punchRecordId },
     });
 
     if (!punchRecord) {
@@ -77,7 +77,7 @@ const addFineData = async (req, res) => {
     return res.status(201).json({ message: "Fine created successfully", fine });
   } catch (error) {
     console.error("Error adding or updating fine:", error.message);
-    res.status(500).json({ error: "Internal server error. Please try again later." });
+    res.status(500).json({ message: "Fine not added or updated", error: error.message });
   }
 };
 
