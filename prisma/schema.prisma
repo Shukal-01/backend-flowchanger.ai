@@ -584,6 +584,8 @@ model PunchRecords {
   status     punchRecordStatus @default(ABSENT)
   fine       Fine?
   Overtime   Overtime?
+  startBreak StartBreak?
+  endBreak   EndBreak?
 
   @@unique([staffId, punchDate])
 }
@@ -673,27 +675,31 @@ enum BreakMethod {
 }
 
 model StartBreak {
-  id             String       @id @default(dbgenerated("gen_random_uuid()"))
-  breakMethod    BreakMethod  @default(PHOTOCLICK)
-  startBreakTime DateTime     @default(now())
+  id             String        @id @default(dbgenerated("gen_random_uuid()"))
+  breakMethod    BreakMethod   @default(PHOTOCLICK)
+  startBreakTime DateTime      @default(now())
   biometricData  String?
   qrCodeValue    String?
   photoUrl       String?
   location       String
   staffId        String
-  staff          StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  punchRecordId  String?       @unique
+  staff          StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  punchRecord    PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
 }
 
 model EndBreak {
-  id            String       @id @default(dbgenerated("gen_random_uuid()"))
-  breakMethod   BreakMethod  @default(PHOTOCLICK)
-  endBreakTime  DateTime     @default(now())
+  id            String        @id @default(dbgenerated("gen_random_uuid()"))
+  breakMethod   BreakMethod   @default(PHOTOCLICK)
+  endBreakTime  DateTime      @default(now())
   biometricData String?
   qrCodeValue   String?
   photoUrl      String?
   location      String
   staffId       String
-  staff         StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  punchRecordId String?       @unique
+  punchRecord   PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model TaskStatus {
