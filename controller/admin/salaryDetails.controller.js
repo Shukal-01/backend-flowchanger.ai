@@ -192,49 +192,65 @@ const getSalaryDetailsById = async (req, res) => {
 
 // Salary Details Fetch All Data:
 
+// const getAllSalaryData = async (req, res) => {
+//   try {
+//     const earningData = await prisma.earnings.findMany();
+//     const deductionData = await prisma.deductions.findMany();
+//     const salaryData = await prisma.salaryDetails.findMany();
+
+//     // Check if there is any salary data
+//     if (salaryData.length === 0) {
+//       return res.status(404).json({
+//         status: 404,
+//         message: "No salary data found.",
+//         data: [],
+//       });
+//     }
+
+//     // Merging salary data with related earnings and deductions based on staffId
+//     const mergedData = salaryData.map((salary) => {
+//       const earnings = earningData.filter(
+//         (earning) => earning.staffId === salary.staffId
+//       );
+//       const deductions = deductionData.filter(
+//         (deduction) => deduction.staffId === salary.staffId
+//       );
+//       return {
+//         ...salary,
+//         earnings: earnings.length > 0 ? earnings : null,
+//         deductions: deductions.length > 0 ? deductions : null,
+//       };
+//     });
+
+//     // Send the merged data as the response
+//     return res.status(200).json({
+//       status: 200,
+//       message: "Successfully retrieved all salary data with related earnings and deductions.",
+//       data: mergedData,
+//     });
+//   } catch (error) {
+//     console.log("Error:", error);
+//     return res.status(500).json({
+//       status: 500,
+//       message: "Failed to retrieve all salary data with related earnings and deductions.",
+//       error: error.message,
+//     });
+//   }
+// };
 const getAllSalaryData = async (req, res) => {
   try {
-    const earningData = await prisma.earnings.findMany();
-    const deductionData = await prisma.deductions.findMany();
-    const salaryData = await prisma.salaryDetails.findMany();
-
-    // Check if there is any salary data
-    if (salaryData.length === 0) {
-      return res.status(404).json({
-        status: 404,
-        message: "No salary data found.",
-        data: [],
-      });
-    }
-
-    // Merging salary data with related earnings and deductions based on staffId
-    const mergedData = salaryData.map((salary) => {
-      const earnings = earningData.filter(
-        (earning) => earning.staffId === salary.staffId
-      );
-      const deductions = deductionData.filter(
-        (deduction) => deduction.staffId === salary.staffId
-      );
-      return {
-        ...salary,
-        earnings: earnings.length > 0 ? earnings : null,
-        deductions: deductions.length > 0 ? deductions : null,
-      };
+    const getAll = await prisma.salaryDetails.findMany({
+      include: {
+        earnings: true,
+        deductions: true,
+      },
     });
-
-    // Send the merged data as the response
-    return res.status(200).json({
-      status: 200,
-      message: "Successfully retrieved all salary data with related earnings and deductions.",
-      data: mergedData,
-    });
+    return res.status(200).json({ status: 200, message: "Get All SalaryData!", data: getAll });
   } catch (error) {
-    console.log("Error:", error);
-    return res.status(500).json({
-      status: 500,
-      message: "Failed to retrieve all salary data with related earnings and deductions.",
-      error: error.message,
-    });
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Failed To get All Salary Data!" });
   }
 };
 
@@ -368,9 +384,6 @@ const updateSalaryData = async (req, res) => {
     });
   }
 };
-
-
-
 
 
 // Delete Salary Data Record By ID
@@ -682,49 +695,62 @@ const deleteEarningsByID = async (req, res) => {
 };
 
 // get current month salary by staffId
+
 const getCurrentMonthSalary = async (req, res) => {
   const { staffId } = req.params;
 
-  // Get current month and year
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so we add 1
-  const currentYear = currentDate.getFullYear();
-
   try {
-    const getById = await prisma.salaryDetails.findFirst({
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+
+    // Define date range for the current month
+    const startOfMonth = new Date(currentYear, currentMonth, 1);
+    const startOfNextMonth = new Date(currentYear, currentMonth + 1, 1);
+
+    // Fetch salary details for the current month along with related earnings and deductions
+    const salaryData = await prisma.salaryDetails.findMany({
       where: {
         staffId,
-        effective_date: {
-          // Find the salary data where the effective date is in the current month and year
-          gte: new Date(currentYear, currentMonth - 1, 1), // Start of the current month
-          lt: new Date(currentYear, currentMonth, 1), // Start of the next month
+        created_at: {
+          gte: startOfMonth, // Start of the current month
+          lt: startOfNextMonth, // Start of the next month
         },
       },
       include: {
         earnings: true,
         deductions: true,
+        Staff: {
+          include: {
+            User: true,
+          },
+        },
       },
     });
 
-    if (getById) {
-      return res
-        .status(200)
-        .json({ status: 200, message: "Get Current Month Salary Data By ID!", data: getById });
+
+    // Check if salary data exists
+    if (salaryData.length > 0) {
+      return res.status(200).json({
+        status: 200,
+        message: "Current month's salary data retrieved successfully!",
+        data: salaryData,
+      });
     } else {
-      return res
-        .status(404)
-        .json({ status: 404, message: "No salary data found for this month!" });
+      return res.status(404).json({
+        status: 404,
+        message: "No salary data found for this month!",
+      });
     }
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ status: 500, message: "Failed to get current month salary data by ID!" });
+    console.error("Error fetching current month's salary data:", error);
+    return res.status(500).json({
+      status: 500,
+      message: "Failed to fetch current month's salary data!",
+      error: error.message,
+    });
   }
 };
-
-
-
 
 const getSelectedMonthSalary = async (req, res) => {
   const { staffId, month, year } = req.params; // Extract staffId, month, and year from URL params
@@ -750,7 +776,7 @@ const getSelectedMonthSalary = async (req, res) => {
 
   // Fetch the salary data from the database
   try {
-    const getById = await prisma.salaryDetails.findFirst({
+    const getById = await prisma.salaryDetails.findMany({
       where: {
         staffId,  // Matching the staff ID
         effective_date: {
@@ -758,9 +784,15 @@ const getSelectedMonthSalary = async (req, res) => {
           lt: new Date(targetYear, targetMonth, 1), // Start of the next month
         },
       },
+
       include: {
         earnings: true,
         deductions: true,
+        Staff: {
+          include: {
+            User: true,
+          },
+        },
       },
     });
 

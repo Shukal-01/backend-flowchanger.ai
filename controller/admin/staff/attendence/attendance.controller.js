@@ -257,6 +257,7 @@ const getSingleStaffAttendance = async (req, res) => {
                         Overtime: true,
                         punchIn: true,
                         punchOut: true,
+
                         staff: {
                             include: {
                                 User: true,
