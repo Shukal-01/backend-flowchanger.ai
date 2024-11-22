@@ -15,7 +15,7 @@ const addOvertimeData = async (req, res) => {
 
     // Validate input
     if (!staffId && !punchRecordId) {
-        return res.status(400).json({ error: "staffId and punchRecordId are required." });
+        return res.status(400).json({ message: "staffId and punchRecordId are required." });
     }
 
     try {
@@ -69,8 +69,8 @@ const addOvertimeData = async (req, res) => {
 
         return res.status(201).json({ message: "Overtime created successfully", overtime });
     } catch (error) {
-        console.error("Error adding or updating overtime:", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Failed to add or update overtime:", error.message);
+        res.status(500).json({ message: "Failed to add or update overtime", error: error.message });
     }
 };
 

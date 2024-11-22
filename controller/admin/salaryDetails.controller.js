@@ -682,23 +682,49 @@ const deleteEarningsByID = async (req, res) => {
 };
 
 // get current month salary by staffId
-
 const getCurrentMonthSalary = async (req, res) => {
   const { staffId } = req.params;
+
+  // Get current month and year
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-based index, so we add 1
+  const currentYear = currentDate.getFullYear();
+
   try {
-    const getById = await prisma.salaryDetails.findUnique({
-      where: { staffId },
+    const getById = await prisma.salaryDetails.findFirst({
+      where: {
+        staffId,
+        effective_date: {
+          // Find the salary data where the effective date is in the current month and year
+          gte: new Date(currentYear, currentMonth - 1, 1), // Start of the current month
+          lt: new Date(currentYear, currentMonth, 1), // Start of the next month
+        },
+      },
+      include: {
+        earnings: true,
+        deductions: true,
+      },
     });
-    return res
-      .status(200)
-      .json({ status: 200, message: "Get Current Month Salary Data By ID!", data: getById });
+
+    if (getById) {
+      return res
+        .status(200)
+        .json({ status: 200, message: "Get Current Month Salary Data By ID!", data: getById });
+    } else {
+      return res
+        .status(404)
+        .json({ status: 404, message: "No salary data found for this month!" });
+    }
   } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Failed To get Current Month Salary Data By ID!" });
+      .json({ status: 500, message: "Failed to get current month salary data by ID!" });
   }
 };
+
+
+
 
 const getSelectedMonthSalary = async (req, res) => {
   const { staffId, month, year } = req.params; // Extract staffId, month, and year from URL params
