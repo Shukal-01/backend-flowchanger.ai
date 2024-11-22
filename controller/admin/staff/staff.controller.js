@@ -35,6 +35,18 @@ const createStaff = async (req, res) => {
   } = validation.data;
 
   try {
+    const existingEmail = await prisma.user.findUnique({
+      where: {
+        email: official_email, // Check if email exists
+      },
+    });
+
+    if (existingEmail) {
+      // If email exists, return an error response
+      return res.status(400).json({
+        message: "Email already exists!",
+      });
+    }
     const user = await prisma.user.create({
       data: {
         name,
@@ -105,12 +117,36 @@ const updateStaff = async (req, res) => {
     emergency_contact_mobile,
     emergency_contact_relation,
     emergency_contact_address,
-    name, // Updated field from User model,
+    name,
     status,
     employment
   } = validation.data;
 
   try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: official_email }, // Check for email
+          { mobile: mobile } // Check for mobile
+        ]
+      },
+    });
+
+    if (existingUser && existingUser.id !== id) {
+      // If an email exists
+      if (existingUser.email === official_email) {
+        return res.status(400).json({
+          message: "Email already exists!",
+        });
+      }
+
+      // If a mobile exists
+      if (existingUser.mobile === mobile) {
+        return res.status(400).json({
+          message: "Mobile already exists!",
+        });
+      }
+    }
     // Update user details if necessary
     await prisma.user.update({
       where: { id: id }, // Assuming the `id` corresponds to the User model

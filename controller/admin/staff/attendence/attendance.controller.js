@@ -10,9 +10,9 @@ const allStaffAttendanceByDate = async (req, res) => {
             const requestedDate = new Date(year, month - 1, day);
             const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0));
             const endOfDay = new Date(startOfDay.getTime() + 86400000);
+
             // Get the current date to ensure no future dates are handled
             const currentDate = new Date();
-            console.log(currentDate)
             currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
 
             // Check if requested date is in the future
@@ -43,6 +43,7 @@ const allStaffAttendanceByDate = async (req, res) => {
             }
 
             const records = [];
+
             for (const staff of eligibleStaff) {
                 const { id, date_of_joining } = staff;
                 const joiningDate = new Date(date_of_joining);
@@ -66,11 +67,11 @@ const allStaffAttendanceByDate = async (req, res) => {
                     include: {
                         punchIn: true,
                         punchOut: true,
+                        fine: true,
+                        Overtime: true,
                         staff: {
                             include: {
                                 User: true,
-                                Fine: true,
-                                Overtime: true,
                             },
                         },
                     },
@@ -86,11 +87,11 @@ const allStaffAttendanceByDate = async (req, res) => {
                                 },
                             },
                             punchDate: startOfDay,
-                            // entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
                             status: 'ABSENT',
                         },
                     });
                 }
+
                 records.push({
                     staffId: id,
                     punchRecord,
@@ -109,6 +110,7 @@ const allStaffAttendanceByDate = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch staff punch records." });
     }
 };
+
 // single staff Attendance get
 
 const getSingleStaffAttendance = async (req, res) => {
@@ -273,17 +275,6 @@ const getSingleStaffAttendance = async (req, res) => {
                             staff: { connect: { id } },
                             punchDate: currentDay,
                             status: 'ABSENT',
-                        },
-                        include: {
-                            fine: true,
-                            Overtime: true,
-                            punchIn: true,
-                            punchOut: true,
-                            staff: {
-                                include: {
-                                    User: true,
-                                },
-                            },
                         },
                     });
                     records.push(newPunchRecord);

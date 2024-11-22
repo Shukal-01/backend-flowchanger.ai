@@ -174,7 +174,7 @@ const addOrUpdateSalaryDetails = async (req, res) => {
 const getSalaryDetailsById = async (req, res) => {
   const { staffId } = req.params;
   try {
-    const getById = await prisma.salaryDetails.findFirst({
+    const getById = await prisma.salaryDetails.findMany({
       where: { staffId },
       include: {
         earnings: true,
@@ -186,7 +186,7 @@ const getSalaryDetailsById = async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ status: 500, message: "Failed To get Salary Data By ID!" });
+      .json({ status: 500, message: "Failed To get Salary Data ByID!" });
   }
 };
 
@@ -681,6 +681,86 @@ const deleteEarningsByID = async (req, res) => {
   }
 };
 
+// get current month salary by staffId
+
+const getCurrentMonthSalary = async (req, res) => {
+  const { staffId } = req.params;
+  try {
+    const getById = await prisma.salaryDetails.findUnique({
+      where: { staffId },
+    });
+    return res
+      .status(200)
+      .json({ status: 200, message: "Get Current Month Salary Data By ID!", data: getById });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ status: 500, message: "Failed To get Current Month Salary Data By ID!" });
+  }
+};
+
+const getSelectedMonthSalary = async (req, res) => {
+  const { staffId, month, year } = req.params; // Extract staffId, month, and year from URL params
+
+  // Ensure the month and year are valid
+  const targetMonth = parseInt(month, 10);
+  const targetYear = parseInt(year, 10);
+
+  // Validate the month and year
+  if (isNaN(targetMonth) || targetMonth < 1 || targetMonth > 12) {
+    return res.status(400).json({
+      status: 400,
+      message: "Invalid month provided. Please provide a valid month (1-12).",
+    });
+  }
+
+  if (isNaN(targetYear) || targetYear < 1900 || targetYear > new Date().getFullYear()) {
+    return res.status(400).json({
+      status: 400,
+      message: "Invalid year provided. Please provide a valid year.",
+    });
+  }
+
+  // Fetch the salary data from the database
+  try {
+    const getById = await prisma.salaryDetails.findFirst({
+      where: {
+        staffId,  // Matching the staff ID
+        effective_date: {
+          gte: new Date(targetYear, targetMonth - 1, 1), // Start of the target month
+          lt: new Date(targetYear, targetMonth, 1), // Start of the next month
+        },
+      },
+      include: {
+        earnings: true,
+        deductions: true,
+      },
+    });
+
+    // Check if data is found
+    if (getById) {
+      return res.status(200).json({
+        status: 200,
+        message: `Get Salary Data for Staff ID: ${staffId} for Month: ${targetMonth}/${targetYear}`,
+        data: getById,
+      });
+    } else {
+      return res.status(404).json({
+        status: 404,
+        message: `No salary data found for month: ${targetMonth}/${targetYear}!`,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      status: 500,
+      message: "Failed to get salary data by staffId and month/year!",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addOrUpdateSalaryDetails,
   deductions,
@@ -695,5 +775,7 @@ module.exports = {
   getAllEarningsData,
   getDeductionById,
   getAllDeductions,
-  deleteEarningsByID
+  deleteEarningsByID,
+  getCurrentMonthSalary,
+  getSelectedMonthSalary,
 };
