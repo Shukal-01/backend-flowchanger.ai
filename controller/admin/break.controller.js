@@ -98,11 +98,15 @@ async function createStartBreak(req, res) {
             });
 
             // Create the breakRecord entry
+            const indiaTime = new Date().toLocaleString("en-US", {
+                timeZone: "Asia/Kolkata",
+            });
+            let indianTime = new Date(indiaTime);
             const breakRecord = await prisma.breakRecord.create({
                 data: {
                     staffId: start.staffId,
                     startBreakId: startBreak.id,
-                    breakDate: new Date(),
+                    breakDate: indianTime,
                 },
             });
 
@@ -157,7 +161,7 @@ const getBreakRecordByStaffId = async (req, res) => {
 
                 // Combine startBreak and endBreak into a single object
                 return {
-                    breakDate: endBreak.endBreakTime, // Use endBreak's time for the breakDate
+                    // breakDate: endBreak.endBreakTime, // Use endBreak's time for the breakDate
                     startBreak: startBreak || null,  // Add startBreak if found, else null
                     endBreak: endBreak,
                 };
@@ -292,12 +296,16 @@ async function createEndBreak(req, res) {
                 },
             });
 
-            // Create the breakRecord entry             
+            // Create the breakRecord entry 
+            const indiaTime = new Date().toLocaleString("en-US", {
+                timeZone: "Asia/Kolkata",
+            });
+            let indianTime = new Date(indiaTime);
             const endBreakRecord = await prisma.breakRecord.create({
                 data: {
                     staffId: staffId,
                     endBreakId: endBreak.id, // Reference the newly created endBreak ID
-                    breakDate: new Date(),   // Use the current date as breakDate
+                    breakDate: indianTime,   // Use the current date as breakDate
                 },
             });
 

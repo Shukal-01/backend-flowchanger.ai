@@ -588,6 +588,7 @@ model PunchRecords {
   startBreak  StartBreak[]
   endBreak    EndBreak[]
   breakRecord breakRecord?
+  // breakRecord breakRecord?      @relation(fields: [id], references: [punchRecordId], onDelete: Cascade)
 
   @@unique([staffId, punchDate])
 }

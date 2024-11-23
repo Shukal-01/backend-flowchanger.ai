@@ -335,9 +335,120 @@ const updatePunchRecordStatus = async (req, res) => {
     }
 };
 
+// get breakRecord data by staffId and date/month/year
+const getBreakRecordByStaffId = async (req, res) => {
+    try {
+        const { staffId } = req.params; // Get the staffId from URL parameters
+        const { date } = req.query; // Get the date (format: 21/11/2024) from query parameters
+
+        if (!date) {
+            return res.status(400).json({ error: "Date is required in format DD/MM/YYYY" });
+        }
+
+        // Parse the input date string
+        const [day, month, year] = date.split("/");
+
+        // Start of the day in IST
+        const startOfDayIST = new Date(`${year}-${month}-${day}T00:00:00`);
+        const indiaStartTime = new Date(
+            startOfDayIST.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+        );
+
+        // End of the day in IST
+        const endOfDayIST = new Date(`${year}-${month}-${day}T23:59:59`);
+        const indiaEndTime = new Date(
+            endOfDayIST.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+        );
+
+        // Fetch all startBreaks for the given staffId and date
+        const startBreaks = await prisma.startBreak.findMany({
+            where: {
+                staffId: staffId,
+                startBreakTime: {
+                    gte: indiaStartTime, // Start of the day in IST
+                    lte: indiaEndTime,   // End of the day in IST
+                },
+            },
+            orderBy: { startBreakTime: "desc" }, // Sort by latest startBreakTime
+        });
+
+        if (startBreaks.length === 0) {
+            return res.status(404).json({ message: "No break records found for this staff ID on the given date" });
+        }
+
+        // Fetch corresponding endBreaks and merge them
+        const breakRecords = await Promise.all(
+            startBreaks.map(async (startBreak) => {
+                // Find the corresponding endBreak for this startBreak
+                const endBreak = await prisma.endBreak.findFirst({
+                    where: {
+                        staffId: staffId,
+                        endBreakTime: {
+                            gte: startBreak.startBreakTime, // Must be after or equal to the startBreak time
+                            lte: indiaEndTime, // Ensure it's within the same day
+                        },
+                    },
+                    orderBy: { endBreakTime: "asc" }, // Get the earliest matching endBreak
+                });
+
+                // Combine startBreak and endBreak into a single object
+                return {
+                    breakDate: new Date(startBreak.startBreakTime).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                    }),
+                    startBreak: {
+                        ...startBreak,
+                        startBreakTime: new Date(startBreak.startBreakTime).toLocaleString(
+                            "en-IN",
+                            {
+                                timeZone: "Asia/Kolkata",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                            }
+                        ),
+                    },
+                    endBreak: endBreak
+                        ? {
+                            ...endBreak,
+                            endBreakTime: new Date(endBreak.endBreakTime).toLocaleString(
+                                "en-IN",
+                                {
+                                    timeZone: "Asia/Kolkata",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                }
+                            ),
+                        }
+                        : null, // If no endBreak, keep it null
+                };
+            })
+        );
+
+        // Return the combined break records as a response
+        return res.status(200).json({
+            message: `Break Records for ${date}`,
+            breakRecords,
+        });
+    } catch (error) {
+        console.error("Error fetching break records:", error);
+
+        // Return an error response for any issues during the process
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+
+
 
 module.exports = {
     allStaffAttendanceByDate,
     updatePunchRecordStatus,
     getSingleStaffAttendance,
+    getBreakRecordByStaffId
 };
