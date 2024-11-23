@@ -101,8 +101,8 @@ async function createStartBreak(req, res) {
             const breakRecord = await prisma.breakRecord.create({
                 data: {
                     staffId: start.staffId,
-                    startBreakId: startBreak.id, // Link the newly created startBreak
-                    breakDate: new Date(), // Store the current date
+                    startBreakId: startBreak.id,
+                    breakDate: new Date(),
                 },
             });
 
@@ -127,33 +127,56 @@ async function createStartBreak(req, res) {
 
 // get break record by staff id
 
-// const getBreakRecordByStaffId = async (req, res) => {
-//     try {
-//         const { staffId } = req.params; // Get the staffId from URL parameters
+const getBreakRecordByStaffId = async (req, res) => {
+    try {
+        const { staffId } = req.params; // Get the staffId from URL parameters
 
-//         // Fetch break records from the database for the given staffId
-//         const breakRecords = await prisma.breakRecord.findFirst({
-//             where: {
-//                 staffId: staffId, // Ensure staffId is treated as an integer
-//             },
-//             orderBy: {
-//                 breakDate: "desc", // Sort the records by breakDate, latest first
-//             },
-//         });
+        // Fetch all endBreaks for the given staffId
+        const endBreaks = await prisma.endBreak.findMany({
+            where: { staffId: staffId }, // Fetch endBreaks for this staffId
+            orderBy: { endBreakTime: "desc" }, // Sort by latest endBreakTime
+        });
 
-//         if (breakRecords.length === 0) {
-//             return res.status(404).json({ message: "No break records found for this staff ID" });
-//         }
+        if (endBreaks.length === 0) {
+            return res.status(404).json({ message: "No break records found for this staff ID" });
+        }
 
-//         // Return the break records as a response
-//         return res.status(200).json(breakRecords);
-//     } catch (error) {
-//         console.error("Error fetching break records:", error);
+        // Fetch corresponding startBreaks and merge them
+        const breakRecords = await Promise.all(
+            endBreaks.map(async (endBreak) => {
+                // Find the latest startBreak before this endBreak
+                const startBreak = await prisma.startBreak.findFirst({
+                    where: {
+                        staffId: staffId,
+                        startBreakTime: {
+                            lte: endBreak.endBreakTime, // Must be before or equal to the endBreak time
+                        },
+                    },
+                    orderBy: { startBreakTime: "desc" }, // Get the latest startBreak
+                });
 
-//         // Return an error response for any issues during the process
-//         return res.status(500).json({ error: "Internal Server Error" });
-//     }
-// };
+                // Combine startBreak and endBreak into a single object
+                return {
+                    breakDate: endBreak.endBreakTime, // Use endBreak's time for the breakDate
+                    startBreak: startBreak || null,  // Add startBreak if found, else null
+                    endBreak: endBreak,
+                };
+            })
+        );
+
+        // Return the combined break records as a response
+        return res.status(200).json({
+            message: "Break Records",
+            breakRecords,
+        });
+    } catch (error) {
+        console.error("Error fetching break records:", error);
+
+        // Return an error response for any issues during the process
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 
 
 async function getAllStartBreaks(req, res) {
@@ -257,6 +280,7 @@ async function createEndBreak(req, res) {
 
         // Use a transaction to ensure the integrity of related records
         const result = await prisma.$transaction(async (prisma) => {
+
             // Create the new endBreak record
             const endBreak = await prisma.endBreak.create({
                 data: {
@@ -268,7 +292,17 @@ async function createEndBreak(req, res) {
                 },
             });
 
-            return { endBreak };
+            // Create the breakRecord entry             
+            const endBreakRecord = await prisma.breakRecord.create({
+                data: {
+                    staffId: staffId,
+                    endBreakId: endBreak.id, // Reference the newly created endBreak ID
+                    breakDate: new Date(),   // Use the current date as breakDate
+                },
+            });
+
+
+            return { endBreak, endBreakRecord };
         });
 
         return res.status(201).json(result); // Return the created records
@@ -309,5 +343,5 @@ async function getEndBreakByStaffId(req, res) {
     }
 }
 
-module.exports = { createStartBreak, createEndBreak, getAllStartBreaks, getStartBreakByStaffId, getAllEndBreaks, getEndBreakByStaffId };
+module.exports = { createStartBreak, createEndBreak, getAllStartBreaks, getStartBreakByStaffId, getAllEndBreaks, getEndBreakByStaffId, getBreakRecordByStaffId };
 

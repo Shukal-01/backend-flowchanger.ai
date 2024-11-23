@@ -587,7 +587,7 @@ model PunchRecords {
   Overtime    Overtime?
   startBreak  StartBreak[]
   endBreak    EndBreak[]
-  breakRecord breakRecord[]
+  breakRecord breakRecord?
 
   @@unique([staffId, punchDate])
 }
@@ -599,7 +599,7 @@ model breakRecord {
   startBreak    StartBreak?   @relation(fields: [startBreakId], references: [id], onDelete: Cascade)
   endBreakId    String?
   endBreak      EndBreak?     @relation(fields: [endBreakId], references: [id], onDelete: Cascade)
-  punchRecordId String?
+  punchRecordId String?       @unique
   punchRecord   PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
   staffId       String?
   staff         StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)

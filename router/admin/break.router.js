@@ -1,7 +1,7 @@
 const express = require("express");
 const breakRouter = express.Router();
 const { uploadAndSaveToCloudinary } = require("../../middleware/multer.middleware.js")
-const { createStartBreak, createEndBreak, getAllStartBreaks, getStartBreakByStaffId, getAllEndBreaks, getEndBreakByStaffId } = require("../../controller/admin/break.controller.js");
+const { createStartBreak, createEndBreak, getAllStartBreaks, getStartBreakByStaffId, getAllEndBreaks, getEndBreakByStaffId, getBreakRecordByStaffId } = require("../../controller/admin/break.controller.js");
 const authorizationMiddleware = require("../../middleware/auth.js");
 
 breakRouter.post("/start", uploadAndSaveToCloudinary("photoUrl"), authorizationMiddleware, createStartBreak);
@@ -11,6 +11,6 @@ breakRouter.get("/end", getAllEndBreaks);
 breakRouter.get("/start/:id", getStartBreakByStaffId);
 breakRouter.get("/end/:id", getEndBreakByStaffId);
 
-// breakRouter.get("/breakRecord/:staffId", getBreakRecordByStaffId);
+breakRouter.get("/breakRecord/:staffId", getBreakRecordByStaffId);
 
 module.exports = breakRouter;

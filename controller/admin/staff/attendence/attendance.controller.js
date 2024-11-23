@@ -180,8 +180,9 @@ const getSingleStaffAttendance = async (req, res) => {
                     Overtime: true,
                     punchIn: true,
                     punchOut: true,
-                    endBreak: true,
-                    startBreak: true,
+                    // endBreak: true,
+                    // startBreak: true,
+                    breakRecord: true,
                     staff: {
                         include: {
                             User: true,
@@ -263,6 +264,7 @@ const getSingleStaffAttendance = async (req, res) => {
                         punchOut: true,
                         endBreak: true,
                         startBreak: true,
+                        breakRecord: true,
                         staff: {
                             include: {
                                 User: true,

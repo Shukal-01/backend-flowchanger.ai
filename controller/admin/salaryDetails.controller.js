@@ -243,6 +243,15 @@ const getAllSalaryData = async (req, res) => {
       include: {
         earnings: true,
         deductions: true,
+        Staff: {
+          include: {
+            User: true,
+            Overtime: true,
+            Fine: true,
+            Earning: true,
+            Deduction: true,
+          },
+        },
       },
     });
     return res.status(200).json({ status: 200, message: "Get All SalaryData!", data: getAll });
@@ -718,8 +727,8 @@ const getCurrentMonthSalary = async (req, res) => {
         },
       },
       include: {
-        // earnings: true,
-        // deductions: true,
+        earnings: true,
+        deductions: true,
         Staff: {
           include: {
             User: true,
@@ -795,6 +804,10 @@ const getSelectedMonthSalary = async (req, res) => {
         Staff: {
           include: {
             User: true,
+            Overtime: true,
+            Fine: true,
+            Earning: true,
+            Deduction: true,
           },
         },
       },
