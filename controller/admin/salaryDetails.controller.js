@@ -718,11 +718,15 @@ const getCurrentMonthSalary = async (req, res) => {
         },
       },
       include: {
-        earnings: true,
-        deductions: true,
+        // earnings: true,
+        // deductions: true,
         Staff: {
           include: {
             User: true,
+            Overtime: true,
+            Fine: true,
+            Earning: true,
+            Deduction: true,
           },
         },
       },

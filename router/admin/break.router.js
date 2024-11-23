@@ -11,4 +11,6 @@ breakRouter.get("/end", getAllEndBreaks);
 breakRouter.get("/start/:id", getStartBreakByStaffId);
 breakRouter.get("/end/:id", getEndBreakByStaffId);
 
+// breakRouter.get("/breakRecord/:staffId", getBreakRecordByStaffId);
+
 module.exports = breakRouter;

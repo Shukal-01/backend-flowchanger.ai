@@ -69,6 +69,8 @@ const allStaffAttendanceByDate = async (req, res) => {
                         punchOut: true,
                         fine: true,
                         Overtime: true,
+                        endBreak: true,
+                        startBreak: true,
                         staff: {
                             include: {
                                 User: true,

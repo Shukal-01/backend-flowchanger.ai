@@ -133,7 +133,7 @@ const searchProjectStatusByName = async (req, res) => {
                 },
             },
         });
-        res.status(200).json({ message: "Successfully searching project status", projects });
+        res.status(200).json({ message: "Successfully searching project status", SearchProjectStatus });
     } catch (error) {
         console.error('Failed to search project status:', error.message);
         res.status(500).json({ message: 'Failed to search project status' + error.message });

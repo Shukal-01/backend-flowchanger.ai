@@ -136,6 +136,7 @@ model StaffDetails {
   past_Employment          PastEmployment?
   Fine                     Fine[]
   Overtime                 Overtime[]
+  breakRecord              breakRecord[]
 }
 
 enum UserType {
@@ -572,22 +573,36 @@ model FlexibleShift {
 }
 
 model PunchRecords {
-  id         String            @id @default(dbgenerated("gen_random_uuid()"))
-  punchDate  DateTime          @default(now())
-  isApproved Boolean           @default(false)
-  punchInId  String?           @unique
-  punchIn    PunchIn?          @relation(fields: [punchInId], references: [id], onDelete: Cascade)
-  punchOutId String?           @unique
-  punchOut   PunchOut?         @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
-  staffId    String?
-  staff      StaffDetails?     @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  status     punchRecordStatus @default(ABSENT)
-  fine       Fine?
-  Overtime   Overtime?
-  startBreak StartBreak?
-  endBreak   EndBreak?
+  id          String            @id @default(dbgenerated("gen_random_uuid()"))
+  punchDate   DateTime          @default(now())
+  isApproved  Boolean           @default(false)
+  punchInId   String?           @unique
+  punchIn     PunchIn?          @relation(fields: [punchInId], references: [id], onDelete: Cascade)
+  punchOutId  String?           @unique
+  punchOut    PunchOut?         @relation(fields: [punchOutId], references: [id], onDelete: Cascade)
+  staffId     String?
+  staff       StaffDetails?     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  status      punchRecordStatus @default(ABSENT)
+  fine        Fine?
+  Overtime    Overtime?
+  startBreak  StartBreak[]
+  endBreak    EndBreak[]
+  breakRecord breakRecord[]
 
   @@unique([staffId, punchDate])
+}
+
+model breakRecord {
+  id            String        @id @default(dbgenerated("gen_random_uuid()"))
+  breakDate     DateTime      @default(now())
+  startBreakId  String?
+  startBreak    StartBreak?   @relation(fields: [startBreakId], references: [id], onDelete: Cascade)
+  endBreakId    String?
+  endBreak      EndBreak?     @relation(fields: [endBreakId], references: [id], onDelete: Cascade)
+  punchRecordId String?
+  punchRecord   PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  staffId       String?
+  staff         StaffDetails? @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 enum punchRecordStatus {
@@ -675,31 +690,37 @@ enum BreakMethod {
 }
 
 model StartBreak {
-  id             String        @id @default(dbgenerated("gen_random_uuid()"))
-  breakMethod    BreakMethod   @default(PHOTOCLICK)
-  startBreakTime DateTime      @default(now())
+  id             String       @id @default(dbgenerated("gen_random_uuid()"))
+  breakMethod    BreakMethod  @default(PHOTOCLICK)
+  startBreakTime DateTime     @default(now())
   biometricData  String?
   qrCodeValue    String?
   photoUrl       String?
   location       String
   staffId        String
-  punchRecordId  String?       @unique
-  staff          StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  punchRecord    PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
+  punchRecordId  String?      @unique
+  staff          StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  breakRecord    breakRecord[]
+  PunchRecords   PunchRecords? @relation(fields: [punchRecordsId], references: [id])
+  punchRecordsId String?
 }
 
 model EndBreak {
-  id            String        @id @default(dbgenerated("gen_random_uuid()"))
-  breakMethod   BreakMethod   @default(PHOTOCLICK)
-  endBreakTime  DateTime      @default(now())
+  id            String       @id @default(dbgenerated("gen_random_uuid()"))
+  breakMethod   BreakMethod  @default(PHOTOCLICK)
+  endBreakTime  DateTime     @default(now())
   biometricData String?
   qrCodeValue   String?
   photoUrl      String?
   location      String
   staffId       String
-  punchRecordId String?       @unique
-  punchRecord   PunchRecords? @relation(fields: [punchRecordId], references: [id], onDelete: Cascade)
-  staff         StaffDetails  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  punchRecordId String?      @unique
+  staff         StaffDetails @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  breakRecord    breakRecord[]
+  PunchRecords   PunchRecords? @relation(fields: [punchRecordsId], references: [id])
+  punchRecordsId String?
 }
 
 model TaskStatus {
