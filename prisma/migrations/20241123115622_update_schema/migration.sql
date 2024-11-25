@@ -556,6 +556,18 @@ CREATE TABLE "PunchRecords" (
 );
 
 -- CreateTable
+CREATE TABLE "breakRecord" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "breakDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "startBreakId" TEXT,
+    "endBreakId" TEXT,
+    "punchRecordId" TEXT,
+    "staffId" TEXT,
+
+    CONSTRAINT "breakRecord_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Fine" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "lateEntryFineAmount" DOUBLE PRECISION DEFAULT 1,
@@ -628,6 +640,8 @@ CREATE TABLE "StartBreak" (
     "photoUrl" TEXT,
     "location" TEXT NOT NULL,
     "staffId" TEXT NOT NULL,
+    "punchRecordId" TEXT,
+    "punchRecordsId" TEXT,
 
     CONSTRAINT "StartBreak_pkey" PRIMARY KEY ("id")
 );
@@ -642,6 +656,8 @@ CREATE TABLE "EndBreak" (
     "photoUrl" TEXT,
     "location" TEXT NOT NULL,
     "staffId" TEXT NOT NULL,
+    "punchRecordId" TEXT,
+    "punchRecordsId" TEXT,
 
     CONSTRAINT "EndBreak_pkey" PRIMARY KEY ("id")
 );
@@ -950,10 +966,19 @@ CREATE UNIQUE INDEX "PunchRecords_punchOutId_key" ON "PunchRecords"("punchOutId"
 CREATE UNIQUE INDEX "PunchRecords_staffId_punchDate_key" ON "PunchRecords"("staffId", "punchDate");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "breakRecord_punchRecordId_key" ON "breakRecord"("punchRecordId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Fine_punchRecordId_key" ON "Fine"("punchRecordId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Overtime_punchRecordId_key" ON "Overtime"("punchRecordId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "StartBreak_punchRecordId_key" ON "StartBreak"("punchRecordId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EndBreak_punchRecordId_key" ON "EndBreak"("punchRecordId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ClientDetails_userId_key" ON "ClientDetails"("userId");
@@ -1124,6 +1149,18 @@ ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_punchOutId_fkey" FOREIGN
 ALTER TABLE "PunchRecords" ADD CONSTRAINT "PunchRecords_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "breakRecord" ADD CONSTRAINT "breakRecord_startBreakId_fkey" FOREIGN KEY ("startBreakId") REFERENCES "StartBreak"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "breakRecord" ADD CONSTRAINT "breakRecord_endBreakId_fkey" FOREIGN KEY ("endBreakId") REFERENCES "EndBreak"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "breakRecord" ADD CONSTRAINT "breakRecord_punchRecordId_fkey" FOREIGN KEY ("punchRecordId") REFERENCES "PunchRecords"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "breakRecord" ADD CONSTRAINT "breakRecord_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Fine" ADD CONSTRAINT "Fine_shiftIds_fkey" FOREIGN KEY ("shiftIds") REFERENCES "Shifts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1145,7 +1182,13 @@ ALTER TABLE "Overtime" ADD CONSTRAINT "Overtime_staffId_fkey" FOREIGN KEY ("staf
 ALTER TABLE "StartBreak" ADD CONSTRAINT "StartBreak_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "StartBreak" ADD CONSTRAINT "StartBreak_punchRecordsId_fkey" FOREIGN KEY ("punchRecordsId") REFERENCES "PunchRecords"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "EndBreak" ADD CONSTRAINT "EndBreak_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EndBreak" ADD CONSTRAINT "EndBreak_punchRecordsId_fkey" FOREIGN KEY ("punchRecordsId") REFERENCES "PunchRecords"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Project" ADD CONSTRAINT "Project_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "ClientDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;

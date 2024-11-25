@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 const addFineData = async (req, res) => {
   const {
     staffId,
+    lateEntryFineHoursTime,
+    excessBreakFineHoursTime,
+    earlyOutFineHoursTime,
     lateEntryFineAmount,
     lateEntryAmount,
     excessBreakFineAmount,
@@ -44,6 +47,9 @@ const addFineData = async (req, res) => {
       const fine = await prisma.fine.update({
         where: { id: existingFine.id },
         data: {
+          lateEntryFineHoursTime,
+          excessBreakFineHoursTime,
+          earlyOutFineHoursTime,
           lateEntryFineAmount,
           lateEntryAmount,
           excessBreakFineAmount,
@@ -62,6 +68,9 @@ const addFineData = async (req, res) => {
     const fine = await prisma.fine.create({
       data: {
         staffId,
+        lateEntryFineHoursTime,
+        excessBreakFineHoursTime,
+        earlyOutFineHoursTime,
         lateEntryFineAmount,
         lateEntryAmount,
         excessBreakFineAmount,
@@ -135,6 +144,9 @@ const getFinesByDate = async (req, res) => {
 const updateFine = async (req, res) => {
   const { id } = req.params;
   const {
+    lateEntryFineHoursTime,
+    excessBreakFineHoursTime,
+    earlyOutFineHoursTime,
     lateEntryFineAmount,
     lateEntryAmount,
     excessBreakFineAmount,
@@ -151,6 +163,9 @@ const updateFine = async (req, res) => {
         id: id,
       },
       data: {
+        lateEntryFineHoursTime,
+        excessBreakFineHoursTime,
+        earlyOutFineHoursTime,
         lateEntryFineAmount,
         lateEntryAmount,
         excessBreakFineAmount,
@@ -193,6 +208,9 @@ const updateMultipleFineData = async (req, res) => {
       return prisma.fine.update({
         where: { id: fine.id },
         data: {
+          lateEntryFineHoursTime: fine.lateEntryFineHoursTime,
+          excessBreakFineHoursTime: fine.excessBreakFineHoursTime,
+          earlyOutFineHoursTime: fine.earlyOutFineHoursTime,
           lateEntryFineAmount: fine.lateEntryFineAmount,
           lateEntryAmount: fine.lateEntryAmount,
           excessBreakFineAmount: fine.excessBreakFineAmount,

@@ -177,7 +177,7 @@ const getBreakRecordByStaffId = async (req, res) => {
         console.error("Error fetching break records:", error);
 
         // Return an error response for any issues during the process
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ message: "Break Records not fetched", error: error.message });
     }
 };
 

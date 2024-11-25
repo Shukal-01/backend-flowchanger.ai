@@ -5,6 +5,8 @@ const addOvertimeData = async (req, res) => {
     const {
         staffId,
         punchRecordId,
+        earlyCommingEntryHoursTime,
+        lateOutOvertimeHoursTime,
         earlyCommingEntryAmount,
         earlyEntryAmount,
         lateOutOvertimeAmount,
@@ -42,6 +44,8 @@ const addOvertimeData = async (req, res) => {
                 where: { id: existingOvertime.id }, // Use the existing overtime's ID to update
                 data: {
                     earlyCommingEntryAmount,
+                    earlyCommingEntryHoursTime,
+                    lateOutOvertimeHoursTime,
                     earlyEntryAmount,
                     lateOutOvertimeAmount,
                     lateOutAmount,
@@ -58,6 +62,8 @@ const addOvertimeData = async (req, res) => {
             data: {
                 staffId,
                 punchRecordId: punchRecord.id,
+                earlyCommingEntryHoursTime,
+                lateOutOvertimeHoursTime,
                 earlyCommingEntryAmount,
                 earlyEntryAmount,
                 lateOutOvertimeAmount,
@@ -97,6 +103,8 @@ const updateMultipleOvertimeData = async (req, res) => {
                 where: { id: overtime.id },
                 data: {
                     earlyCommingEntryAmount: overtime.earlyCommingEntryAmount,
+                    earlyCommingEntryHoursTime: overtime.earlyCommingEntryHoursTime,
+                    lateOutOvertimeHoursTime: overtime.lateOutOvertimeHoursTime,
                     earlyEntryAmount: overtime.earlyEntryAmount,
                     lateOutOvertimeAmount: overtime.lateOutOvertimeAmount,
                     lateOutAmount: overtime.lateOutAmount,
