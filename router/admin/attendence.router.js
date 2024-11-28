@@ -12,6 +12,7 @@ const {
   allStaffAttendanceByDate,
   updatePunchRecordStatus,
   getSingleStaffAttendance,
+  getBreakRecordByStaffId,
 } = require("../../controller/admin/staff/attendence/attendance.controller.js");
 
 const attendanceRouter = Router();
@@ -28,5 +29,7 @@ attendanceRouter.patch("/status/:id", updatePunchRecordStatus);
 attendanceRouter.get("/summary", allStaffAttendanceByDate);
 
 attendanceRouter.get("/single/:id", getSingleStaffAttendance);
+
+attendanceRouter.get("/break-record/:staffId", getBreakRecordByStaffId);
 
 module.exports = attendanceRouter;

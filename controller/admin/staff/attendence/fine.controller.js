@@ -6,6 +6,9 @@ const prisma = new PrismaClient();
 const addFineData = async (req, res) => {
   const {
     staffId,
+    lateEntryFineHoursTime,
+    excessBreakFineHoursTime,
+    earlyOutFineHoursTime,
     lateEntryFineAmount,
     lateEntryAmount,
     excessBreakFineAmount,
@@ -14,57 +17,39 @@ const addFineData = async (req, res) => {
     earlyOutAmount,
     totalAmount,
     shiftIds,
+    punchRecordId,
   } = req.body;
 
+  // Validate input
+  if (!staffId && !punchRecordId) {
+    return res.status(400).json({ error: "staffId and punchRecordId are required." });
+  }
+
   try {
-    // Check if the staffId exists in punchRecords
-    const existingPunchRecord = await prisma.punchRecords.findFirst({
-      where: {
-        staffId: staffId,
-      },
+    // Check or create punchRecord
+    let punchRecord = await prisma.punchRecords.findFirst({
+      where: { staffId, id: punchRecordId },
     });
 
-    if (!existingPunchRecord) {
-      // If staffId is not found in punchRecords, create a new record with status 'ABSENT'
-      const newPunchRecord = await prisma.punchRecords.create({
-        data: {
-          staffId: staffId,
-          status: "ABSENT",
-        },
+    if (!punchRecord) {
+      punchRecord = await prisma.punchRecords.create({
+        data: { staffId, status: "ABSENT" },
       });
-      // Create a new fine record with the new punchRecordId
-      const fine = await prisma.fine.create({
-        data: {
-          staffId,
-          lateEntryFineAmount,
-          lateEntryAmount,
-          excessBreakFineAmount,
-          excessBreakAmount,
-          earlyOutFineAmount,
-          earlyOutAmount,
-          totalAmount,
-          shiftIds,
-          punchRecordId: newPunchRecord.id,
-        },
-      });
-
-      return res.status(200).json(fine);
     }
 
-    // Check if a fine record exists for the given punchRecordId
+    // Check or create/update fine
     const existingFine = await prisma.fine.findFirst({
-      where: {
-        punchRecordId: existingPunchRecord.id,
-      },
+      where: { punchRecordId: punchRecord.id },
     });
 
     if (existingFine) {
-      // If fine record exists, update it with new data
+      // Update existing fine
       const fine = await prisma.fine.update({
-        where: {
-          id: existingFine.id, // Use the existing fine's ID to update
-        },
+        where: { id: existingFine.id },
         data: {
+          lateEntryFineHoursTime,
+          excessBreakFineHoursTime,
+          earlyOutFineHoursTime,
           lateEntryFineAmount,
           lateEntryAmount,
           excessBreakFineAmount,
@@ -72,18 +57,20 @@ const addFineData = async (req, res) => {
           earlyOutFineAmount,
           earlyOutAmount,
           totalAmount,
-          shiftIds,
+          shiftIds: JSON.stringify(shiftIds),
         },
       });
 
-      // Respond with the updated fine record
-      return res.status(200).json({ message: "Update fine data", fine });
+      return res.status(200).json({ message: "Fine updated successfully", fine });
     }
 
-    // If no fine record exists, create a new fine record
+    // Create new fine
     const fine = await prisma.fine.create({
       data: {
         staffId,
+        lateEntryFineHoursTime,
+        excessBreakFineHoursTime,
+        earlyOutFineHoursTime,
         lateEntryFineAmount,
         lateEntryAmount,
         excessBreakFineAmount,
@@ -91,17 +78,18 @@ const addFineData = async (req, res) => {
         earlyOutFineAmount,
         earlyOutAmount,
         totalAmount,
-        shiftIds,
-        punchRecordId: existingPunchRecord.id,
+        shiftIds: JSON.stringify(shiftIds),
+        punchRecordId: punchRecord.id,
       },
     });
 
-    return res.status(200).json({ message: "Create fine data", fine });
+    return res.status(201).json({ message: "Fine created successfully", fine });
   } catch (error) {
-    console.error("Error adding or updating fine:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error adding or updating fine:", error.message);
+    res.status(500).json({ message: "Fine not added or updated", error: error.message });
   }
 };
+
 
 
 const getFinesByDate = async (req, res) => {
@@ -156,6 +144,9 @@ const getFinesByDate = async (req, res) => {
 const updateFine = async (req, res) => {
   const { id } = req.params;
   const {
+    lateEntryFineHoursTime,
+    excessBreakFineHoursTime,
+    earlyOutFineHoursTime,
     lateEntryFineAmount,
     lateEntryAmount,
     excessBreakFineAmount,
@@ -172,6 +163,9 @@ const updateFine = async (req, res) => {
         id: id,
       },
       data: {
+        lateEntryFineHoursTime,
+        excessBreakFineHoursTime,
+        earlyOutFineHoursTime,
         lateEntryFineAmount,
         lateEntryAmount,
         excessBreakFineAmount,
@@ -194,16 +188,29 @@ const updateMultipleFineData = async (req, res) => {
   try {
     const { fineUpdates } = req.body;
 
+    // Validate input
     if (!Array.isArray(fineUpdates) || fineUpdates.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "Please provide valid fine updates" });
+      return res.status(400).json({ error: "Please provide valid fine updates" });
     }
 
-    const updatePromises = fineUpdates.map((fine) =>
-      prisma.fine.update({
+    // Iterate over fine updates and validate `punchRecordId` before updating
+    const updatePromises = fineUpdates.map(async (fine) => {
+      // Check if the punchRecordId exists
+      const existingPunchRecord = await prisma.punchRecords.findFirst({
+        where: { id: fine.punchRecordId },
+      });
+
+      if (!existingPunchRecord) {
+        throw new Error(`PunchRecord with ID ${fine.punchRecordId} does not exist.`);
+      }
+
+      // Update fine record
+      return prisma.fine.update({
         where: { id: fine.id },
         data: {
+          lateEntryFineHoursTime: fine.lateEntryFineHoursTime,
+          excessBreakFineHoursTime: fine.excessBreakFineHoursTime,
+          earlyOutFineHoursTime: fine.earlyOutFineHoursTime,
           lateEntryFineAmount: fine.lateEntryFineAmount,
           lateEntryAmount: fine.lateEntryAmount,
           excessBreakFineAmount: fine.excessBreakFineAmount,
@@ -211,19 +218,25 @@ const updateMultipleFineData = async (req, res) => {
           earlyOutFineAmount: fine.earlyOutFineAmount,
           earlyOutAmount: fine.earlyOutAmount,
           totalAmount: fine.totalAmount,
-          shiftIds: fine.shiftIds,
+          shiftIds: JSON.stringify(fine.shiftIds),
         },
-      })
-    );
+      });
+    });
 
+    // Wait for all updates to complete
     const updatedFines = await Promise.all(updatePromises);
 
-    res
-      .status(200)
-      .json({ message: "Fines updated successfully", data: updatedFines });
+    res.status(200).json({ message: "Fines updated successfully", data: updatedFines });
   } catch (error) {
-    console.error("Error updating fine data:", error);
-    res.status(500).json({ message: " please enter a valid fine id" });
+    console.error("Error updating fine data:", error.message);
+
+    // Send specific error message if the punchRecordId is invalid
+    if (error.message.includes("PunchRecord")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    // Send generic error response
+    res.status(500).json({ error: "Internal server error. Please try again later." });
   }
 };
 

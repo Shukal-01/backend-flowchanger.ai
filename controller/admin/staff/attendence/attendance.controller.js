@@ -10,9 +10,9 @@ const allStaffAttendanceByDate = async (req, res) => {
             const requestedDate = new Date(year, month - 1, day);
             const startOfDay = new Date(requestedDate.setHours(0, 0, 0, 0));
             const endOfDay = new Date(startOfDay.getTime() + 86400000);
+
             // Get the current date to ensure no future dates are handled
             const currentDate = new Date();
-            console.log(currentDate)
             currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
 
             // Check if requested date is in the future
@@ -43,6 +43,7 @@ const allStaffAttendanceByDate = async (req, res) => {
             }
 
             const records = [];
+
             for (const staff of eligibleStaff) {
                 const { id, date_of_joining } = staff;
                 const joiningDate = new Date(date_of_joining);
@@ -66,11 +67,13 @@ const allStaffAttendanceByDate = async (req, res) => {
                     include: {
                         punchIn: true,
                         punchOut: true,
+                        fine: true,
+                        Overtime: true,
+                        endBreak: true,
+                        startBreak: true,
                         staff: {
                             include: {
                                 User: true,
-                                Fine: true,
-                                Overtime: true,
                             },
                         },
                     },
@@ -86,11 +89,11 @@ const allStaffAttendanceByDate = async (req, res) => {
                                 },
                             },
                             punchDate: startOfDay,
-                            // entryDate: `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`,
                             status: 'ABSENT',
                         },
                     });
                 }
+
                 records.push({
                     staffId: id,
                     punchRecord,
@@ -109,6 +112,7 @@ const allStaffAttendanceByDate = async (req, res) => {
         return res.status(500).json({ message: "Failed to fetch staff punch records." });
     }
 };
+
 // single staff Attendance get
 
 const getSingleStaffAttendance = async (req, res) => {
@@ -129,9 +133,17 @@ const getSingleStaffAttendance = async (req, res) => {
         let entryCount = 0;
         let createdCount = 0;
 
+        const indiaTime = new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Kolkata",
+        });
+        let indianTime = new Date(indiaTime);
+
+        const currentDate = new Date(indianTime);
+
         // Get the current date to check for future date
-        const currentDate = new Date();
+        // const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); // Reset time for comparison
+
 
         if (type === "day") {
             const [day, month, year] = date.split('/').map(Number);
@@ -164,16 +176,18 @@ const getSingleStaffAttendance = async (req, res) => {
                     },
                 },
                 include: {
-                    staff: {
-                        include: {
-                            User: true,
-                            // Fine: true,
-                        },
-                    },
                     fine: true,
                     Overtime: true,
                     punchIn: true,
                     punchOut: true,
+                    // endBreak: true,
+                    // startBreak: true,
+                    breakRecord: true,
+                    staff: {
+                        include: {
+                            User: true,
+                        },
+                    },
                 },
             });
 
@@ -224,14 +238,14 @@ const getSingleStaffAttendance = async (req, res) => {
 
             const records = [];
 
-            // Loop through punchRecords for the given month
+            // Loop through each day in the requested month
             for (let day = 1; day <= endMonth.getDate(); day++) {
                 const currentDay = new Date(year, month - 1, day);
 
                 // Skip dates before the joining date
                 if (currentDay < startDate) continue;
 
-                // Check if the current day is in the future (do not create records for future dates)
+                // Skip future dates
                 if (currentDay > currentDate) continue;
 
                 // Fetch punch record for the current day
@@ -248,6 +262,9 @@ const getSingleStaffAttendance = async (req, res) => {
                         Overtime: true,
                         punchIn: true,
                         punchOut: true,
+                        endBreak: true,
+                        startBreak: true,
+                        breakRecord: true,
                         staff: {
                             include: {
                                 User: true,
@@ -257,9 +274,10 @@ const getSingleStaffAttendance = async (req, res) => {
                 });
 
                 if (punchRecord) {
-                    records.push(punchRecord); // Add punchRecord with Fine data
+                    // Add existing record with all relational data
+                    records.push(punchRecord);
                 } else {
-                    // If no punch record exists, create a new one
+                    // Create a new record if none exists
                     const newPunchRecord = await prisma.punchRecords.create({
                         data: {
                             staff: { connect: { id } },
@@ -271,7 +289,7 @@ const getSingleStaffAttendance = async (req, res) => {
                 }
             }
 
-            // Send the response
+            // Send the response with all relational data included
             return res.status(200).json({
                 message: `Attendance records for the month fetched successfully.`,
                 attendanceRecords: records,
@@ -285,6 +303,8 @@ const getSingleStaffAttendance = async (req, res) => {
         return res.status(500).json({ message: 'Attendance not fetched', error: error.message });
     }
 };
+
+
 
 const updatePunchRecordStatus = async (req, res) => {
     const { id } = req.params;
@@ -315,9 +335,120 @@ const updatePunchRecordStatus = async (req, res) => {
     }
 };
 
+// get breakRecord data by staffId and date/month/year
+const getBreakRecordByStaffId = async (req, res) => {
+    try {
+        const { staffId } = req.params; // Get the staffId from URL parameters
+        const { date } = req.query; // Get the date (format: 21/11/2024) from query parameters
+
+        if (!date) {
+            return res.status(400).json({ error: "Date is required in format DD/MM/YYYY" });
+        }
+
+        // Parse the input date string
+        const [day, month, year] = date.split("/");
+
+        // Start of the day in IST
+        const startOfDayIST = new Date(`${year}-${month}-${day}T00:00:00`);
+        const indiaStartTime = new Date(
+            startOfDayIST.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+        );
+
+        // End of the day in IST
+        const endOfDayIST = new Date(`${year}-${month}-${day}T23:59:59`);
+        const indiaEndTime = new Date(
+            endOfDayIST.toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+        );
+
+        // Fetch all startBreaks for the given staffId and date
+        const startBreaks = await prisma.startBreak.findMany({
+            where: {
+                staffId: staffId,
+                startBreakTime: {
+                    gte: indiaStartTime, // Start of the day in IST
+                    lte: indiaEndTime,   // End of the day in IST
+                },
+            },
+            orderBy: { startBreakTime: "desc" }, // Sort by latest startBreakTime
+        });
+
+        if (startBreaks.length === 0) {
+            return res.status(404).json({ message: "No break records found for this staff ID on the given date" });
+        }
+
+        // Fetch corresponding endBreaks and merge them
+        const breakRecords = await Promise.all(
+            startBreaks.map(async (startBreak) => {
+                // Find the corresponding endBreak for this startBreak
+                const endBreak = await prisma.endBreak.findFirst({
+                    where: {
+                        staffId: staffId,
+                        endBreakTime: {
+                            gte: startBreak.startBreakTime, // Must be after or equal to the startBreak time
+                            lte: indiaEndTime, // Ensure it's within the same day
+                        },
+                    },
+                    orderBy: { endBreakTime: "asc" }, // Get the earliest matching endBreak
+                });
+
+                // Combine startBreak and endBreak into a single object
+                return {
+                    breakDate: new Date(startBreak.startBreakTime).toLocaleString("en-IN", {
+                        timeZone: "Asia/Kolkata",
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                    }),
+                    startBreak: {
+                        ...startBreak,
+                        startBreakTime: new Date(startBreak.startBreakTime).toLocaleString(
+                            "en-IN",
+                            {
+                                timeZone: "Asia/Kolkata",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                            }
+                        ),
+                    },
+                    endBreak: endBreak
+                        ? {
+                            ...endBreak,
+                            endBreakTime: new Date(endBreak.endBreakTime).toLocaleString(
+                                "en-IN",
+                                {
+                                    timeZone: "Asia/Kolkata",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                }
+                            ),
+                        }
+                        : null, // If no endBreak, keep it null
+                };
+            })
+        );
+
+        // Return the combined break records as a response
+        return res.status(200).json({
+            message: `Break Records for ${date}`,
+            breakRecords,
+        });
+    } catch (error) {
+        console.error("Error fetching break records:", error);
+
+        // Return an error response for any issues during the process
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+
+
+
 
 module.exports = {
     allStaffAttendanceByDate,
     updatePunchRecordStatus,
     getSingleStaffAttendance,
+    getBreakRecordByStaffId
 };
