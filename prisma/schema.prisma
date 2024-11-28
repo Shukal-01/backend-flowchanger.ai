@@ -110,9 +110,10 @@ model StaffDetails {
   blood_group                String?
   branchId                   String?
   // relations
-  department                 Department?                  @relation(fields: [departmentId], references: [id])
-  role                       Role?                        @relation(fields: [roleId], references: [id])
-  User                       User                         @relation(fields: [userId], references: [id])
+  department                 Department?                  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  role                       Role?                        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  User                       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                     Branch?                      @relation(fields: [branchId], references: [id], onDelete: Cascade)
   BankDetails                BankDetails?
   LeavePolicy                LeavePolicy[]
   LeaveBalance               LeaveBalance[]
@@ -141,7 +142,6 @@ model StaffDetails {
   past_Employment            PastEmployment?
   Fine                       Fine[]
   Overtime                   Overtime[]
-  branch                     Branch?                      @relation(fields: [branchId], references: [id])
 }
 
 enum UserType {
