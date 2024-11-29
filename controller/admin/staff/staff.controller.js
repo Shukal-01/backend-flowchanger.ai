@@ -14,8 +14,8 @@ const createStaff = async (req, res) => {
 
   const {
     job_title,
-    branch,
     departmentId,
+    branchId,
     roleId,
     mobile,
     login_otp,
@@ -57,8 +57,8 @@ const createStaff = async (req, res) => {
         staffDetails: {
           create: {
             job_title,
-            branch,
             departmentId,
+            branchId,
             roleId,
             login_otp,
             gender,
@@ -102,8 +102,8 @@ const updateStaff = async (req, res) => {
 
   const {
     job_title,
-    branch,
     departmentId,
+    branchId,
     roleId,
     mobile,
     login_otp,
@@ -160,7 +160,7 @@ const updateStaff = async (req, res) => {
       where: { userId: id }, // Assuming userId is used to fetch staff
       data: {
         job_title,
-        branch,
+        branchId,
         departmentId,
         roleId,
         login_otp,
@@ -196,6 +196,7 @@ async function getAllStaff(req, res) {
       include: {
         staffDetails: {
           include: {
+            branch: true,
             department: true,
             role: true,
             BankDetails: true,
@@ -251,6 +252,7 @@ const getStaffById = async (req, res) => {
       include: {
         staffDetails: {
           include: {
+            branch: true,
             department: true,
             role: true,
             BankDetails: true,

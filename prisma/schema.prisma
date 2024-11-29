@@ -80,18 +80,25 @@ model AdminDetails {
   user User @relation(fields: [userId], references: [id])
 }
 
+model Branch {
+  id           String         @id @default(dbgenerated("gen_random_uuid()"))
+  branchName   String
+  StaffDetails StaffDetails[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
 model StaffDetails {
-  id                         String    @id @default(dbgenerated("gen_random_uuid()"))
-  userId                     String    @unique
+  id                         String                       @id @default(dbgenerated("gen_random_uuid()"))
+  userId                     String                       @unique
   job_title                  String?
-  branch                     String?
   departmentId               String?
   roleId                     String?
   login_otp                  String?
   gender                     String?
   official_email             String?
-  date_of_joining            DateTime? @default(now())
-  date_of_birth              DateTime? @default(now())
+  date_of_joining            DateTime?                    @default(now())
+  date_of_birth              DateTime?                    @default(now())
   current_address            String?
   permanent_address          String?
   emergency_contact_name     String?
@@ -103,40 +110,41 @@ model StaffDetails {
   employment                 String?
   marital_status             String?
   blood_group                String?
-
+  branchId                   String?
   // relations
-  department               Department?                  @relation(fields: [departmentId], references: [id])
-  role                     Role?                        @relation(fields: [roleId], references: [id])
-  User                     User                         @relation(fields: [userId], references: [id])
-  BankDetails              BankDetails?
-  LeavePolicy              LeavePolicy[]
-  LeaveBalance             LeaveBalance[]
-  LeaveRequest             LeaveRequest[]
-  FixedShift               FixedShift[]
-  FlexibleShift            FlexibleShift[]
-  OverLeavePolicy          OvertimePolicy[]
-  EarlyLeavePolicy         EarlyLeavePolicy[]
-  LateComingPolicy         LateComingPolicy[]
-  SalaryDetails            SalaryDetails[]
-  PunchRecords             PunchRecords[]
-  attendanceAutomationRule AttendanceAutomationRule?
-  AttendenceMode           AttendanceMode?
-  staff_bg_verification    StaffBackgroundVerification?
-  CustomDetails            CustomDetails[]
-  TicketInformation        TicketInformation[]
-  UpiDetails               UpiDetails?
-  StartBreak               StartBreak[]
-  EndBreak                 EndBreak[]
-  WorkEntry                WorkEntry[]
-  Deduction                Deductions[]
-  Earning                  Earnings[]
-  TaskDetail               TaskDetail[]                 @relation("staffId")
-  projects                 Project[]                    @relation("ProjectStaff")
-  TaskStatus               TaskStatus[]                 @relation("staffId")
-  past_Employment          PastEmployment?
-  Fine                     Fine[]
-  Overtime                 Overtime[]
-  breakRecord              breakRecord[]
+  department                 Department?                  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  role                       Role?                        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  User                       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch                     Branch?                      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  BankDetails                BankDetails?
+  LeavePolicy                LeavePolicy[]
+  LeaveBalance               LeaveBalance[]
+  LeaveRequest               LeaveRequest[]
+  FixedShift                 FixedShift[]
+  FlexibleShift              FlexibleShift[]
+  OverLeavePolicy            OvertimePolicy[]
+  EarlyLeavePolicy           EarlyLeavePolicy[]
+  LateComingPolicy           LateComingPolicy[]
+  SalaryDetails              SalaryDetails[]
+  PunchRecords               PunchRecords[]
+  attendanceAutomationRule   AttendanceAutomationRule?
+  AttendenceMode             AttendanceMode?
+  staff_bg_verification      StaffBackgroundVerification?
+  CustomDetails              CustomDetails[]
+  TicketInformation          TicketInformation[]
+  UpiDetails                 UpiDetails?
+  StartBreak                 StartBreak[]
+  EndBreak                   EndBreak[]
+  WorkEntry                  WorkEntry[]
+  Deduction                  Deductions[]
+  Earning                    Earnings[]
+  TaskDetail                 TaskDetail[]                 @relation("staffId")
+  projects                   Project[]                    @relation("ProjectStaff")
+  TaskStatus                 TaskStatus[]                 @relation("staffId")
+  past_Employment            PastEmployment?
+  Fine                       Fine[]
+  Overtime                   Overtime[]
+  breakRecord                breakRecord[]
 }
 
 enum UserType {

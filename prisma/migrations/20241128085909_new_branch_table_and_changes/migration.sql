@@ -104,11 +104,18 @@ CREATE TABLE "AdminDetails" (
 );
 
 -- CreateTable
+CREATE TABLE "Branch" (
+    "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "branchName" TEXT NOT NULL,
+
+    CONSTRAINT "Branch_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "StaffDetails" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
     "userId" TEXT NOT NULL,
     "job_title" TEXT,
-    "branch" TEXT,
     "departmentId" TEXT,
     "roleId" TEXT,
     "login_otp" TEXT,
@@ -127,6 +134,7 @@ CREATE TABLE "StaffDetails" (
     "employment" TEXT,
     "marital_status" TEXT,
     "blood_group" TEXT,
+    "branchId" TEXT,
 
     CONSTRAINT "StaffDetails_pkey" PRIMARY KEY ("id")
 );
@@ -570,10 +578,13 @@ CREATE TABLE "breakRecord" (
 -- CreateTable
 CREATE TABLE "Fine" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "lateEntryFineHoursTime" TEXT,
     "lateEntryFineAmount" DOUBLE PRECISION DEFAULT 1,
     "lateEntryAmount" DOUBLE PRECISION DEFAULT 0,
+    "excessBreakFineHoursTime" TEXT,
     "excessBreakFineAmount" DOUBLE PRECISION DEFAULT 1,
     "excessBreakAmount" DOUBLE PRECISION DEFAULT 0,
+    "earlyOutFineHoursTime" TEXT,
     "earlyOutFineAmount" DOUBLE PRECISION DEFAULT 1,
     "earlyOutAmount" DOUBLE PRECISION DEFAULT 0,
     "totalAmount" DOUBLE PRECISION DEFAULT 0,
@@ -588,8 +599,10 @@ CREATE TABLE "Fine" (
 -- CreateTable
 CREATE TABLE "Overtime" (
     "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+    "earlyCommingEntryHoursTime" TEXT,
     "earlyCommingEntryAmount" DOUBLE PRECISION DEFAULT 1,
     "earlyEntryAmount" DOUBLE PRECISION DEFAULT 0,
+    "lateOutOvertimeHoursTime" TEXT,
     "lateOutOvertimeAmount" DOUBLE PRECISION DEFAULT 1,
     "lateOutAmount" DOUBLE PRECISION DEFAULT 0,
     "totalAmount" DOUBLE PRECISION DEFAULT 0,
@@ -1044,13 +1057,16 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_roomId_fkey" FOREIGN KEY ("roomId"
 ALTER TABLE "AdminDetails" ADD CONSTRAINT "AdminDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StaffDetails" ADD CONSTRAINT "StaffDetails_branchId_fkey" FOREIGN KEY ("branchId") REFERENCES "Branch"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AttendanceAutomationRule" ADD CONSTRAINT "AttendanceAutomationRule_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "StaffDetails"("id") ON DELETE CASCADE ON UPDATE CASCADE;

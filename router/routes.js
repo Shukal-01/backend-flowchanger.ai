@@ -34,6 +34,7 @@ const ChatRouter = require("./chat.router.js");
 const MessageRouter = require("./message.router.js");
 const FineRouter = require("./admin/fine.router.js");
 const overtime = require("./admin/overtime.router.js");
+const branchRouter = require("./admin/branch.router.js");
 
 rootRouter.use("/role", roleRouter);
 rootRouter.use("/attendance", attendanceRouter);
@@ -67,6 +68,7 @@ rootRouter.use("/work-entry", workRouter);
 rootRouter.use("/past-employment", pastEmploymentRouter);
 rootRouter.use("/chat", ChatRouter);
 rootRouter.use("/message", MessageRouter);
+rootRouter.use("/branch", branchRouter);
 
 rootRouter.use("/fine", FineRouter);
 rootRouter.use("/overtime", overtime);

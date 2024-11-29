@@ -241,8 +241,8 @@ const staffSchema = z.object({
     required_error: "Name is required",
   }),
   job_title: z.string().optional(),
-  branch: z.string().optional(),
   departmentId: z.string().optional(),
+  branchId: z.string().optional(),
   roleId: z.string().optional(),
   mobile: z
     .string()
@@ -683,6 +683,10 @@ const DepartmentSchema = z.object({
   departmentName: z.string().min(1, "Department Name is required"),
 });
 
+const BranchSchema = z.object({
+  branchName: z.string().min(1, "Branch Name is required"),
+})
+
 const FineSchema = z
   .object({
     staffId: z.string().uuid("Invalid staff ID"), // UUID format check
@@ -753,4 +757,5 @@ module.exports = {
   FineSchema,
   MultipleFixedShiftSchema,
   MultipleFlexibleShiftSchema,
+  BranchSchema
 };
