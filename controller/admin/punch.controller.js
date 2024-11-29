@@ -208,13 +208,18 @@ async function createPunchIn(req, res) {
           status: "PRESENT",
         },
       });
-      console.log(fine);
       if (fine > 0) {
         const fineRecord = await prisma.fine.create({
           data: {
             lateEntryAmount: parseFloat(fine.toFixed(2)),
             punchRecord: { connect: { id: punchRecord.id } },
             staff: { connect: { id: user.staffDetails.id } },
+
+            shiftDetails: {
+              connect: {
+                id: shift.shifts[0].id,
+              },
+            },
           },
         });
       }

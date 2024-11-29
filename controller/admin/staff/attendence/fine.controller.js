@@ -22,11 +22,12 @@ const addFineData = async (req, res) => {
 
   // Validate input
   if (!staffId && !punchRecordId) {
-    return res.status(400).json({ error: "staffId and punchRecordId are required." });
+    return res
+      .status(400)
+      .json({ error: "staffId and punchRecordId are required." });
   }
 
   try {
-    // Check or create punchRecord
     let punchRecord = await prisma.punchRecords.findFirst({
       where: { staffId, id: punchRecordId },
     });
@@ -37,13 +38,11 @@ const addFineData = async (req, res) => {
       });
     }
 
-    // Check or create/update fine
     const existingFine = await prisma.fine.findFirst({
       where: { punchRecordId: punchRecord.id },
     });
 
     if (existingFine) {
-      // Update existing fine
       const fine = await prisma.fine.update({
         where: { id: existingFine.id },
         data: {
@@ -57,11 +56,12 @@ const addFineData = async (req, res) => {
           earlyOutFineAmount,
           earlyOutAmount,
           totalAmount,
-          shiftIds: JSON.stringify(shiftIds),
         },
       });
 
-      return res.status(200).json({ message: "Fine updated successfully", fine });
+      return res
+        .status(200)
+        .json({ message: "Fine updated successfully", fine });
     }
 
     // Create new fine
@@ -78,19 +78,27 @@ const addFineData = async (req, res) => {
         earlyOutFineAmount,
         earlyOutAmount,
         totalAmount,
-        shiftIds: JSON.stringify(shiftIds),
-        punchRecordId: punchRecord.id,
+        shiftDetails: {
+          connect: {
+            id: shiftIds,
+          },
+        },
+        punchRecord: {
+          connect: {
+            id: punchRecord.id,
+          },
+        },
       },
     });
 
     return res.status(201).json({ message: "Fine created successfully", fine });
   } catch (error) {
     console.error("Error adding or updating fine:", error.message);
-    res.status(500).json({ message: "Fine not added or updated", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Fine not added or updated", error: error.message });
   }
 };
-
-
 
 const getFinesByDate = async (req, res) => {
   try {
@@ -190,10 +198,11 @@ const updateMultipleFineData = async (req, res) => {
 
     // Validate input
     if (!Array.isArray(fineUpdates) || fineUpdates.length === 0) {
-      return res.status(400).json({ error: "Please provide valid fine updates" });
+      return res
+        .status(400)
+        .json({ error: "Please provide valid fine updates" });
     }
 
-    // Iterate over fine updates and validate `punchRecordId` before updating
     const updatePromises = fineUpdates.map(async (fine) => {
       // Check if the punchRecordId exists
       const existingPunchRecord = await prisma.punchRecords.findFirst({
@@ -201,7 +210,9 @@ const updateMultipleFineData = async (req, res) => {
       });
 
       if (!existingPunchRecord) {
-        throw new Error(`PunchRecord with ID ${fine.punchRecordId} does not exist.`);
+        throw new Error(
+          `PunchRecord with ID ${fine.punchRecordId} does not exist.`
+        );
       }
 
       // Update fine record
@@ -226,7 +237,9 @@ const updateMultipleFineData = async (req, res) => {
     // Wait for all updates to complete
     const updatedFines = await Promise.all(updatePromises);
 
-    res.status(200).json({ message: "Fines updated successfully", data: updatedFines });
+    res
+      .status(200)
+      .json({ message: "Fines updated successfully", data: updatedFines });
   } catch (error) {
     console.error("Error updating fine data:", error.message);
 
@@ -236,7 +249,9 @@ const updateMultipleFineData = async (req, res) => {
     }
 
     // Send generic error response
-    res.status(500).json({ error: "Internal server error. Please try again later." });
+    res
+      .status(500)
+      .json({ error: "Internal server error. Please try again later." });
   }
 };
 
@@ -246,9 +261,9 @@ const getAllFine = async (req, res) => {
     return res.status(200).json({ fine });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Error fetching fines' });
+    return res.status(500).json({ message: "Error fetching fines" });
   }
-}
+};
 
 module.exports = {
   addFineData,
