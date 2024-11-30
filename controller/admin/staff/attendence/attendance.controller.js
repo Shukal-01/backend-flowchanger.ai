@@ -330,17 +330,20 @@ const updatePunchRecordStatus = async (req, res) => {
           punchOut: true,
         },
       });
+      if (!punchRecord) {
+        return res.status(404).json({ message: "PunchRecords not found." });
+      }
       if (punchRecord?.punchIn) {
         const punchIn = await prisma.punchIn.update({
           where: { id: punchRecord.punchIn.id },
           data: {
             punchInTime: startTime,
             punchInDate: startTime,
-            shiftId: shiftId,
           },
         });
       } else {
         await prisma.punchRecords.update({
+          where: { id: id },
           data: {
             punchIn: {
               create: {
@@ -361,12 +364,12 @@ const updatePunchRecordStatus = async (req, res) => {
         });
       } else {
         await prisma.punchRecords.update({
+          where: { id: punchRecord.id },
           data: {
             punchOut: {
               create: {
-                punchInTime: startTime,
-                punchInDate: startTime,
-                shiftId: shiftId,
+                punchOutDate: endTime,
+                punchOutTime: endTime,
               },
             },
           },
@@ -374,7 +377,6 @@ const updatePunchRecordStatus = async (req, res) => {
       }
       return res.status(200).json({
         message: "Punch record status updated successfully",
-        updatedPunchRecord,
       });
     }
     const updatedPunchRecord = await prisma.punchRecords.update({
