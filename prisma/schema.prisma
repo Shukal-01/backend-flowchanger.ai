@@ -666,16 +666,16 @@ enum PunchInMethod {
 }
 
 model PunchIn {
-  id            String        @id @default(dbgenerated("gen_random_uuid()"))
-  punchInMethod PunchInMethod @default(PHOTOCLICK)
-  punchInTime   DateTime      @default(now())
-  punchInDate   DateTime      @default(now())
+  id            String         @id @default(dbgenerated("gen_random_uuid()"))
+  punchInMethod PunchInMethod? @default(PHOTOCLICK)
+  punchInTime   DateTime       @default(now())
+  punchInDate   DateTime       @default(now())
   biometricData String?
   qrCodeValue   String?
   photoUrl      String?
-  location      String
+  location      String?
   PunchRecords  PunchRecords?
-  approve       String?       @default("Pending")
+  approve       String?        @default("Pending")
 }
 
 enum PunchOutMethod {
