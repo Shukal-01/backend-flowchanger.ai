@@ -685,14 +685,14 @@ enum PunchOutMethod {
 }
 
 model PunchOut {
-  id             String         @id @default(dbgenerated("gen_random_uuid()"))
-  punchOutMethod PunchOutMethod @default(PHOTOCLICK)
-  punchOutTime   DateTime       @default(now())
-  punchOutDate   DateTime       @default(now())
+  id             String          @id @default(dbgenerated("gen_random_uuid()"))
+  punchOutMethod PunchOutMethod? @default(PHOTOCLICK)
+  punchOutTime   DateTime        @default(now())
+  punchOutDate   DateTime        @default(now())
   biometricData  String?
   qrCodeValue    String?
   photoUrl       String?
-  location       String
+  location       String?
   overtime       String?
   punchRecords   PunchRecords?
 }

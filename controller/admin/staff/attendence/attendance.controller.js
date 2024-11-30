@@ -330,12 +330,13 @@ const updatePunchRecordStatus = async (req, res) => {
           punchOut: true,
         },
       });
-      if (punchRecord.punchIn) {
+      if (punchRecord?.punchIn) {
         const punchIn = await prisma.punchIn.update({
           where: { id: punchRecord.punchIn.id },
           data: {
             punchInTime: startTime,
             punchInDate: startTime,
+            shiftId: shiftId,
           },
         });
       } else {
@@ -350,7 +351,7 @@ const updatePunchRecordStatus = async (req, res) => {
           },
         });
       }
-      if (punchRecord.punchOut) {
+      if (punchRecord?.punchOut) {
         const punchOut = await prisma.punchOut.update({
           where: { id: punchRecord.punchOut.id },
           data: {
@@ -365,6 +366,7 @@ const updatePunchRecordStatus = async (req, res) => {
               create: {
                 punchInTime: startTime,
                 punchInDate: startTime,
+                shiftId: shiftId,
               },
             },
           },
