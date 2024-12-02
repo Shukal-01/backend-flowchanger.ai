@@ -322,7 +322,7 @@ const updatePunchRecordStatus = async (req, res) => {
   }
 
   try {
-    if (status === "PRESENT") {
+    if (status === "PRESENT" || status === "HALFDAY") {
       const punchRecord = await prisma.punchRecords.findUnique({
         where: { id },
         include: {
@@ -334,17 +334,23 @@ const updatePunchRecordStatus = async (req, res) => {
         return res.status(404).json({ message: "PunchRecords not found." });
       }
       if (punchRecord?.punchIn) {
-        const punchIn = await prisma.punchIn.update({
-          where: { id: punchRecord.punchIn.id },
+        await prisma.punchRecords.update({
+          where: { id: id },
           data: {
-            punchInTime: startTime,
-            punchInDate: startTime,
+            status: status,
+            punchIn: {
+              update: {
+                punchInTime: startTime,
+                punchInDate: startTime,
+              },
+            },
           },
         });
       } else {
         await prisma.punchRecords.update({
           where: { id: id },
           data: {
+            status: status,
             punchIn: {
               create: {
                 punchInTime: startTime,
@@ -355,17 +361,23 @@ const updatePunchRecordStatus = async (req, res) => {
         });
       }
       if (punchRecord?.punchOut) {
-        const punchOut = await prisma.punchOut.update({
-          where: { id: punchRecord.punchOut.id },
+        await prisma.punchRecords.update({
+          where: { id: id },
           data: {
-            punchOutTime: endTime,
-            punchOutDate: endTime,
+            status: status,
+            punchOut: {
+              update: {
+                punchOutDate: endTime,
+                punchOutTime: endTime,
+              },
+            },
           },
         });
       } else {
         await prisma.punchRecords.update({
           where: { id: punchRecord.id },
           data: {
+            status: status,
             punchOut: {
               create: {
                 punchOutDate: endTime,
