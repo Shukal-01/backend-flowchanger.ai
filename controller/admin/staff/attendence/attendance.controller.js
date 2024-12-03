@@ -312,8 +312,6 @@ const updatePunchRecordStatus = async (req, res) => {
   const { id } = req.params;
   const { status, shiftId, startTime, endTime } = req.body;
 
-  console.log(id, status);
-
   const validStatuses = ["ABSENT", "PRESENT", "HALFDAY", "PAIDLEAVE"];
 
   if (!validStatuses.includes(status)) {
@@ -420,9 +418,6 @@ const getBreakRecordByStaffId = async (req, res) => {
         .json({ error: "Date is required in format DD/MM/YYYY" });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: staffId },
-    });
     // Parse the input date string
     const [day, month, year] = date.split("/");
 
@@ -439,7 +434,7 @@ const getBreakRecordByStaffId = async (req, res) => {
     );
 
     // Fetch all startBreaks for the given staffId and date
-    const startBreaks = await prisma.startBreak.findFirst({
+    const startBreaks = await prisma.startBreak.findMany({
       where: {
         staffId: staffId,
         startBreakTime: {
@@ -449,6 +444,12 @@ const getBreakRecordByStaffId = async (req, res) => {
       },
       orderBy: { startBreakTime: "desc" }, // Sort by latest startBreakTime
     });
+
+    if (startBreaks.length === 0) {
+      return res.status(404).json({
+        message: "No break records found for this staff ID on the given date",
+      });
+    }
 
     // Fetch corresponding endBreaks and merge them
     const breakRecords = await Promise.all(
@@ -518,7 +519,6 @@ const getBreakRecordByStaffId = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-// const getBreakRecordByStaffId/
 
 module.exports = {
   allStaffAttendanceByDate,
