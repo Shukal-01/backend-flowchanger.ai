@@ -3,6 +3,85 @@ const prisma = new PrismaClient();
 const { ZodError } = require("zod");
 const { StartBreakSchema, EndBreakSchema } = require("../../utils/validations");
 
+const getBreakRecordByDate = async (req, res) => {
+  try {
+    const { date } = req.query;
+
+    if (!date) {
+      return res
+        .status(400)
+        .json({ error: "Date is required in the format YYYY-MM-DD" });
+    }
+
+    const providedDate = new Date(date);
+    if (isNaN(providedDate)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid date format. Use YYYY-MM-DD" });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { id: req.userId, role: "STAFF" },
+      include: { staffDetails: true },
+    });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    console.log(user);
+    const staffId = user.staffDetails.id;
+
+    // Parse date from DD/MM/YYYY format
+    const [day, month, year] = date.split("/");
+    if (!day || !month || !year) {
+      return res
+        .status(400)
+        .json({ error: "Invalid date format. Use DD/MM/YYYY" });
+    }
+
+    const startOfDayUTC = new Date(
+      `${year}-${month}-${day}T00:00:00+05:30`
+    ).toISOString();
+    const endOfDayUTC = new Date(
+      `${year}-${month}-${day}T23:59:59+05:30`
+    ).toISOString();
+
+    const breakRecord = await prisma.breakRecord.findFirst({
+      where: {
+        staffId,
+        breakDate: {
+          gte: startOfDayUTC,
+          lte: endOfDayUTC,
+        },
+      },
+    });
+
+    if (!breakRecord) {
+      return res
+        .status(404)
+        .json({ message: "No break record found for the given date." });
+    }
+
+    return res.status(200).json({
+      message: "Break record found.",
+      breakRecord: {
+        ...breakRecord,
+        breakDate: new Date(breakRecord.breakDate).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching break record:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 async function createStartBreak(req, res) {
   try {
     const { breakMethod, biometricData, qrCodeValue, location } = req.body;
@@ -130,7 +209,14 @@ async function createStartBreak(req, res) {
 
 const getBreakRecordByStaffId = async (req, res) => {
   try {
-    const { staffId } = req.params; // Get the staffId from URL parameters
+    const user = await prisma.user.findFirst({
+      where: { id: req.userId, role: "STAFF" },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const staffId = user.staffDetails;
 
     // Fetch all endBreaks for the given staffId
     const endBreaks = await prisma.endBreak.findMany({
@@ -179,85 +265,6 @@ const getBreakRecordByStaffId = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Break Records not fetched", error: error.message });
-  }
-};
-
-const getBreakRecordByDate = async (req, res) => {
-  try {
-    const { date } = req.query;
-
-    if (!date) {
-      return res
-        .status(400)
-        .json({ error: "Date is required in the format YYYY-MM-DD" });
-    }
-
-    const providedDate = new Date(date);
-    if (isNaN(providedDate)) {
-      return res
-        .status(400)
-        .json({ error: "Invalid date format. Use YYYY-MM-DD" });
-    }
-
-    const user = await prisma.user.findFirst({
-      where: { id: req.userId, role: "STAFF" },
-      include: { staffDetails: true },
-    });
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-    console.log(user);
-    const staffId = user.staffDetails.id;
-
-    // Parse date from DD/MM/YYYY format
-    const [day, month, year] = date.split("/");
-    if (!day || !month || !year) {
-      return res
-        .status(400)
-        .json({ error: "Invalid date format. Use DD/MM/YYYY" });
-    }
-
-    const startOfDayUTC = new Date(
-      `${year}-${month}-${day}T00:00:00+05:30`
-    ).toISOString();
-    const endOfDayUTC = new Date(
-      `${year}-${month}-${day}T23:59:59+05:30`
-    ).toISOString();
-
-    const breakRecord = await prisma.breakRecord.findFirst({
-      where: {
-        staffId,
-        breakDate: {
-          gte: startOfDayUTC,
-          lte: endOfDayUTC,
-        },
-      },
-    });
-
-    if (!breakRecord) {
-      return res
-        .status(404)
-        .json({ message: "No break record found for the given date." });
-    }
-
-    return res.status(200).json({
-      message: "Break record found.",
-      breakRecord: {
-        ...breakRecord,
-        breakDate: new Date(breakRecord.breakDate).toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching break record:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

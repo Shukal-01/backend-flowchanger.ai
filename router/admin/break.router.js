@@ -28,15 +28,19 @@ breakRouter.post(
   authorizationMiddleware,
   createEndBreak
 );
+breakRouter.get("/end", getAllEndBreaks);
+breakRouter.get("/start/:id", getStartBreakByStaffId);
+breakRouter.get("/end/:id", getEndBreakByStaffId);
 breakRouter.get(
   "/record/single",
   authorizationMiddleware,
   getBreakRecordByDate
 );
 
-breakRouter.get("/breakRecord/:staffId", getBreakRecordByStaffId);
-breakRouter.get("/end", getAllEndBreaks);
-breakRouter.get("/start/:id", getStartBreakByStaffId);
-breakRouter.get("/end/:id", getEndBreakByStaffId);
+// breakRouter.get(
+//   "/breakRecord/all",
+//   authorizationMiddleware,
+//   getBreakRecordByStaffId
+// );
 
 module.exports = breakRouter;

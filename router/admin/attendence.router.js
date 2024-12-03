@@ -14,6 +14,7 @@ const {
   getSingleStaffAttendance,
   getBreakRecordByStaffId,
 } = require("../../controller/admin/staff/attendence/attendance.controller.js");
+const authorizationMiddleware = require("../../middleware/auth.js");
 
 const attendanceRouter = Router();
 
@@ -30,6 +31,10 @@ attendanceRouter.get("/summary", allStaffAttendanceByDate);
 
 attendanceRouter.get("/single/:id", getSingleStaffAttendance);
 
-attendanceRouter.get("/break-record/:staffId", getBreakRecordByStaffId);
+attendanceRouter.get(
+  "/break-record/all",
+  authorizationMiddleware,
+  getBreakRecordByStaffId
+);
 
 module.exports = attendanceRouter;

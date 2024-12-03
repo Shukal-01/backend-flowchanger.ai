@@ -420,16 +420,9 @@ const getBreakRecordByStaffId = async (req, res) => {
         .json({ error: "Date is required in format DD/MM/YYYY" });
     }
 
-    const user = await prisma.user.findFirst({
+    const user = await prisma.user.findUnique({
       where: { id: staffId },
     });
-
-    console.log(user);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    staffId = user.staffDetails;
     // Parse the input date string
     const [day, month, year] = date.split("/");
 
