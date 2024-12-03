@@ -583,27 +583,33 @@ model Overtime {
 }
 
 model PunchIn {
-  id            String        @id @default(dbgenerated("gen_random_uuid()"))
-  punchInMethod PunchInMethod @default(PHOTOCLICK)
-  punchInTime   DateTime      @default(now())
-  punchInDate   DateTime      @default(now())
+  id            String         @id @default(dbgenerated("gen_random_uuid()"))
+  punchInMethod PunchInMethod? @default(PHOTOCLICK)
+  punchInTime   DateTime       @default(now())
+  punchInDate   DateTime       @default(now())
   biometricData String?
   qrCodeValue   String?
   photoUrl      String?
-  location      String
-  approve       String?       @default("Pending")
+  location      String?
   PunchRecords  PunchRecords?
+  approve       String?        @default("Pending")
+}
+
+enum PunchOutMethod {
+  BIOMETRIC
+  QRSCAN
+  PHOTOCLICK
 }
 
 model PunchOut {
-  id             String         @id @default(dbgenerated("gen_random_uuid()"))
-  punchOutMethod PunchOutMethod @default(PHOTOCLICK)
-  punchOutTime   DateTime       @default(now())
-  punchOutDate   DateTime       @default(now())
+  id             String          @id @default(dbgenerated("gen_random_uuid()"))
+  punchOutMethod PunchOutMethod? @default(PHOTOCLICK)
+  punchOutTime   DateTime        @default(now())
+  punchOutDate   DateTime        @default(now())
   biometricData  String?
   qrCodeValue    String?
   photoUrl       String?
-  location       String
+  location       String?
   overtime       String?
   punchRecords   PunchRecords?
 }

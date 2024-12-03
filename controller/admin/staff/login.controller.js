@@ -11,21 +11,23 @@ const matchStaffLoginOTP = async (req, res) => {
     const staff = await prisma.user.findFirst({
       where: { mobile: mobile },
     });
-    console.log(staff.mobile);
     if (!staff) {
       return res.status(404).json({ message: "Staff member not found" });
     }
-    console.log("staff mobile", staff.mobile);
-    console.log("login otp", staff.otp, login_otp);
 
     if (staff.otp === login_otp) {
       const token = jwt.sign({ userId: staff.id }, process.env.JWT_SECRET);
       return res.status(200).json({ message: "OTP matched", token: token });
     } else {
-      return res.status(400).json({ message: "OTP not matched" + error.message });
+      return res
+        .status(400)
+        .json({ message: "OTP not matched" + error.message });
     }
   } catch (error) {
-    res.status(500).json({ message: "Failed to login and match OTP", error: error.message });
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Failed to login and match OTP", error: error });
   }
 };
 

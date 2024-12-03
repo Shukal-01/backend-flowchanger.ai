@@ -208,13 +208,18 @@ async function createPunchIn(req, res) {
           status: "PRESENT",
         },
       });
-      console.log(fine);
       if (fine > 0) {
         const fineRecord = await prisma.fine.create({
           data: {
             lateEntryAmount: parseFloat(fine.toFixed(2)),
             punchRecord: { connect: { id: punchRecord.id } },
             staff: { connect: { id: user.staffDetails.id } },
+
+            shiftDetails: {
+              connect: {
+                id: shift.shifts[0].id,
+              },
+            },
           },
         });
       }
@@ -348,11 +353,17 @@ async function createPunchOut(req, res) {
     if (shiftType === "FIXED") {
       shift = user.staffDetails.FixedShift.find(
         (sh) => sh.day.toUpperCase() === currentDay
-      )?.shifts[0];
+      );
+      console.log("shift", shift);
+      console.log("shifts", shift.shifts);
 
-      if (shift.length === 0) {
+      if (!shift || shift.shifts.length == 0) {
         return res.status(404).send("No shift found");
       }
+
+      start = parseTime(shift.shifts[0].shiftStartTime);
+      end = parseTime(shift.shifts[shift.shifts.length - 1].shiftEndTime);
+      console.log(start, end);
     }
 
     if (shiftType === "FLEXIBLE") {
@@ -477,7 +488,6 @@ async function createPunchOut(req, res) {
       return res.status(201).json({
         punchOut,
         punchRecord,
-        fineRecord,
       });
     } else {
       const punchOut = await prisma.punchOut.create({
