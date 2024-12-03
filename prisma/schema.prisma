@@ -871,12 +871,6 @@ enum PunchInMethod {
   PHOTOCLICK
 }
 
-enum PunchOutMethod {
-  BIOMETRIC
-  QRSCAN
-  PHOTOCLICK
-}
-
 enum BreakMethod {
   BIOMETRIC
   QRSCAN
