@@ -330,6 +330,17 @@ const updatePunchRecordStatus = async (req, res) => {
           punchOut: true,
         },
       });
+      if (punchRecord.status == status) {
+        await prisma.punchRecords.update({
+          where: { id: id },
+          data: {
+            isApproved: true,
+          },
+        });
+        return res.status(200).json({
+          message: "Punch record updated successfully...",
+        });
+      }
       if (!punchRecord) {
         return res.status(404).json({ message: "PunchRecords not found." });
       }
