@@ -31,7 +31,7 @@ const createStaff = async (req, res) => {
     emergency_contact_address,
     name,
     status,
-    employment
+    employment,
   } = validation.data;
 
   try {
@@ -72,7 +72,7 @@ const createStaff = async (req, res) => {
             emergency_contact_relation,
             emergency_contact_address,
             status,
-            employment
+            employment,
           },
         },
       },
@@ -119,7 +119,7 @@ const updateStaff = async (req, res) => {
     emergency_contact_address,
     name,
     status,
-    employment
+    employment,
   } = validation.data;
 
   try {
@@ -127,8 +127,8 @@ const updateStaff = async (req, res) => {
       where: {
         OR: [
           { email: official_email }, // Check for email
-          { mobile: mobile } // Check for mobile
-        ]
+          { mobile: mobile }, // Check for mobile
+        ],
       },
     });
 
@@ -175,7 +175,7 @@ const updateStaff = async (req, res) => {
         emergency_contact_relation,
         emergency_contact_address,
         status,
-        employment
+        employment,
       },
     });
     res.status(200).json(updatedStaff);
@@ -221,7 +221,7 @@ async function getAllStaff(req, res) {
             Deduction: true,
             projects: true,
             TaskDetail: true,
-            TaskStatus: true,
+            // TaskStatus: true,
             past_Employment: true,
             Fine: true,
             Overtime: true,
@@ -277,7 +277,7 @@ const getStaffById = async (req, res) => {
             Deduction: true,
             projects: true,
             TaskDetail: true,
-            TaskStatus: true,
+            // TaskStatus: true,
             past_Employment: true,
           },
         },
@@ -322,18 +322,18 @@ const searchStaffByName = async (req, res) => {
         role: "STAFF",
         name: name
           ? {
-            contains: name,
-            mode: "insensitive",
-          }
+              contains: name,
+              mode: "insensitive",
+            }
           : undefined,
         staffDetails: {
           department: department_name
             ? {
-              department_name: {
-                contains: department_name,
-                mode: "insensitive",
-              },
-            }
+                department_name: {
+                  contains: department_name,
+                  mode: "insensitive",
+                },
+              }
             : undefined,
           date_of_joining: date_of_joining
             ? new Date(date_of_joining)
@@ -352,7 +352,9 @@ const searchStaffByName = async (req, res) => {
     return res.status(200).json(searchStaff);
   } catch (error) {
     console.error("Error fetching staff members:", error);
-    return res.status(500).json({ message: "Failed to search staff members" + error.message });
+    return res
+      .status(500)
+      .json({ message: "Failed to search staff members" + error.message });
   }
 };
 
@@ -366,21 +368,21 @@ const searchStaffByStatus = async (req, res) => {
     if (status) {
       whereDataArray.status = {
         contains: status,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
     if (gender) {
       whereDataArray.gender = {
         contains: gender,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
     if (employment) {
       whereDataArray.employment = {
         contains: employment,
-        mode: 'insensitive',
+        mode: "insensitive",
       };
     }
 
@@ -405,5 +407,5 @@ module.exports = {
   updateStaff,
   searchStaffByName,
   deleteStaff,
-  searchStaffByStatus
+  searchStaffByStatus,
 };
