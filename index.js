@@ -75,6 +75,10 @@ io.on("connection", (socket) => {
   });
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(buildpath, 'index.html'));
+});
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
