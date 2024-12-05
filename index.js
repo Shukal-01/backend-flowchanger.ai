@@ -10,7 +10,7 @@ const path = require("path");
 const app = express();
 const _dirname = path.dirname("")
 const buildpath = path.join(_dirname, "../frontend-flowchanger.ai/build")
-app.use(express.static(buildpath))
+// app.use(express.static(buildpath))
 
 app.use(express.static(path.join(__dirname, 'build')));
 
