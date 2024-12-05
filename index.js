@@ -12,9 +12,9 @@ const _dirname = path.dirname("")
 const buildpath = path.join(_dirname, "../frontend-flowchanger.ai/build")
 app.use(express.static(buildpath))
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(buildpath, 'index.html'));
-});
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(buildpath, 'index.html'));
+// });
 const PORT = process.env.PORT || 4000;
 
 app.use(
