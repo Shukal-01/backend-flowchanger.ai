@@ -12,7 +12,7 @@ const _dirname = path.dirname("")
 const buildpath = path.join(_dirname, "../frontend-flowchanger.ai/build")
 app.use(express.static(buildpath))
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
