@@ -7,11 +7,11 @@ module.exports = {
             exec_mode: "cluster", // Use cluster mode for better performance
             env: {
                 NODE_ENV: "development",
-                PORT: 5000,
+                PORT: 6000,
             },
             env_production: {
                 NODE_ENV: "production",
-                PORT: 5000,
+                PORT: 8080,
             },
         },
     ],
