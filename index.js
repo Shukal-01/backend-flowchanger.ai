@@ -5,8 +5,13 @@ const cors = require("cors");
 const socketIo = require("socket.io");
 const rootRouter = require("./router/routes");
 const jwt = require("jsonwebtoken");
+const path = require("path");
 
 const app = express();
+const _dirname = path.dirname("")
+const buildpath = path.join(_dirname, "../frontend-flowchanger.ai/build")
+app.use(express.static(buildpath))
+
 const PORT = process.env.PORT || 8000;
 
 app.use(
