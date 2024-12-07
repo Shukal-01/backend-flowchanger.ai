@@ -5,18 +5,18 @@ const cors = require("cors");
 const socketIo = require("socket.io");
 const rootRouter = require("./router/routes");
 const jwt = require("jsonwebtoken");
-const path = require("path");
+// const path = require("path");
 
 const app = express();
-const _dirname = path.dirname("")
-const buildpath = path.join(_dirname, "../frontend-flowchanger.ai/build")
-app.use(express.static(buildpath))
+// const _dirname = path.dirname("")
+// const buildpath = path.join(_dirname, "../frontend-flowchanger.ai/build")
+// app.use(express.static(buildpath))
 
 // app.get('*', (req, res) => {
 //   res.sendFile(path.join(buildpath, 'index.html'));
 // });
-// const PORT = process.env.PORT || 4000;
-const PORT = 5000;
+const PORT = process.env.PORT || 4000;
+// const PORT = 5000;
 app.use(
   cors({
     origin: "*",
